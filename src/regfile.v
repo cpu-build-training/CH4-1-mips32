@@ -67,7 +67,7 @@ always @(*) begin
         // 如果符合条件，直接将数据送出，因为是非阻塞赋值
         rdata2 <= wdata;
     end
-    else if (re1 == `ReadEnable) begin
+    else if (re2 == `ReadEnable) begin
         // 若读使能，则读取
         rdata2 <= regs[raddr2];
     end
