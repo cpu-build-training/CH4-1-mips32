@@ -11,6 +11,19 @@ module ex(
            wire[`RegAddrBus]   wd_i,
            wire                wreg_i,
 
+           // HILO
+           input
+           wire[`RegBus] hi_i,
+           wire[`RegBus] lo_i,
+
+           // 回写阶段的指令是否要写 HI\LO，用于检测数据相关问题
+           wire[`RegBus] wb_hi_i,
+           wire[`RegBus] wb_lo_i,
+           wire          wb_whilo_i,
+           // 访存阶段的指令是否要写 HI\LO，用于检测数据相关问题
+           wire[`RegBus] mem_hi_i,
+           wire[`RegBus] mem_lo_i,
+           wire          mem_whilo_i,
 
            // 执行结果
            output
@@ -18,11 +31,16 @@ module ex(
            reg                 wreg_o,
            reg[`RegBus]        wdata_o,
 
+           // 处于执行阶段的指令对 HI\LO 寄存器的写操作请求
+           reg[`RegBus]        hi_o,
+           reg[`RegBus]        lo_o,
+           reg                 whilo_o
            // 保存逻辑运算的结果
-           reg[`RegBus]        logicout
+           //    reg[`RegBus]        logicout
        );
 
 // ???
+reg[`RegBus] logicout;
 reg[`RegBus] shiftres;
 reg[`RegBus] moveres;
 reg[`RegBus] HI;
@@ -54,6 +72,48 @@ assign ov_sum = ((!reg1_i[31] && !reg2_i_mux[31]) && result_sum[31]) || ((reg1_i
 assign reg1_lt_reg2 = ((aluop_i== `EXE_SLT_OP))? ((reg1_i[31] && !reg2_i[31]) || (!reg1_i[31] && !reg2_i[31] && result_sum[31])||(reg1_i[31] && reg2_i[31] && result_sum[31])):(reg1_i < reg2_i);
 
 assign reg1_i_not = ~reg1_i;
+
+// 得到最新的 HI/LO
+always @(*) begin
+    if(rst == `RstEnable) begin
+        {HI, LO} <= {`ZeroWord, `ZeroWord};
+    end
+    else if (mem_whilo_i == `WriteEnable) begin
+        {HI, LO} <= {mem_hi_i, mem_lo_i};
+    end
+    else if (wb_whilo_i == `WriteEnable) begin
+        {HI,LO} <= {wb_hi_i, wb_lo_i};
+    end
+    else begin
+        {HI,LO} <= {hi_i, lo_i};
+    end
+end
+
+
+//  MOV 类指令
+
+always @(*) begin
+    if(rst == `RstEnable) begin
+        moveres <= `ZeroWord;
+    end
+    else begin
+        moveres <= `ZeroWord;
+        case (aluop_i)
+            `EXE_MFHI_OP: begin
+                moveres <= HI;
+            end
+            `EXE_MFLO_OP: begin
+                moveres <= LO;
+            end
+            `EXE_MOVZ_OP,`EXE_MOVN_OP: begin
+                moveres <= reg1_i;
+            end
+            default: begin
+
+            end
+        endcase
+    end
+end
 
 // 根据 aluop_i 指示的运算子类型进行运算，此处只有 ori
 always @(*) begin
@@ -117,10 +177,38 @@ always @(*) begin
         `EXE_RES_SHIFT: begin
             wdata_o <= shiftres;
         end
+        `EXE_RES_MOVE: begin
+            wdata_o <= moveres;
+        end
         default: begin
             wdata_o <= `ZeroWord;
         end
     endcase
 end
+
+// update hi,lo
+always @(*) begin
+    if(rst == `RstEnable) begin
+        whilo_o  <= `WriteDisable;
+        hi_o <= `ZeroWord;
+        lo_o <= `ZeroWord;
+    end
+    else if (aluop_i == `EXE_MTHI_OP) begin
+        whilo_o  <= `WriteEnable;
+        hi_o <= reg1_i;
+        lo_o <= LO;
+    end
+    else if (aluop_i == `EXE_MTLO_OP) begin
+        whilo_o <= `WriteEnable;
+        hi_o <= HI;
+        lo_o <= reg1_i;
+    end
+    else begin
+        whilo_o  <= `WriteDisable;
+        hi_o <= `ZeroWord;
+        lo_o <= `ZeroWord;
+    end
+end
+
 
 endmodule // ex

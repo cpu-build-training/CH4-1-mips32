@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="200270000fs"></ZoomStartTime>
-      <ZoomEndTime time="465070001fs"></ZoomEndTime>
-      <Cursor1Time time="361870000fs"></Cursor1Time>
+      <ZoomStartTime time="240010000fs"></ZoomStartTime>
+      <ZoomEndTime time="372910001fs"></ZoomEndTime>
+      <Cursor1Time time="320610000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="148"></NameColumnWidth>
-      <ValueColumnWidth column_width="101"></ValueColumnWidth>
+      <ValueColumnWidth column_width="96"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="46" />
+   <WVObjectSize size="50" />
    <wvobject type="logic" fp_name="/openmips_min_sopc_tb/CLOCK_50">
       <obj_property name="ElementShortName">CLOCK_50</obj_property>
       <obj_property name="ObjectShortName">CLOCK_50</obj_property>
@@ -163,6 +163,22 @@
    <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem0/wdata_o">
       <obj_property name="ElementShortName">wdata_o[31:0]</obj_property>
       <obj_property name="ObjectShortName">wdata_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider47" type="divider">
+      <obj_property name="label">hilo</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/we">
+      <obj_property name="ElementShortName">we</obj_property>
+      <obj_property name="ObjectShortName">we</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/hi_o">
+      <obj_property name="ElementShortName">hi_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">hi_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/lo_o">
+      <obj_property name="ElementShortName">lo_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">lo_o[31:0]</obj_property>
    </wvobject>
    <wvobject fp_name="divider214" type="divider">
       <obj_property name="label">writeback</obj_property>

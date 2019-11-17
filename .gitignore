@@ -69,6 +69,7 @@
 !*.tcl
 #Journal - files
 !*.jou
+*.backup.jou
 #Reports
 !*.rpt
 !*.txt

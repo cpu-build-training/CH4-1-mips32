@@ -118,7 +118,7 @@ always @(*) begin
                 instvalid <= `InstValid;
             end
             `EXE_ANDI: begin
-            // CHECK
+                // CHECK
                 wreg_o <= `WriteEnable;
                 aluop_o <= `EXE_AND_OP;
                 alusel_o <= `EXE_RES_LOGIC;
@@ -128,7 +128,7 @@ always @(*) begin
                 instvalid <= `InstValid;
             end
             `EXE_XORI: begin
-            // CHECK
+                // CHECK
                 wreg_o <= `WriteEnable;
                 aluop_o <= `EXE_XOR_OP;
                 alusel_o <= `EXE_RES_LOGIC;
@@ -194,7 +194,7 @@ always @(*) begin
                         instvalid <= `InstValid;
                     end
                     `EXE_SLLV: begin
-                    // CHECK
+                        // CHECK
                         wreg_o <= `WriteEnable;
                         aluop_o <= `EXE_SLL_OP;
                         alusel_o <= `EXE_RES_SHIFT;
@@ -203,7 +203,7 @@ always @(*) begin
                         instvalid <= `InstValid;
                     end
                     `EXE_SRLV: begin
-                    // CHECK
+                        // CHECK
                         wreg_o <= `WriteEnable;
                         aluop_o <= `EXE_SRL_OP;
                         alusel_o <= `EXE_RES_SHIFT;
@@ -212,7 +212,7 @@ always @(*) begin
                         instvalid <= `InstValid;
                     end
                     `EXE_SRAV: begin
-                    // CHECK
+                        // CHECK
                         wreg_o <= `WriteEnable;
                         aluop_o <= `EXE_SRA_OP;
                         alusel_o <= `EXE_RES_SHIFT;
@@ -221,7 +221,7 @@ always @(*) begin
                         instvalid <= `InstValid;
                     end
                     `EXE_SYNC: begin
-                    // CHECK
+                        // CHECK
                         wreg_o <= `WriteEnable;
                         aluop_o <= `EXE_NOP_OP;
                         alusel_o <= `EXE_RES_NOP;
@@ -253,6 +253,59 @@ always @(*) begin
                         imm[4:0] <= inst_i[10:6];
                         instvalid <= `InstValid;
                     end
+                    `EXE_MFHI: begin
+                        wreg_o <= `WriteEnable;
+                        aluop_o <= `EXE_MFHI_OP;
+                        alusel_o <= `EXE_RES_MOVE;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_MFLO: begin
+                        wreg_o <= `WriteEnable;
+                        aluop_o <= `EXE_MFLO_OP;
+                        alusel_o <= `EXE_RES_MOVE;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_MTHI: begin
+                        wreg_o <= `WriteDisable;
+                        aluop_o <= `EXE_MTHI_OP;
+                        reg1_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_MTLO: begin
+                        wreg_o <= `WriteDisable;
+                        aluop_o <= `EXE_MTLO_OP;
+                        reg1_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_MOVN: begin
+                        aluop_o <= `EXE_MOVN_OP;
+                        alusel_o <= `EXE_RES_MOVE;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                        // reg2_o 的值就是地址为 rt 的通用寄存器的值
+                        if(reg2_o != `ZeroWord) begin
+                            wreg_o <= `WriteEnable;
+                        end
+                        else begin
+                            wreg_o <= `WriteDisable;
+                        end
+                    end
+                    `EXE_MOVZ: begin
+                        aluop_o <= `EXE_MOVZ_OP;
+                        alusel_o <= `EXE_RES_MOVE;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                        // reg2_o 的值就是地址为 rt 的通用寄存器的值
+                        if(reg2_o == `ZeroWord) begin
+                            wreg_o <= `WriteEnable;
+                        end
+                        else begin
+                            wreg_o <= `WriteDisable;
+                        end
+                    end
+                    // TODO
                     default: begin
                     end
                 endcase

@@ -2,6 +2,7 @@
 verilog xil_defaultlib  \
 "../../../../../src/ex.v" \
 "../../../../../src/ex_mem.v" \
+"../../../../../src/hilo_reg.v" \
 "../../../../../src/id.v" \
 "../../../../../src/id_ex.v" \
 "../../../../../src/if_id.v" \
