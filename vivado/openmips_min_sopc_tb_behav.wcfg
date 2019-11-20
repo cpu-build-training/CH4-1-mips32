@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="240010000fs"></ZoomStartTime>
-      <ZoomEndTime time="372910001fs"></ZoomEndTime>
-      <Cursor1Time time="320610000fs"></Cursor1Time>
+      <ZoomStartTime time="1004495000fs"></ZoomStartTime>
+      <ZoomEndTime time="1139395001fs"></ZoomEndTime>
+      <Cursor1Time time="1049095000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="148"></NameColumnWidth>
-      <ValueColumnWidth column_width="96"></ValueColumnWidth>
+      <ValueColumnWidth column_width="76"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="50" />
+   <WVObjectSize size="51" />
    <wvobject type="logic" fp_name="/openmips_min_sopc_tb/CLOCK_50">
       <obj_property name="ElementShortName">CLOCK_50</obj_property>
       <obj_property name="ObjectShortName">CLOCK_50</obj_property>
@@ -139,6 +139,10 @@
    <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/logicout">
       <obj_property name="ElementShortName">logicout[31:0]</obj_property>
       <obj_property name="ObjectShortName">logicout[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/arithmeticres">
+      <obj_property name="ElementShortName">arithmeticres[31:0]</obj_property>
+      <obj_property name="ObjectShortName">arithmeticres[31:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/shiftres">
       <obj_property name="ElementShortName">shiftres[31:0]</obj_property>

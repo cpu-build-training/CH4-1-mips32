@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenRun Id="synth_1" LaunchPart="xc7vx485tffg1157-1" LaunchTime="1573704233">
-  <File Type="RDS-RDS" Name="openmips_min_sopc_tb.vds"/>
   <File Type="RDS-DCP" Name="openmips_min_sopc_tb.dcp"/>
   <File Type="PA-TCL" Name="openmips_min_sopc_tb.tcl"/>
+  <File Type="RDS-RDS" Name="openmips_min_sopc_tb.vds"/>
   <File Type="REPORTS-TCL" Name="openmips_min_sopc_tb_reports.tcl"/>
   <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
     <Filter Type="Srcs"/>

@@ -6,7 +6,7 @@
 `define WriteEnable     1'b1    // 写使能
 `define WriteDisable    1'b0
 `define ReadEnable      1'b1    // 读使能
-`define ReadDisable     1'b0    
+`define ReadDisable     1'b0
 `define AluOpBus        7:0     // 译码阶段的输出 aluop_o 的宽度
 `define AluSelBus       2:0     // 译码阶段的输出 alusel_o 的宽度
 `define InstValid       1'b0    // 指令有效
@@ -19,7 +19,13 @@
 `define EXE_XORI        6'b001110
 `define EXE_LUI         6'b001111
 `define EXE_SPECIAL     6'b000000
+`define EXE_SPECIAL2    6'b011100
 `define EXE_PREF        6'b110011
+`define EXE_ADDI        6'b001000
+`define EXE_ADDIU       6'b001001
+`define EXE_SLTI        6'b001010
+`define EXE_SLTIU       6'b001011
+
 
 // function code
 `define EXE_OR          6'b100101
@@ -40,8 +46,20 @@
 `define EXE_MTHI        6'b010001
 `define EXE_MFLO        6'b010010
 `define EXE_MTLO        6'b010011
+`define EXE_ADD         6'b100000
+`define EXE_ADDU        6'b100001
+`define EXE_SUB         6'b100010
+`define EXE_SUBU        6'b100011
+`define EXE_CLO         6'b100001
+`define EXE_CLZ         6'b100000
+`define EXE_SLT         6'b101010
+`define EXE_SLTU        6'b101011
+`define EXE_MUL         6'b000010
+`define EXE_MULT        6'b011000
+`define EXE_MULTU       6'b011001
 
-// AluOp
+
+// AluOp 尽量不要出现重复，比如 ADD & CLZ
 `define EXE_OR_OP       8'b00100101
 `define EXE_NOP_OP      8'b0
 `define EXE_AND_OP      8'b00100100
@@ -56,15 +74,27 @@
 `define EXE_MTLO_OP     8'b00010011
 `define EXE_MOVZ_OP     8'b00001010
 `define EXE_MOVN_OP     8'b00001011
-`define EXE_SUB_OP      8'b00001111 // TODO
-`define EXE_SUBU_OP     8'b10101010 // TODO
-`define EXE_SLT_OP      8'b10101011 // TODO
+`define EXE_SUB_OP      8'b00100010
+`define EXE_SUBU_OP     8'b00100011
+`define EXE_SLT_OP      8'b00101010
+`define EXE_SLTU_OP     8'b00101011
+`define EXE_ADD_OP      8'b00100000
+`define EXE_ADDU_OP     8'b00100001
+`define EXE_MULT_OP     8'b00011000
+`define EXE_MULTU_OP    8'b00011001
+`define EXE_ADDI_OP     8'b00001100
+`define EXE_ADDIU_OP    8'b00001001
+`define EXE_CLZ_OP      8'b01100000
+`define EXE_CLO_OP      8'b01100001
+`define EXE_MUL_OP      8'b00000010
 
 // AluSel
-`define EXE_RES_LOGIC   3'b001
-`define EXE_RES_NOP     3'b000
-`define EXE_RES_SHIFT   3'b010
-`define EXE_RES_MOVE    4'b011
+`define EXE_RES_LOGIC       3'b001
+`define EXE_RES_NOP         3'b000
+`define EXE_RES_SHIFT       3'b010
+`define EXE_RES_MOVE        3'b011
+`define EXE_RES_ARITHMETIC  3'b100
+`define EXE_RES_MUL         3'b101
 
 // 与指令存储器 ROM 有关的宏定义
 `define InstAddrBus     31:0    // ROM 的地址总线宽度
@@ -79,4 +109,4 @@
 `define DoubleRegBus    63:0    // 2 * RegBus
 `define RegNum          32      // 通用寄存器的数量
 `define RegNumLog2      5       // 寻址通用寄存器使用的地址位数，上面的数log2
-`define NOPRegAddr      5'b0    // 
+`define NOPRegAddr      5'b0    //
