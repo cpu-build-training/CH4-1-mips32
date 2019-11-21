@@ -18,7 +18,10 @@ module mem_wb(
            reg[`RegBus]           wb_wdata,
            reg[`RegBus]        wb_hi,
            reg[`RegBus]        wb_lo,
-           reg                 wb_whilo
+           reg                 wb_whilo,
+
+           // From CTRL module.
+           input wire[5:0]     stall
        );
 
 always @(posedge clk) begin
@@ -30,7 +33,15 @@ always @(posedge clk) begin
         wb_lo <= `ZeroWord;
         wb_whilo <= `WriteDisable;
     end
-    else begin
+    else if(stall[4] == `Stop && stall[5] == `NoStop) begin
+        wb_wd <= `NOPRegAddr;
+        wb_wreg <= `WriteDisable;
+        wb_wdata <= `ZeroWord;
+        wb_hi <= `ZeroWord;
+        wb_lo <= `ZeroWord;
+        wb_whilo <= `WriteDisable;
+    end
+    else if(stall[4] == `NoStop ) begin
         wb_wd <=  mem_wd;
         wb_wreg <=  mem_wreg;
         wb_wdata <=  mem_wdata;

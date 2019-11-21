@@ -2,7 +2,8 @@
 
 
 module pc_reg(
-    input wire clk, wire rst,
+    input wire clk, wire rst, 
+    wire[5:0] stall, // From CTRL mudule
     output reg[`InstAddrBus] pc, reg ce
 );
 
@@ -23,9 +24,9 @@ always @(posedge clk) begin
     // 会导致 pc 与 ir 总是表示同一个地址
     // 而在这里使用 ce 和 非阻塞复制，就是为了产生一个周期的延迟效果。
     // 因为这一个 always 的判断条件，依赖于上一个时钟周期结束时的赋值结果
-    if (ce == `RstDisable) begin
+    if (ce == `ChipDisable) begin
         pc <= 32'h0;
-    end else begin
+    end else if(stall[0] == `NoStop) begin
         //  按照字节寻址
         pc <= pc + `InstAddrIncrement; // 3'h4?
     end

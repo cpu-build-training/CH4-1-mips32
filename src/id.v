@@ -26,6 +26,9 @@ module id(
            reg[`RegAddrBus] wd_o,
            reg          wreg_o,
 
+           //    TO CTRL
+           output wire stallreq,
+
            // 数据前推所需要加入的新的输入
            // 来自 ex, mem 的输出
            // 处于执行阶段的指令的运算结果
@@ -39,6 +42,8 @@ module id(
            wire                 mem_wreg_i,
            wire[`RegBus]        mem_wdata_i,
            wire[`RegAddrBus]    mem_wd_i
+
+
        );
 
 // reg1_data_i  从 Regfile 输入的第一个读寄存器端口的输入
@@ -155,7 +160,7 @@ always @(*) begin
                 reg1_read_o <= `ReadEnable;
                 instvalid <= `InstValid;
             end
-            `EXE_SLTI:begin
+            `EXE_SLTI: begin
                 wreg_o <= `WriteEnable;
                 aluop_o <= `EXE_SLT_OP;
                 alusel_o <= `EXE_RES_ARITHMETIC;
@@ -164,7 +169,7 @@ always @(*) begin
                 wd_o <= inst_i[20:16];
                 instvalid <= `InstValid;
             end
-            `EXE_SLTIU:begin
+            `EXE_SLTIU: begin
                 wreg_o <= `WriteEnable;
                 aluop_o <= `EXE_SLTU_OP;
                 alusel_o <= `EXE_RES_ARITHMETIC;
@@ -173,7 +178,7 @@ always @(*) begin
                 wd_o <= inst_i[20:16];
                 instvalid <= `InstValid;
             end
-            `EXE_ADDI:begin
+            `EXE_ADDI: begin
                 wreg_o <= `WriteEnable;
                 aluop_o <= `EXE_ADDI_OP;
                 alusel_o <= `EXE_RES_ARITHMETIC;
@@ -182,7 +187,7 @@ always @(*) begin
                 wd_o <= inst_i[20:16];
                 instvalid <= `InstValid;
             end
-            `EXE_ADDIU:begin
+            `EXE_ADDIU: begin
                 wreg_o <= `WriteEnable;
                 aluop_o <= `EXE_ADDIU_OP;
                 alusel_o <= `EXE_RES_ARITHMETIC;
@@ -365,7 +370,7 @@ always @(*) begin
                         reg2_read_o <= `ReadEnable;
                         instvalid <= `InstValid;
                     end
-                    `EXE_ADDU:begin
+                    `EXE_ADDU: begin
                         wreg_o <= `WriteEnable;
                         aluop_o <= `EXE_ADDU_OP;
                         alusel_o <= `EXE_RES_ARITHMETIC;
@@ -390,7 +395,6 @@ always @(*) begin
                         instvalid <= `InstValid;
                     end
                     `EXE_MULT: begin
-                        wreg_o <= `WriteEnable;
                         aluop_o <= `EXE_MULT_OP;
                         reg1_read_o <= `ReadEnable;
                         reg2_read_o <= `ReadEnable;
@@ -407,34 +411,65 @@ always @(*) begin
                     end
                 endcase
             end
-            `EXE_SPECIAL2:begin
-               case (op3)
-                   `EXE_CLZ:begin
-                       wreg_o <= `WriteEnable;
-                       aluop_o <= `EXE_CLZ_OP;
-                       alusel_o <= `EXE_RES_ARITHMETIC;
-                       reg1_read_o <= `ReadEnable;
-                       instvalid <= `InstValid;
-                   end 
-                   `EXE_CLO:begin
-                       wreg_o <= `WriteEnable;
-                       aluop_o <= `EXE_CLO_OP;
-                       alusel_o <= `EXE_RES_ARITHMETIC;
-                       reg1_read_o <= `ReadEnable;
-                       instvalid <= `InstValid;
-                   end
-                   `EXE_MUL:begin
-                       wreg_o <= `WriteEnable;
-                       aluop_o <= `EXE_MUL_OP;
-                       alusel_o <= `EXE_RES_MUL;
-                       reg1_read_o <= `ReadEnable;
-                       reg2_read_o <= `ReadEnable;
-                       instvalid <= `InstValid;
-                   end 
-                   default:begin
-                       
-                   end 
-               endcase 
+            `EXE_SPECIAL2: begin
+                case (op3)
+                    `EXE_CLZ: begin
+                        wreg_o <= `WriteEnable;
+                        aluop_o <= `EXE_CLZ_OP;
+                        alusel_o <= `EXE_RES_ARITHMETIC;
+                        reg1_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_CLO: begin
+                        wreg_o <= `WriteEnable;
+                        aluop_o <= `EXE_CLO_OP;
+                        alusel_o <= `EXE_RES_ARITHMETIC;
+                        reg1_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_MUL: begin
+                        wreg_o <= `WriteEnable;
+                        aluop_o <= `EXE_MUL_OP;
+                        alusel_o <= `EXE_RES_MUL;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_MADD: begin
+                        aluop_o <= `EXE_MADD_OP;
+                        alusel_o <= `EXE_RES_MUL;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_MADDU: begin
+                        wreg_o <= `WriteDisable;
+                        aluop_o <= `EXE_MADDU_OP;
+                        alusel_o <= `EXE_RES_MUL;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_MSUB: begin
+                        wreg_o <= `WriteDisable;
+                        aluop_o <= `EXE_MSUB_OP;
+                        alusel_o <= `EXE_RES_MUL;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_MSUBU: begin
+                        wreg_o <= `WriteDisable;
+                        aluop_o <= `EXE_MSUBU_OP;
+                        alusel_o <= `EXE_RES_MUL;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    default: begin
+
+                    end
+                endcase
             end
             default: begin
             end

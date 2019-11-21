@@ -12,6 +12,8 @@ module ex_mem(
            wire[`RegBus]    ex_hi,
            wire[`RegBus]    ex_lo,
 
+            wire[`DoubleRegBus] hilo_i,
+            wire[1:0]       cnt_i,
            // 送到访存阶段的信息
            output
            reg[`RegAddrBus]        mem_wd,
@@ -20,7 +22,12 @@ module ex_mem(
 
            reg[`RegBus]         mem_hi,
            reg[`RegBus]         mem_lo,
-           reg mem_whilo
+           reg mem_whilo,
+           reg[`DoubleRegBus]   hilo_o,
+           reg[1:0]             cnt_o,
+
+           // From CTRL module.
+           input wire[5:0]     stall
        );
 
 always @(posedge clk) begin
@@ -31,14 +38,34 @@ always @(posedge clk) begin
         mem_hi <= `ZeroWord;
         mem_lo <= `ZeroWord;
         mem_whilo <= `WriteDisable;
+        hilo_o <= {`ZeroWord, `ZeroWord};
+        cnt_o <= 2'b00;
     end
-    else begin
+    else if(stall[3] == `Stop && stall[4] == `NoStop) begin
+        // 输出 NOP
+        mem_wd <= `NOPRegAddr;
+        mem_wreg<= `WriteDisable;
+        mem_wdata <= `ZeroWord;
+        mem_hi <= `ZeroWord;
+        mem_lo <= `ZeroWord;
+        mem_whilo <= `WriteDisable;
+        hilo_o <= hilo_i;
+        cnt_o <= cnt_i;
+    end
+    else if(stall[3] == `NoStop) begin
+        // normal
         mem_wd <= ex_wd;
         mem_wreg<= ex_wreg;
         mem_wdata<=ex_wdata;
         mem_hi <= ex_hi;
         mem_lo <= ex_lo;
         mem_whilo <= ex_whilo;
+        hilo_o <= {`ZeroWord, `ZeroWord};
+        cnt_o <= 2'b00;
+    end else begin
+    // keep same
+        hilo_o <= hilo_i;
+        cnt_o <= cnt_i;
     end
 end
 

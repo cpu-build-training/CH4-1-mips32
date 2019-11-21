@@ -57,9 +57,13 @@
 `define EXE_MUL         6'b000010
 `define EXE_MULT        6'b011000
 `define EXE_MULTU       6'b011001
+`define EXE_MADD        6'b000000
+`define EXE_MADDU       6'b000001
+`define EXE_MSUB        6'b000100
+`define EXE_MSUBU       6'b000101
 
 
-// AluOp 尽量不要出现重复，比如 ADD & CLZ
+// AluOp !!! 尽量不要出现重复，比如 ADD & CLZ
 `define EXE_OR_OP       8'b00100101
 `define EXE_NOP_OP      8'b0
 `define EXE_AND_OP      8'b00100100
@@ -87,6 +91,10 @@
 `define EXE_CLZ_OP      8'b01100000
 `define EXE_CLO_OP      8'b01100001
 `define EXE_MUL_OP      8'b00000010
+`define EXE_MADD_OP        8'b01000000
+`define EXE_MADDU_OP       8'b01000001
+`define EXE_MSUB_OP        8'b01000100
+`define EXE_MSUBU_OP       8'b01000101
 
 // AluSel
 `define EXE_RES_LOGIC       3'b001
@@ -110,3 +118,7 @@
 `define RegNum          32      // 通用寄存器的数量
 `define RegNumLog2      5       // 寻址通用寄存器使用的地址位数，上面的数log2
 `define NOPRegAddr      5'b0    //
+
+// For CTRL unit
+`define Stop            1'b1    // 流水线暂停
+`define NoStop          1'b0    // 流水线继续

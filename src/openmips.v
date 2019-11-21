@@ -37,6 +37,8 @@ wire[`RegBus]       ex_wdata_o;
 wire                ex_whilo_o;
 wire[`RegBus]       ex_hi_o;
 wire[`RegBus]       ex_lo_o;
+wire[1:0]           cnt_o;
+wire[`DoubleRegBus] hilo_temp_o;
 
 // 连接 EX/MEM 模块的输出与访存阶段 MEM 模块的输入的变量
 wire                mem_wreg_i;
@@ -76,9 +78,19 @@ wire[`RegBus]       reg2_data;
 wire[`RegAddrBus]   reg1_addr;
 wire[`RegAddrBus]   reg2_addr;
 
+// 连接 CTRL 和其他模块的通路
+wire                stallreq_from_id;
+wire                stallreq_from_ex;
+wire[5:0]           stall;
+
+// EX/MEM -> EX
+wire[1:0]           cnt_i;
+wire[`DoubleRegBus] hilo_temp_i;
+
 // pc_reg 实例化
 pc_reg  pc_reg0(
-            .clk(clk), .rst(rst), .pc(pc), .ce(rom_ce_o)
+            .clk(clk), .rst(rst), .pc(pc), .ce(rom_ce_o),
+            .stall(stall)
         );
 
 assign rom_addr_o = pc; // 指令存储器的输入地址就是 pc 的值
@@ -87,7 +99,8 @@ assign rom_addr_o = pc; // 指令存储器的输入地址就是 pc 的值
 if_id if_id0(
           .clk(clk), .rst(rst), .if_pc(pc),
           .if_inst(rom_data_i), .id_pc(id_pc_i),
-          .id_inst(id_inst_i)
+          .id_inst(id_inst_i),
+          .stall(stall)
       );
 
 id id0(
@@ -110,7 +123,9 @@ id id0(
        .ex_wd_i(ex_wd_o),
 
        .mem_wreg_i(mem_wreg_o), .mem_wdata_i(mem_wdata_o),
-       .mem_wd_i(mem_wd_o)
+       .mem_wd_i(mem_wd_o),
+
+       .stallreq(stallreq_from_id)
    );
 
 // 通用寄存器 Regfile 实例化
@@ -135,7 +150,9 @@ id_ex id_ex0(
           // 传递到执行阶段 EX 模块的信息
           .ex_aluop(ex_aluop_i), .ex_alusel(ex_alusel_i),
           .ex_reg1(ex_reg1_i), .ex_reg2(ex_reg2_i),
-          .ex_wd(ex_wd_i),    .ex_wreg(ex_wreg_i)
+          .ex_wd(ex_wd_i),    .ex_wreg(ex_wreg_i),
+
+          .stall(stall)
       );
 
 // EX 实例化
@@ -159,6 +176,9 @@ ex ex0(
        .whilo_o(ex_whilo_o),
        .hi_o(ex_hi_o),.lo_o(ex_lo_o),
 
+       .cnt_o(cnt_o),
+       .hilo_temp_o(hilo_temp_o),
+
        // 从 MEM 过来的数据
        .mem_whilo_i(mem_whilo_o),
        .mem_hi_i(mem_hi_o),
@@ -167,7 +187,14 @@ ex ex0(
        // 从 MEM/WB 过来的数据
        .wb_whilo_i(hilo_we_i),
        .wb_hi_i(hilo_hi_i),
-       .wb_lo_i(hilo_lo_i)
+       .wb_lo_i(hilo_lo_i),
+
+       // From EX/MEM
+       .cnt_i(cnt_i),
+       .hilo_temp_i(hilo_temp_i),
+
+        // TO CTRL
+        .stallreq(stallreq_from_ex)
    );
 
 // EX/MEM 实例化
@@ -181,12 +208,21 @@ ex_mem ex_mem0(
            .ex_whilo(ex_whilo_o), .ex_hi(ex_hi_o),
            .ex_lo(ex_lo_o),
 
+           .cnt_i(cnt_o),
+           .hilo_i(hilo_temp_o),
+
            // 送到访存阶段 MEM 模块的信息
            .mem_wd(mem_wd_i), .mem_wreg(mem_wreg_i),
            .mem_wdata(mem_wdata_i),
 
            .mem_hi(mem_hi_i), .mem_lo(mem_lo_i),
-           .mem_whilo(mem_whilo_i)
+           .mem_whilo(mem_whilo_i),
+
+           .stall(stall),
+
+            // TO EX
+            .cnt_o(cnt_i),
+            .hilo_o(hilo_temp_i)
        );
 
 // MEM 实例化
@@ -225,7 +261,9 @@ mem_wb mem_wb0(
 
            .wb_hi(hilo_hi_i),
            .wb_lo(hilo_lo_i),
-           .wb_whilo(hilo_we_i)
+           .wb_whilo(hilo_we_i),
+
+           .stall(stall)
        );
 
 hilo_reg hilo_reg0(
@@ -237,4 +275,12 @@ hilo_reg hilo_reg0(
          .hi_o(hilo_hi_o),
          .lo_o(hilo_lo_o)
      );
+
+ctrl ctrl0(
+    .rst(rst),
+    .stall(stall),
+    .stallreq_from_ex(stallreq_from_ex),
+    .stallreq_from_id(stallreq_from_id)
+);
+
 endmodule // openmips
