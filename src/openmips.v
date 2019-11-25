@@ -87,6 +87,14 @@ wire[5:0]           stall;
 wire[1:0]           cnt_i;
 wire[`DoubleRegBus] hilo_temp_i;
 
+// DIV modules
+wire[`DoubleRegBus] ex_div_result_i;
+wire                ex_div_ready_i;
+wire[`RegBus]        ex_div_opdata1_o;
+wire[`RegBus]        ex_div_opdata2_o;
+wire                 ex_div_start_o;
+wire                 ex_signed_div_o;
+
 // pc_reg 实例化
 pc_reg  pc_reg0(
             .clk(clk), .rst(rst), .pc(pc), .ce(rom_ce_o),
@@ -194,7 +202,16 @@ ex ex0(
        .hilo_temp_i(hilo_temp_i),
 
         // TO CTRL
-        .stallreq(stallreq_from_ex)
+        .stallreq(stallreq_from_ex),
+
+        // For DIV modules
+        .div_result_i(ex_div_result_i),
+        .div_ready_i(ex_div_ready_i),
+
+        .div_opdata1_o(ex_div_opdata1_o),
+        .div_opdata2_o(ex_div_opdata2_o),
+        .div_start_o(ex_div_start_o),
+        .signed_div_o(ex_signed_div_o)
    );
 
 // EX/MEM 实例化
@@ -281,6 +298,20 @@ ctrl ctrl0(
     .stall(stall),
     .stallreq_from_ex(stallreq_from_ex),
     .stallreq_from_id(stallreq_from_id)
+);
+
+div div0(
+    .clk(clk),
+    .rst(rst),
+
+    .signed_div_i(ex_signed_div_o),
+    .opdata1_i(ex_div_opdata1_o),
+    .opdata2_i(ex_div_opdata2_o),
+    .start_i(ex_div_start_o),
+    .annul_i(1'b0),
+
+    .result_o(ex_div_result_i),
+    .ready_o(ex_div_ready_i)
 );
 
 endmodule // openmips

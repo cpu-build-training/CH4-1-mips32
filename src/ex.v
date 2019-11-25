@@ -30,6 +30,10 @@ module ex(
            // 当前处于执行阶段的第几个时钟周期
            wire[1:0]   cnt_i,
 
+           // 来自除法模块的输入
+           wire[`DoubleRegBus] div_result_i,
+           wire                 div_ready_i,
+
            // 执行结果
            output
            reg[`RegAddrBus]    wd_o,
@@ -49,7 +53,14 @@ module ex(
            reg[1:0]             cnt_o,
 
            //    TO CTRL
-           output reg stallreq
+           output reg stallreq,
+
+           // 到除法模块的输出
+           reg[`RegBus]    div_opdata1_o,
+           reg[`RegBus]    div_opdata2_o,
+           reg             div_start_o,
+           reg             signed_div_o
+
        );
 
 // ???
@@ -58,6 +69,9 @@ reg[`RegBus] shiftres;
 reg[`RegBus] moveres;
 reg[`RegBus] HI;
 reg[`RegBus] LO;
+
+// 是否由于除法运算导致流水线暂停
+reg stallreq_for_div;
 
 // NEW
 wire    ov_sum;         // 保存溢出情况
@@ -243,10 +257,78 @@ always @(*) begin
     end
 end
 
+// 输出 DIV 模块的控制信息，获取 DIV 模块给出的结果
+always @(*) begin
+    if(rst == `RstEnable) begin
+        stallreq_for_div <= `NoStop;
+        div_opdata1_o <= `ZeroWord;
+        div_opdata2_o <= `ZeroWord;
+        div_start_o <= `DivStop;
+        signed_div_o <= 1'b0;
+    end
+    else begin
+        stallreq_for_div <= `NoStop;
+        div_opdata1_o <= `ZeroWord;
+        div_opdata2_o <= `ZeroWord;
+        div_start_o <= `DivStop;
+        signed_div_o <= 1'b0;
+        case (aluop_i)
+            `EXE_DIV_OP: begin
+                if(div_ready_i == `DivResultNotReady) begin
+                    div_opdata1_o <= reg1_i; //被除数
+                    div_opdata2_o <= reg2_i; // 除数
+                    div_start_o <= `DivStart;
+                    signed_div_o <= 1'b1;
+                    stallreq_for_div <= `Stop;
+                end
+                else if (div_ready_i == `DivResultReady) begin
+                    div_opdata1_o <= reg1_i;
+                    div_opdata2_o <= reg2_i;
+                    div_start_o <= `DivStop;
+                    signed_div_o <= 1'b1;
+                    stallreq_for_div <= `NoStop;
+                end
+                else begin
+                    stallreq_for_div <= `NoStop;
+                    div_opdata1_o <= `ZeroWord;
+                    div_opdata2_o <= `ZeroWord;
+                    div_start_o <= `DivStop;
+                    signed_div_o <= 1'b0;
+                end
+            end
+            `EXE_DIVU_OP: begin
+                if(div_ready_i == `DivResultNotReady) begin
+                    div_opdata1_o <= reg1_i; //被除数
+                    div_opdata2_o <= reg2_i; // 除数
+                    div_start_o <= `DivStart;
+                    signed_div_o <= 1'b0; // 无符号
+                    stallreq_for_div <= `Stop;
+                end else if(div_ready_i == `DivResultReady) begin
+                    div_opdata1_o <= reg1_i;
+                    div_opdata2_o <= reg2_i;
+                    div_start_o <= `DivStop;
+                    signed_div_o <= 1'b0;
+                    stallreq_for_div <= `NoStop;
+                end
+                else begin
+                    stallreq_for_div <= `NoStop;
+                    div_opdata1_o <= `ZeroWord;
+                    div_opdata2_o <= `ZeroWord;
+                    div_start_o <= `DivStop;
+                    signed_div_o <= 1'b0;
+                end
+            end
+            default: begin
+            end
+        endcase
+    end
+end
+
+
 // 暂停流水线
 // 目前只有四条会导致暂停，所以就 stallreq 直接等于 stallreq_for_madd_msub 的值
 always @(*) begin
-    stallreq = stallreq_for_madd_msub;
+    stallreq = stallreq_for_madd_msub || stallreq_for_div;
 end
 
 // 得到最新的 HI/LO
@@ -388,6 +470,10 @@ always @(*) begin
         whilo_o  <= `WriteDisable;
         hi_o <= `ZeroWord;
         lo_o <= `ZeroWord;
+    end else if ((aluop_i == `EXE_DIV_OP) || (aluop_i == `EXE_DIVU_OP))begin
+        whilo_o <= `WriteEnable;
+        hi_o <= div_result_i[63:32];
+        lo_o <= div_result_i[31:0];
     end
     else if ((aluop_i == `EXE_MULT_OP) || (aluop_i == `EXE_MULTU_OP)) begin
         whilo_o <= `WriteEnable;

@@ -61,6 +61,8 @@
 `define EXE_MADDU       6'b000001
 `define EXE_MSUB        6'b000100
 `define EXE_MSUBU       6'b000101
+`define EXE_DIV         6'b011010
+`define EXE_DIVU        6'b011011
 
 
 // AluOp !!! 尽量不要出现重复，比如 ADD & CLZ
@@ -95,6 +97,8 @@
 `define EXE_MADDU_OP       8'b01000001
 `define EXE_MSUB_OP        8'b01000100
 `define EXE_MSUBU_OP       8'b01000101
+`define EXE_DIV_OP         8'b00011010
+`define EXE_DIVU_OP        8'b00011011
 
 // AluSel
 `define EXE_RES_LOGIC       3'b001
@@ -122,3 +126,14 @@
 // For CTRL unit
 `define Stop            1'b1    // 流水线暂停
 `define NoStop          1'b0    // 流水线继续
+
+// DIV unit
+`define DivFree         2'b00
+`define DivByZero       2'b01
+`define DivOn           2'b10
+`define DivEnd          2'b11
+
+`define DivResultNotReady   1'b0
+`define DivResultReady      1'b1
+`define DivStart        1'b1
+`define DivStop         1'b0

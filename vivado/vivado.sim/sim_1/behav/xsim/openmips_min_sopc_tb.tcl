@@ -8,4 +8,4 @@ if { [string length $curr_wave] == 0 } {
   }
 }
 
-run 1500ns
+run 4000ns
