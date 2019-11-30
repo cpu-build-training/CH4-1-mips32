@@ -20,6 +20,7 @@
 `define EXE_LUI         6'b001111
 `define EXE_SPECIAL     6'b000000
 `define EXE_SPECIAL2    6'b011100
+`define EXE_REGIMM_INST 6'b000001
 `define EXE_PREF        6'b110011
 `define EXE_ADDI        6'b001000
 `define EXE_ADDIU       6'b001001
@@ -63,7 +64,19 @@
 `define EXE_MSUBU       6'b000101
 `define EXE_DIV         6'b011010
 `define EXE_DIVU        6'b011011
-
+`define EXE_J           6'b000010
+`define EXE_JAL         6'b000011
+`define EXE_JALR        6'b001001
+`define EXE_JR          6'b001000
+`define EXE_BEQ         6'b000100
+`define EXE_BGEZ        5'b00001
+`define EXE_BGEZAL      5'b10001
+`define EXE_BGTZ        6'b000111
+`define EXE_BLEZ        6'b000110
+`define EXE_BLTZ        5'b00000
+`define EXE_BLTZ        5'b00000
+`define EXE_BLTZAL      5'b10000
+`define EXE_BNE         6'b000101
 
 // AluOp !!! 尽量不要出现重复，比如 ADD & CLZ
 `define EXE_OR_OP       8'b00100101
@@ -99,6 +112,20 @@
 `define EXE_MSUBU_OP       8'b01000101
 `define EXE_DIV_OP         8'b00011010
 `define EXE_DIVU_OP        8'b00011011
+`define EXE_J_OP           8'b01000010
+`define EXE_JAL_OP         8'b01000011
+`define EXE_JALR_OP        8'b01001001
+`define EXE_JR_OP          8'b01001000
+`define EXE_BEQ_OP         8'b10000100
+`define EXE_BGEZ_OP        8'b00000001
+`define EXE_BGEZAL_OP      8'b10010001
+`define EXE_BGTZ_OP        8'b10000111
+`define EXE_BLEZ_OP        8'b10000110
+`define EXE_BLTZ_OP        8'b00000000
+`define EXE_BLTZ_OP        8'b00000000
+`define EXE_BLTZAL_OP      8'b10010000
+`define EXE_BNE_OP         8'b00000101
+
 
 // AluSel
 `define EXE_RES_LOGIC       3'b001
@@ -107,6 +134,7 @@
 `define EXE_RES_MOVE        3'b011
 `define EXE_RES_ARITHMETIC  3'b100
 `define EXE_RES_MUL         3'b101
+`define EXE_RES_JUMP_BRANCH 3'b110
 
 // 与指令存储器 ROM 有关的宏定义
 `define InstAddrBus     31:0    // ROM 的地址总线宽度
@@ -137,3 +165,9 @@
 `define DivResultReady      1'b1
 `define DivStart        1'b1
 `define DivStop         1'b0
+
+`define Branch          1'b1
+`define NotBranch       1'b0
+
+`define InDelaySlot     1'b1        // 在延迟槽中
+`define NotInDelaySlot  1'b0

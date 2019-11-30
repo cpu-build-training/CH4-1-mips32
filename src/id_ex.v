@@ -12,6 +12,10 @@ module id_ex(
            wire[`RegBus]   id_reg2,
            wire[`RegAddrBus] id_wd,
            wire            id_wreg,
+           
+           wire[`RegBus]    id_link_address,
+           wire             id_is_in_delayslot,
+           wire             next_inst_in_delayslot_i,
 
            // 传到执行阶段的信息
            output
@@ -21,6 +25,10 @@ module id_ex(
            reg[`RegBus]        ex_reg2,
            reg[`RegAddrBus]    ex_wd,
            reg                 ex_wreg,
+
+           reg[`RegBus]         ex_link_address,
+           reg                  ex_is_in_delayslot,
+           reg                  is_in_delayslot_o,
 
            // From CTRL module.
            input wire[5:0]     stall
@@ -35,6 +43,9 @@ always @(posedge clk) begin
         ex_reg2 <= `ZeroWord;
         ex_wd   <= `NOPRegAddr;
         ex_wreg <= `WriteDisable;
+        ex_link_address <= `ZeroWord;
+        ex_is_in_delayslot <= `NotInDelaySlot;
+        is_in_delayslot_o <= `NotInDelaySlot;
     end else if(stall[2] == `Stop && stall[3] == `NoStop) begin
         // 下一个环节继续，本环节暂停，则输出 NOP
         ex_aluop <= `EXE_NOP_OP;
@@ -43,6 +54,9 @@ always @(posedge clk) begin
         ex_reg2 <= `ZeroWord;
         ex_wd   <= `NOPRegAddr;
         ex_wreg <= `WriteDisable;
+        ex_link_address <= `ZeroWord;
+        ex_is_in_delayslot <= `NotInDelaySlot;
+        // ??? 为什么少了一项
     end
     else if(stall[2] == `NoStop) begin
         ex_aluop <= id_aluop;
@@ -51,6 +65,9 @@ always @(posedge clk) begin
         ex_reg2 <= id_reg2;
         ex_wd   <= id_wd;
         ex_wreg <= id_wreg;
+        ex_link_address <= id_link_address;
+        ex_is_in_delayslot <= id_is_in_delayslot;
+        is_in_delayslot_o <= next_inst_in_delayslot_i;
     end
     // 其他情况，保持不变
 end

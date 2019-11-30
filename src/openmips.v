@@ -8,11 +8,19 @@ module openmips(
            output  wire[`RegBus]   rom_addr_o,
            output wire             rom_ce_o
        );
+// id_pc_i 模块_功能_输入or输出
+
+// 送入 PC 有关跳转的信号
+wire[`RegBus] pc_branch_target_address_i;
+wire pc_branch_flag_i;
 
 //  连接 IF/ID 模块与译码阶段 ID 模块的变量
 wire[`InstAddrBus]  pc;
 wire[`InstAddrBus]  id_pc_i;
 wire[`InstBus]      id_inst_i;
+
+// 从 ID/EX 回写到 ID 的变量
+wire                id_is_in_delayslot_i;
 
 // 连接译码阶段 ID 模块输出与 ID/EX 模块的输入变量
 wire[`AluOpBus]     id_aluop_o;
@@ -21,6 +29,10 @@ wire[`RegBus]       id_reg1_o;
 wire[`RegBus]       id_reg2_o;
 wire                id_wreg_o;
 wire[`RegAddrBus]   id_wd_o;
+wire                id_is_in_delayslot_o;
+wire[`RegBus]       id_link_addr_o;
+wire                id_next_inst_in_delayslot_o;
+
 
 // 连接 ID/EX 模块输出与执行阶段 EX 模块的输入变量
 wire[`AluOpBus]     ex_aluop_i;
@@ -29,6 +41,8 @@ wire[`RegBus]       ex_reg1_i;
 wire[`RegBus]       ex_reg2_i;
 wire                ex_wreg_i;
 wire[`RegAddrBus]   ex_wd_i;
+wire                ex_is_in_delayslot_i;
+wire[`RegBus]       ex_link_address_i;
 
 // 连接执行阶段 EX 模块的输出与 EX/MEM 模块的输入的变量
 wire                ex_wreg_o;
@@ -98,7 +112,10 @@ wire                 ex_signed_div_o;
 // pc_reg 实例化
 pc_reg  pc_reg0(
             .clk(clk), .rst(rst), .pc(pc), .ce(rom_ce_o),
-            .stall(stall)
+            .stall(stall),
+
+            .branch_flag_i(pc_branch_flag_i),
+            .branch_target_address_i(pc_branch_target_address_i)
         );
 
 assign rom_addr_o = pc; // 指令存储器的输入地址就是 pc 的值
@@ -133,7 +150,14 @@ id id0(
        .mem_wreg_i(mem_wreg_o), .mem_wdata_i(mem_wdata_o),
        .mem_wd_i(mem_wd_o),
 
-       .stallreq(stallreq_from_id)
+       .stallreq(stallreq_from_id),
+
+       .is_in_delayslot_i(id_is_in_delayslot_i),
+       .is_in_delayslot_o(id_is_in_delayslot_o),
+       .link_addr_o(id_link_addr_o),
+       .next_inst_in_delayslot_o(id_next_inst_in_delayslot_o),
+       .branch_target_address_o(pc_branch_target_address_i),
+       .branch_flag_o(pc_branch_flag_i)
    );
 
 // 通用寄存器 Regfile 实例化
@@ -160,7 +184,14 @@ id_ex id_ex0(
           .ex_reg1(ex_reg1_i), .ex_reg2(ex_reg2_i),
           .ex_wd(ex_wd_i),    .ex_wreg(ex_wreg_i),
 
-          .stall(stall)
+          .stall(stall),
+
+          .id_link_address(id_link_addr_o),
+          .id_is_in_delayslot(id_is_in_delayslot_o),
+          .next_inst_in_delayslot_i(id_next_inst_in_delayslot_o),
+          .ex_is_in_delayslot(ex_is_in_delayslot_i),
+          .ex_link_address(ex_link_address_i),
+          .is_in_delayslot_o(id_is_in_delayslot_i)
       );
 
 // EX 实例化
@@ -211,7 +242,10 @@ ex ex0(
         .div_opdata1_o(ex_div_opdata1_o),
         .div_opdata2_o(ex_div_opdata2_o),
         .div_start_o(ex_div_start_o),
-        .signed_div_o(ex_signed_div_o)
+        .signed_div_o(ex_signed_div_o),
+
+        .is_in_delayslot_i(ex_is_in_delayslot_i),
+        .link_address_i(ex_link_address_i)
    );
 
 // EX/MEM 实例化

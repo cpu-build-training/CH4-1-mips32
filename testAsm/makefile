@@ -5,32 +5,34 @@ CC = $(CROSS_COMPILE)as
 LD = $(CROSS_COMPILE)ld
 OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
+V := @
 
 OBJECTS = inst_rom.o
 SOURCE = $(shell ls *.S | sort -nr | head -n1 | tr -d '\n')
 
 export CROSS_COMPILE
 
-# Rules of Compilation
-
 all: inst_rom.data
 
-# %.o: %.S
-$(OBJECTS): $(SOURCE)
-	$(CC) -EB -mips32 $< -o $(OBJECTS)
+# strip all the comment, now we can write chinese character in .S file.
+inst_rom.Ss: $(SOURCE)
+	$(V)sed -e 's/#.*//' $< > $@
+
+$(OBJECTS): inst_rom.Ss
+	$(V)$(CC) -EB -mips32 $< -o $(OBJECTS)
 
 inst_rom.om: ram.ld $(OBJECTS)
-	$(LD) -T ram.ld -EB $(OBJECTS) -o $@
+	$(V)$(LD) -T ram.ld -EB $(OBJECTS) -o $@
 
 inst_rom.bin: inst_rom.om
-	$(OBJCOPY) --only-section=.text -O verilog $< $@
+	$(V)$(OBJCOPY) --only-section=.text -O verilog $< $@
 
 inst_rom.data: inst_rom.bin
-	cp $< $@
-	sed -i '1d' $@
-	sed -i 's/ //g' $@
-	sed -i 's_\(.\{8\}\)_\1\n_g' $@
-	sed -i '/^\s*$$/d' $@
+	$(V)cp $< $@
+	$(V)sed -i '1d' $@
+	$(V)sed -i 's/ //g' $@
+	$(V)sed -i 's_\(.\{8\}\)_\1\n_g' $@
+	$(V)sed -i '/^\s*$$/d' $@
 
 clean:
-	rm -f *.o *.om *.bin *.data
+	$(V)rm -f *.o *.om *.bin *.data *.Ss

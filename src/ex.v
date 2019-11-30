@@ -34,6 +34,11 @@ module ex(
            wire[`DoubleRegBus] div_result_i,
            wire                 div_ready_i,
 
+           // 当前处于执行阶段的指令是否位于延迟槽
+           wire is_in_delayslot_i,
+           // 当前处于执行阶段的转移指令要保存的返回地址
+           wire[`RegBus]        link_address_i,
+
            // 执行结果
            output
            reg[`RegAddrBus]    wd_o,
@@ -457,6 +462,9 @@ always @(*) begin
         end
         `EXE_RES_MUL: begin
             wdata_o <= mulres[31:0];
+        end
+        `EXE_RES_JUMP_BRANCH: begin
+            wdata_o <= link_address_i;
         end
         default: begin
             wdata_o <= `ZeroWord;
