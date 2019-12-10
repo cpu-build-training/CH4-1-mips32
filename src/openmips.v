@@ -65,6 +65,7 @@ wire[`DoubleRegBus] hilo_temp_o;
 wire[`AluOpBus]     ex_aluop_o;
 wire[`RegBus]       ex_mem_addr_o;
 wire[`RegBus]       ex_reg2_o;
+wire[`AluSelBus]    ex_alusel_o;
 
 
 
@@ -78,6 +79,7 @@ wire[`RegBus]       mem_lo_i;
 wire[`AluOpBus]      mem_aluop_i;
 wire[`RegBus]        mem_mem_addr_i;
 wire[`RegBus]        mem_reg2_i;
+wire[`AluSelBus]    mem_alusel_i;
 
 // 连接访存阶段 MEM 模块的输出与 MEM/WB 模块的输入变量
 wire                mem_wreg_o;
@@ -86,6 +88,7 @@ wire[`RegBus]       mem_wdata_o;
 wire                mem_whilo_o;
 wire[`RegBus]       mem_hi_o;
 wire[`RegBus]       mem_lo_o;
+wire[`AluSelBus]    mem_alusel_o;
 
 // 连接 MEM/WB 模块的输出与回写阶段的输入的变量
 wire                wb_wreg_i;
@@ -241,6 +244,7 @@ ex ex0(
        .cnt_o(cnt_o),
        .hilo_temp_o(hilo_temp_o),
 
+       .alusel_o(ex_alusel_o),
        .aluop_o(ex_aluop_o),
        .mem_addr_o(ex_mem_addr_o),
        .reg2_o(ex_reg2_o),
@@ -249,6 +253,10 @@ ex ex0(
        .mem_whilo_i(mem_whilo_o),
        .mem_hi_i(mem_hi_o),
        .mem_lo_i(mem_lo_o),
+       .mem_alusel_i(mem_alusel_o),
+       .mem_wreg_i(mem_wreg_o),
+       .mem_wdata_i(mem_wdata_o),
+       .mem_wd_i(mem_wd_o),
 
        // 从 MEM/WB 过来的数据
        .wb_whilo_i(hilo_we_i),
@@ -289,6 +297,7 @@ ex_mem ex_mem0(
            .cnt_i(cnt_o),
            .hilo_i(hilo_temp_o),
 
+           .ex_alusel(ex_alusel_o),
            .ex_aluop(ex_aluop_o),
            .ex_mem_addr(ex_mem_addr_o),
            .ex_reg2(ex_reg2_o),
@@ -300,6 +309,7 @@ ex_mem ex_mem0(
            .mem_hi(mem_hi_i), .mem_lo(mem_lo_i),
            .mem_whilo(mem_whilo_i),
 
+           .mem_alusel(mem_alusel_i),
            .mem_aluop(mem_aluop_i),
            .mem_mem_addr(mem_mem_addr_i),
            .mem_reg2(mem_reg2_i),
@@ -323,13 +333,14 @@ mem mem0(
         .whilo_i(mem_whilo_i),
         .hi_i(mem_hi_i),.lo_i(mem_lo_i),
 
+        .alusel_i(mem_alusel_i),
         .aluop_i(mem_aluop_i),
         .mem_addr_i(mem_mem_addr_i),
         .reg2_i(mem_reg2_i),
 
-        // 送到 MEM/WB 模块的信息
+        // 送到 MEM/WB 模块的信息，也用作数据前推
         .wd_o(mem_wd_o),    .wreg_o(mem_wreg_o),
-        .wdata_o(mem_wdata_o),
+        .wdata_o(mem_wdata_o), .alusel_o(mem_alusel_o),
 
         .whilo_o(mem_whilo_o),
         .hi_o(mem_hi_o), .lo_o(mem_lo_o),

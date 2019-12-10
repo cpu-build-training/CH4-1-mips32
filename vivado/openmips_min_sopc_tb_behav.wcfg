@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="3892799999fs"></ZoomStartTime>
-      <ZoomEndTime time="4021440001fs"></ZoomEndTime>
-      <Cursor1Time time="4000000000fs"></Cursor1Time>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="322462800fs"></ZoomEndTime>
+      <Cursor1Time time="226006000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="178"></NameColumnWidth>
-      <ValueColumnWidth column_width="112"></ValueColumnWidth>
+      <ValueColumnWidth column_width="92"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="87" />
+   <WVObjectSize size="95" />
    <wvobject type="logic" fp_name="/openmips_min_sopc_tb/CLOCK_50">
       <obj_property name="ElementShortName">CLOCK_50</obj_property>
       <obj_property name="ObjectShortName">CLOCK_50</obj_property>
@@ -40,10 +40,6 @@
       <obj_property name="ElementShortName">if_pc[31:0]</obj_property>
       <obj_property name="ObjectShortName">if_pc[31:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/inst">
-      <obj_property name="ElementShortName">inst[31:0]</obj_property>
-      <obj_property name="ObjectShortName">inst[31:0]</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/if_id0/id_pc">
       <obj_property name="ElementShortName">id_pc[31:0]</obj_property>
       <obj_property name="ObjectShortName">id_pc[31:0]</obj_property>
@@ -59,6 +55,10 @@
    <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/id0/pc_i">
       <obj_property name="ElementShortName">pc_i[31:0]</obj_property>
       <obj_property name="ObjectShortName">pc_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/inst">
+      <obj_property name="ElementShortName">inst[31:0]</obj_property>
+      <obj_property name="ObjectShortName">inst[31:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/id0/wreg_o">
       <obj_property name="ElementShortName">wreg_o</obj_property>
@@ -158,9 +158,29 @@
       <obj_property name="ObjectShortName">aluop_i[7:0]</obj_property>
       <obj_property name="Radix">BINARYRADIX</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/mem_wdata_i">
+      <obj_property name="ElementShortName">mem_wdata_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_wdata_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/mem_wreg_i">
+      <obj_property name="ElementShortName">mem_wreg_i</obj_property>
+      <obj_property name="ObjectShortName">mem_wreg_i</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/mem_wd_i">
+      <obj_property name="ElementShortName">mem_wd_i[4:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_wd_i[4:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/mem_alusel_i">
+      <obj_property name="ElementShortName">mem_alusel_i[2:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_alusel_i[2:0]</obj_property>
+   </wvobject>
    <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/wd_o">
       <obj_property name="ElementShortName">wd_o[4:0]</obj_property>
       <obj_property name="ObjectShortName">wd_o[4:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/reg2_o">
+      <obj_property name="ElementShortName">reg2_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">reg2_o[31:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/wreg_o">
       <obj_property name="ElementShortName">wreg_o</obj_property>
@@ -186,6 +206,10 @@
       <obj_property name="ElementShortName">stallreq_for_madd_msub</obj_property>
       <obj_property name="ObjectShortName">stallreq_for_madd_msub</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/alusel_o">
+      <obj_property name="ElementShortName">alusel_o[2:0]</obj_property>
+      <obj_property name="ObjectShortName">alusel_o[2:0]</obj_property>
+   </wvobject>
    <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/mem_addr_o">
       <obj_property name="ElementShortName">mem_addr_o[31:0]</obj_property>
       <obj_property name="ObjectShortName">mem_addr_o[31:0]</obj_property>
@@ -209,6 +233,11 @@
    <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem0/aluop_i">
       <obj_property name="ElementShortName">aluop_i[7:0]</obj_property>
       <obj_property name="ObjectShortName">aluop_i[7:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem0/alusel_i">
+      <obj_property name="ElementShortName">alusel_i[2:0]</obj_property>
+      <obj_property name="ObjectShortName">alusel_i[2:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem0/mem_data_i">
       <obj_property name="ElementShortName">mem_data_i[31:0]</obj_property>
@@ -250,6 +279,10 @@
    <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem0/wdata_o">
       <obj_property name="ElementShortName">wdata_o[31:0]</obj_property>
       <obj_property name="ObjectShortName">wdata_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem0/alusel_o">
+      <obj_property name="ElementShortName">alusel_o[2:0]</obj_property>
+      <obj_property name="ObjectShortName">alusel_o[2:0]</obj_property>
    </wvobject>
    <wvobject fp_name="divider47" type="divider">
       <obj_property name="label">hilo</obj_property>

@@ -15,6 +15,7 @@ module mem(
            wire[`RegBus]    lo_i,
 
            // 来自执行阶段的信息
+           wire[`AluSelBus] alusel_i,
            wire[`AluOpBus]  aluop_i,
            wire[`RegBus]    mem_addr_i,
            wire[`RegBus]    reg2_i,
@@ -28,6 +29,8 @@ module mem(
            reg[`RegAddrBus]        wd_o,
            reg                     wreg_o,
            reg[`RegBus]            wdata_o,
+           // 用于数据前推
+           wire[`AluSelBus]          alusel_o,
 
            reg[`RegBus]         hi_o,
            reg[`RegBus]         lo_o,
@@ -45,6 +48,9 @@ reg             mem_we;
 // 外部数据存储器 RAM 的读写信号
 assign mem_we_o = mem_we;
 assign zero32 = `ZeroWord;
+
+// 用于数据前推
+assign alusel_o = alusel_i;
 
 
 // 目前是组合逻辑电路
