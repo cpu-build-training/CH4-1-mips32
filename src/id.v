@@ -7,6 +7,9 @@ module id(
            wire [`InstAddrBus] pc_i,
            wire[`InstBus]  inst_i,
 
+           // 来自执行阶段的 aluop
+           wire[`AluOpBus]      ex_aluop_i,
+
            // 读取的 Regfile 的值
            input wire[`RegBus] reg1_data_i,
            wire[`RegBus] reg2_data_i,
@@ -87,6 +90,9 @@ wire[`RegBus]   imm_sll2_signedext;
 assign pc_plus_8 = pc_i + 8;
 assign pc_plus_4 = pc_i + 4;
 
+reg stallreq_for_reg1_loadrelate;
+reg stallreq_for_reg2_loadrelate;
+wire pre_inst_is_load;
 
 // 保存指令执行需要的立即数
 reg[`RegBus] imm;
@@ -94,13 +100,24 @@ reg[`RegBus] imm;
 // 指示指令是否有效
 reg instvalid;
 
-assign stallreq = `NoStop;
-
 // imm_sll2_signedext 对应分支指令中的 offset 左移两位，再符号扩展至 32 位的值
 assign imm_sll2_signedext = {{14{inst_i[15]}}, inst_i[15:0], 2'b00};
 
 // inst_o 的值就是译码阶段的指令
 assign inst_o = inst_i;
+assign stallreq = stallreq_for_reg1_loadrelate | stallreq_for_reg2_loadrelate;
+assign pre_inst_is_load = ((ex_aluop_i == `EXE_LB_OP) ||
+                           (ex_aluop_i == `EXE_LBU_OP)||
+                           (ex_aluop_i == `EXE_LH_OP) ||
+                           (ex_aluop_i == `EXE_LHU_OP)||
+                           (ex_aluop_i == `EXE_LW_OP) ||
+                           (ex_aluop_i == `EXE_LWR_OP)||
+                           (ex_aluop_i == `EXE_LWL_OP) // ||
+                           //    (ex_aluop_i == `EXE_LL_OP) ||
+                           //    (ex_aluop_i == `EXE_SC_OP)
+                          ) ? 1'b1 : 1'b0;
+
+
 
 // 对指令进行译码
 
@@ -311,7 +328,7 @@ always @(*) begin
                 wd_o <= inst_i[20:16];
                 instvalid <= `InstValid;
             end
-            `EXE_LH:begin
+            `EXE_LH: begin
                 wreg_o <= `WriteEnable;
                 aluop_o <= `EXE_LH_OP;
                 alusel_o <= `EXE_RES_LOAD_STORE;
@@ -319,7 +336,7 @@ always @(*) begin
                 wd_o <= inst_i[20:16];
                 instvalid <= `InstValid;
             end
-            `EXE_LHU:begin
+            `EXE_LHU: begin
                 wreg_o <= `WriteEnable;
                 aluop_o <= `EXE_LHU_OP;
                 alusel_o <= `EXE_RES_LOAD_STORE;
@@ -765,14 +782,17 @@ end // always
 //      那么直接把访存阶段的结果 mem_wdata_i 作为 reg1_o 的值;
 
 always @(*) begin
+    stallreq_for_reg1_loadrelate <= `NoStop;
     if (rst == `RstEnable) begin
         reg1_o <= `ZeroWord;
     end// NEW FEATURE 数据前推
+    else if (pre_inst_is_load == 1'b1 && ex_wd_i == reg1_addr_o && reg1_read_o == `ReadEnable) begin
+        stallreq_for_reg1_loadrelate <= `Stop;
+    end
     else if((reg1_read_o == 1'b1) && (ex_wreg_i == 1'b1)
             && (ex_wd_i == reg1_addr_o)) begin
         // from ex
         reg1_o <= ex_wdata_i;
-
     end
     else if((reg1_read_o == 1'b1) && (mem_wreg_i == 1'b1)
             && (mem_wd_i == reg1_addr_o)) begin
@@ -798,9 +818,13 @@ end // always
 // 确定进行运算的源操作数 2
 
 always @(*) begin
+    stallreq_for_reg2_loadrelate <= `NoStop;
     if (rst == `RstEnable) begin
         reg2_o <= `ZeroWord;
     end// NEW FEATURE 数据前推
+    else if(pre_inst_is_load == 1'b1 && ex_wd_i == reg2_addr_o && reg2_read_o == 1'b1) begin
+        stallreq_for_reg2_loadrelate<= `Stop;
+    end
     else if((reg2_read_o == 1'b1) && (ex_wreg_i == 1'b1)
             && (ex_wd_i == reg2_addr_o)) begin
         // from ex
