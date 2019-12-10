@@ -77,6 +77,18 @@
 `define EXE_BLTZ        5'b00000
 `define EXE_BLTZAL      5'b10000
 `define EXE_BNE         6'b000101
+`define EXE_LB          6'b100000
+`define EXE_LBU         6'b100100
+`define EXE_LH          6'b100001
+`define EXE_LHU         6'b100101
+`define EXE_LW          6'b100011
+`define EXE_LWL         6'b100010
+`define EXE_LWR         6'b100110
+`define EXE_SB          6'b101000
+`define EXE_SH          6'b101001
+`define EXE_SW          6'b101011
+`define EXE_SWL         6'b101010
+`define EXE_SWR         6'b101110
 
 // AluOp !!! 尽量不要出现重复，比如 ADD & CLZ
 `define EXE_OR_OP       8'b00100101
@@ -125,7 +137,18 @@
 `define EXE_BLTZ_OP        8'b00000000
 `define EXE_BLTZAL_OP      8'b10010000
 `define EXE_BNE_OP         8'b00000101
-
+`define EXE_LB_OP          8'b10100000
+`define EXE_LBU_OP         8'b10100100
+`define EXE_LH_OP          8'b10100001
+`define EXE_LHU_OP          8'b10100101
+`define EXE_LW_OP         8'b10100011
+`define EXE_LWL_OP          8'b10100010
+`define EXE_LWR_OP          8'b10100110
+`define EXE_SB_OP          8'b00101000
+`define EXE_SH_OP          8'b00101001
+`define EXE_SW_OP           8'b10101011
+`define EXE_SWL_OP          8'b10101010
+`define EXE_SWR_OP         8'b00101110
 
 // AluSel
 `define EXE_RES_LOGIC       3'b001
@@ -135,6 +158,7 @@
 `define EXE_RES_ARITHMETIC  3'b100
 `define EXE_RES_MUL         3'b101
 `define EXE_RES_JUMP_BRANCH 3'b110
+`define EXE_RES_LOAD_STORE  3'b111
 
 // 与指令存储器 ROM 有关的宏定义
 `define InstAddrBus     31:0    // ROM 的地址总线宽度
@@ -171,3 +195,9 @@
 
 `define InDelaySlot     1'b1        // 在延迟槽中
 `define NotInDelaySlot  1'b0
+
+`define DataAddrBus     31:0        // 地址总线宽度
+`define DataBus         31:0        // 数据总线宽度
+`define DataMemNum      3 //131071      // RAM 的大小，单位是字，此处是 128K word
+`define DataMemNumLog2  17          // 实际使用的地址宽度
+`define ByteWidth       7:0         // 一个字节的宽度，是 8bit

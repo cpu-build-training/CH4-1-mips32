@@ -14,6 +14,13 @@ module ex_mem(
 
             wire[`DoubleRegBus] hilo_i,
             wire[1:0]       cnt_i,
+
+            // 为实现加载、存储指令而添加的输入
+            wire[`AluOpBus] ex_aluop,
+            // 
+            wire[`RegBus]   ex_mem_addr,
+            // 要存储的数据或者原始值
+            wire[`RegBus]   ex_reg2,
            // 送到访存阶段的信息
            output
            reg[`RegAddrBus]        mem_wd,
@@ -25,6 +32,11 @@ module ex_mem(
            reg mem_whilo,
            reg[`DoubleRegBus]   hilo_o,
            reg[1:0]             cnt_o,
+
+           // STORE / LOAD
+            reg[`AluOpBus]      mem_aluop,
+            reg[`RegBus]        mem_mem_addr,
+            reg[`RegBus]        mem_reg2,
 
            // From CTRL module.
            input wire[5:0]     stall
@@ -40,6 +52,9 @@ always @(posedge clk) begin
         mem_whilo <= `WriteDisable;
         hilo_o <= {`ZeroWord, `ZeroWord};
         cnt_o <= 2'b00;
+        mem_aluop <= `EXE_NOP_OP;
+        mem_mem_addr <= `ZeroWord;
+        mem_reg2 <= `ZeroWord;
     end
     else if(stall[3] == `Stop && stall[4] == `NoStop) begin
         // 输出 NOP
@@ -51,6 +66,9 @@ always @(posedge clk) begin
         mem_whilo <= `WriteDisable;
         hilo_o <= hilo_i;
         cnt_o <= cnt_i;
+        mem_aluop <= `EXE_NOP_OP;
+        mem_mem_addr <= `ZeroWord;
+        mem_reg2 <= `ZeroWord;
     end
     else if(stall[3] == `NoStop) begin
         // normal
@@ -62,6 +80,9 @@ always @(posedge clk) begin
         mem_whilo <= ex_whilo;
         hilo_o <= {`ZeroWord, `ZeroWord};
         cnt_o <= 2'b00;
+        mem_aluop <= ex_aluop;
+        mem_mem_addr <= ex_mem_addr;
+        mem_reg2 <= ex_reg2;
     end else begin
     // keep same
         hilo_o <= hilo_i;

@@ -38,6 +38,9 @@ module ex(
            wire is_in_delayslot_i,
            // 当前处于执行阶段的转移指令要保存的返回地址
            wire[`RegBus]        link_address_i,
+           // 新增输入接口 inst_i, 其值就是当前处于执行阶段的指令
+           input wire[`RegBus]  inst_i,
+
 
            // 执行结果
            output
@@ -64,7 +67,12 @@ module ex(
            reg[`RegBus]    div_opdata1_o,
            reg[`RegBus]    div_opdata2_o,
            reg             div_start_o,
-           reg             signed_div_o
+           reg             signed_div_o,
+
+           // 为加载、存储指令
+           wire[`AluOpBus]     aluop_o,
+           wire[`RegBus]       mem_addr_o,
+           wire[`RegBus]       reg2_o
 
        );
 
@@ -93,6 +101,17 @@ reg[`DoubleRegBus] hilo_temp1;
 reg             stallreq_for_madd_msub;
 reg[`DoubleRegBus] mulres;     // 保存乘法结果
 
+// aluop_o 会传递到访存阶段，届时将利用其确定加载、存储类型
+assign aluop_o = aluop_i;
+
+// mem_addr_o 会传递到访存阶段，是加载、存储指令对应的存储器地址，此处的 reg1_i
+// 就是加载、存储指令中地址为 base 的通用寄存器的值，inst_i[15:0] 就是指令中的
+// offset。通过 mem_addr_o 的计算，读者也可以明白为何要在译码阶段 ID 模块新增输出接口 inst_o
+assign mem_addr_o = reg1_i + {{16{inst_i[15]}},inst_i[15:0]};
+
+// reg2_i 是存储指令要存储的数据，或者 lwl\lwr 指令要加载到的目的寄存器的原始值，
+// 将该值通过 reg2_o 接口传递到访存阶段
+assign reg2_o = reg2_i;
 
 // 预计算
 
@@ -308,7 +327,8 @@ always @(*) begin
                     div_start_o <= `DivStart;
                     signed_div_o <= 1'b0; // 无符号
                     stallreq_for_div <= `Stop;
-                end else if(div_ready_i == `DivResultReady) begin
+                end
+                else if(div_ready_i == `DivResultReady) begin
                     div_opdata1_o <= reg1_i;
                     div_opdata2_o <= reg2_i;
                     div_start_o <= `DivStop;
@@ -378,7 +398,7 @@ always @(*) begin
     end
 end
 
-// 根据 aluop_i 指示的运算子类型进行运算，此处只有 ori
+// 根据 aluop_i 指示的运算子类型进行运算
 always @(*) begin
     if(rst == `RstEnable) begin
         logicout <= `ZeroWord;
@@ -478,7 +498,8 @@ always @(*) begin
         whilo_o  <= `WriteDisable;
         hi_o <= `ZeroWord;
         lo_o <= `ZeroWord;
-    end else if ((aluop_i == `EXE_DIV_OP) || (aluop_i == `EXE_DIVU_OP))begin
+    end
+    else if ((aluop_i == `EXE_DIV_OP) || (aluop_i == `EXE_DIVU_OP)) begin
         whilo_o <= `WriteEnable;
         hi_o <= div_result_i[63:32];
         lo_o <= div_result_i[31:0];

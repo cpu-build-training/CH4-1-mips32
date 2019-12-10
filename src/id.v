@@ -50,7 +50,10 @@ module id(
            reg                  branch_flag_o,
            reg[`RegBus]         branch_target_address_o,
            reg[`RegBus]         link_addr_o,
-           reg                  is_in_delayslot_o
+           reg                  is_in_delayslot_o,
+
+           // 当前处于译码阶段的指令
+           output wire[`RegBus]   inst_o
        );
 
 // reg1_data_i  从 Regfile 输入的第一个读寄存器端口的输入
@@ -96,7 +99,8 @@ assign stallreq = `NoStop;
 // imm_sll2_signedext 对应分支指令中的 offset 左移两位，再符号扩展至 32 位的值
 assign imm_sll2_signedext = {{14{inst_i[15]}}, inst_i[15:0], 2'b00};
 
-
+// inst_o 的值就是译码阶段的指令
+assign inst_o = inst_i;
 
 // 对指令进行译码
 
@@ -290,6 +294,100 @@ always @(*) begin
                     branch_flag_o <= `Branch;
                     next_inst_in_delayslot_o <= `InDelaySlot;
                 end
+            end
+            `EXE_LB: begin
+                wreg_o <= `WriteEnable;
+                aluop_o <= `EXE_LB_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                wd_o <= inst_i[20:16];
+                instvalid <= `InstValid;
+            end
+            `EXE_LBU: begin
+                wreg_o <= `WriteEnable;
+                aluop_o <= `EXE_LBU_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                wd_o <= inst_i[20:16];
+                instvalid <= `InstValid;
+            end
+            `EXE_LH:begin
+                wreg_o <= `WriteEnable;
+                aluop_o <= `EXE_LH_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                wd_o <= inst_i[20:16];
+                instvalid <= `InstValid;
+            end
+            `EXE_LHU:begin
+                wreg_o <= `WriteEnable;
+                aluop_o <= `EXE_LHU_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                wd_o <= inst_i[20:16];
+                instvalid <= `InstValid;
+            end
+            `EXE_LW: begin
+                wreg_o <= `WriteEnable;
+                aluop_o <= `EXE_LW_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                reg2_read_o <= `ReadEnable;
+                wd_o <= inst_i[20:16];
+                instvalid <= `InstValid;
+            end
+            `EXE_LWL: begin
+                wreg_o <= `WriteEnable;
+                aluop_o <= `EXE_LWL_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                reg2_read_o <= `ReadEnable;
+                wd_o <= inst_i[20:16];
+                instvalid <= `InstValid;
+            end
+            `EXE_LWR: begin
+                wreg_o <= `WriteEnable;
+                aluop_o <= `EXE_LWR_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                reg2_read_o <= `ReadEnable;
+                wd_o <= inst_i[20:16];
+                instvalid <= `InstValid;
+            end
+            `EXE_SB: begin
+                aluop_o <= `EXE_SB_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                reg2_read_o <= `ReadEnable;
+                instvalid <= `InstValid;
+            end
+            `EXE_SH: begin
+                aluop_o <= `EXE_SH_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                reg2_read_o <= `ReadEnable;
+                instvalid <= `InstValid;
+            end
+            `EXE_SW: begin
+                aluop_o <= `EXE_SW_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                reg2_read_o <= `ReadEnable;
+                instvalid <= `InstValid;
+            end
+            `EXE_SWL: begin
+                aluop_o <= `EXE_SWL_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                reg2_read_o <= `ReadEnable;
+                instvalid <= `InstValid;
+            end
+            `EXE_SWR: begin
+                aluop_o <= `EXE_SWR_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                reg2_read_o <= `ReadEnable;
+                instvalid <= `InstValid;
             end
             `EXE_SPECIAL: begin
                 case (op3)
