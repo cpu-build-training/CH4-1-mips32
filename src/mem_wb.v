@@ -11,6 +11,11 @@ module mem_wb(
            wire[`RegBus]         mem_hi,
            wire[`RegBus]         mem_lo,
            wire mem_whilo,
+
+           // LLbit
+           wire    mem_LLbit_we,
+           wire mem_LLbit_value,
+
            // 送到回写阶段的信息
            output
            reg[`RegAddrBus]        wb_wd,
@@ -19,6 +24,10 @@ module mem_wb(
            reg[`RegBus]        wb_hi,
            reg[`RegBus]        wb_lo,
            reg                 wb_whilo,
+
+           // LLbit
+           reg wb_LLbit_we,
+           reg wb_LLbit_value,
 
            // From CTRL module.
            input wire[5:0]     stall
@@ -32,6 +41,8 @@ always @(posedge clk) begin
         wb_hi <= `ZeroWord;
         wb_lo <= `ZeroWord;
         wb_whilo <= `WriteDisable;
+        wb_LLbit_we <= 1'b0;
+        wb_LLbit_value <= 1'b0;
     end
     else if(stall[4] == `Stop && stall[5] == `NoStop) begin
         wb_wd <= `NOPRegAddr;
@@ -40,6 +51,8 @@ always @(posedge clk) begin
         wb_hi <= `ZeroWord;
         wb_lo <= `ZeroWord;
         wb_whilo <= `WriteDisable;
+        wb_LLbit_we <= 1'b0;
+        wb_LLbit_value <= 1'b0;
     end
     else if(stall[4] == `NoStop ) begin
         wb_wd <=  mem_wd;
@@ -48,6 +61,8 @@ always @(posedge clk) begin
         wb_hi <= mem_hi;
         wb_lo <= mem_lo;
         wb_whilo <= mem_whilo;
+        wb_LLbit_we <= mem_LLbit_we;
+        wb_LLbit_value <= mem_LLbit_value;
     end
 end
 endmodule // mem_wb
