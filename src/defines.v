@@ -89,6 +89,8 @@
 `define EXE_SW          6'b101011
 `define EXE_SWL         6'b101010
 `define EXE_SWR         6'b101110
+`define EXE_LL          6'b110000
+`define EXE_SC          6'b111000
 
 // AluOp !!! 尽量不要出现重复，比如 ADD & CLZ
 `define EXE_OR_OP       8'b00100101
@@ -149,6 +151,8 @@
 `define EXE_SW_OP           8'b10101011
 `define EXE_SWL_OP          8'b10101010
 `define EXE_SWR_OP         8'b00101110
+`define EXE_LL_OP          8'b00110000
+`define EXE_SC_OP          8'b00111000
 
 // AluSel
 `define EXE_RES_LOGIC       3'b001

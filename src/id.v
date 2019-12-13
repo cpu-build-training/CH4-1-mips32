@@ -406,6 +406,23 @@ always @(*) begin
                 reg2_read_o <= `ReadEnable;
                 instvalid <= `InstValid;
             end
+            `EXE_LL: begin
+                wreg_o <= `WriteEnable;
+                aluop_o <= `EXE_LL_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                wd_o <= inst_i[20:16];
+                instvalid <= `InstValid;
+            end
+            `EXE_SC: begin
+                wreg_o <= `WriteEnable;
+                aluop_o <= `EXE_SC_OP;
+                alusel_o <= `EXE_RES_LOAD_STORE;
+                reg1_read_o <= `ReadEnable;
+                reg2_read_o <= `ReadEnable;
+                wd_o <= inst_i[20:16];
+                instvalid <= `InstValid;
+            end
             `EXE_SPECIAL: begin
                 case (op3)
                     `EXE_OR: begin

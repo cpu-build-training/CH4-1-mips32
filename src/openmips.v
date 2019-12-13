@@ -86,11 +86,15 @@ wire[`RegBus]       mem_wdata_o;
 wire                mem_whilo_o;
 wire[`RegBus]       mem_hi_o;
 wire[`RegBus]       mem_lo_o;
+wire                mem_LLbit_we_o;
+wire                mem_LLbit_value_o;
 
 // 连接 MEM/WB 模块的输出与回写阶段的输入的变量
 wire                wb_wreg_i;
 wire[`RegAddrBus]   wb_wd_i;
 wire[`RegBus]       wb_wdata_i;
+wire                wb_LLbit_we;
+wire                wb_LLbit_value;
 
 // 连接 MEM/WB 与 HILO 模块的变量
 wire                hilo_we_i;
@@ -125,6 +129,9 @@ wire[`RegBus]        ex_div_opdata1_o;
 wire[`RegBus]        ex_div_opdata2_o;
 wire                 ex_div_start_o;
 wire                 ex_signed_div_o;
+
+// LLbit
+wire                 LLbit_LLbit_value;
 
 // pc_reg 实例化
 pc_reg  pc_reg0(
@@ -327,12 +334,19 @@ mem mem0(
         .mem_addr_i(mem_mem_addr_i),
         .reg2_i(mem_reg2_i),
 
+        .LLbit_i(LLbit_LLbit_value),
+        .wb_LLbit_we_i(wb_LLbit_we),
+        .wb_LLbit_value_i(wb_LLbit_value),
+
         // 送到 MEM/WB 模块的信息
         .wd_o(mem_wd_o),    .wreg_o(mem_wreg_o),
         .wdata_o(mem_wdata_o),
 
         .whilo_o(mem_whilo_o),
         .hi_o(mem_hi_o), .lo_o(mem_lo_o),
+
+        .LLbit_we_o(mem_LLbit_we_o),
+        .LLbit_value_o(mem_LLbit_value_o),
 
         // 来自数据存储器的信息
         .mem_data_i(ram_data_i),
@@ -343,6 +357,7 @@ mem mem0(
         .mem_sel_o(ram_sel_o),
         .mem_data_o(ram_data_o),
         .mem_ce_o(ram_ce_o)
+        
     );
 
 // MEM/WB 实例化
@@ -356,6 +371,9 @@ mem_wb mem_wb0(
            .mem_whilo(mem_whilo_o),
            .mem_hi(mem_hi_o), .mem_lo(mem_lo_o),
 
+           .mem_LLbit_value(mem_LLbit_value_o),
+           .mem_LLbit_we(mem_LLbit_we_o),
+
 
            // 送到回写阶段的信息
            .wb_wd(wb_wd_i), .wb_wreg(wb_wreg_i),
@@ -364,6 +382,9 @@ mem_wb mem_wb0(
            .wb_hi(hilo_hi_i),
            .wb_lo(hilo_lo_i),
            .wb_whilo(hilo_we_i),
+
+           .wb_LLbit_we(wb_LLbit_we),
+           .wb_LLbit_value(wb_LLbit_value),
 
            .stall(stall)
        );
@@ -398,5 +419,13 @@ div div0(
         .result_o(ex_div_result_i),
         .ready_o(ex_div_ready_i)
     );
+
+LLbit_reg LLbit_reg0(
+        .clk(clk),
+        .rst(rst),
+        .we(wb_LLbit_we),
+        .LLbit_i(wb_LLbit_value),
+        .LLbit_o(LLbit_LLbit_value)
+);
 
 endmodule // openmips
