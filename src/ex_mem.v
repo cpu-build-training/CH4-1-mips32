@@ -21,8 +21,6 @@ module ex_mem(
             wire[`RegBus]   ex_mem_addr,
             // 要存储的数据或者原始值
             wire[`RegBus]   ex_reg2,
-            wire[`AluSelBus] ex_alusel,   
-
            // 送到访存阶段的信息
            output
            reg[`RegAddrBus]        mem_wd,
@@ -36,7 +34,6 @@ module ex_mem(
            reg[1:0]             cnt_o,
 
            // STORE / LOAD
-           reg[`AluSelBus]      mem_alusel,
             reg[`AluOpBus]      mem_aluop,
             reg[`RegBus]        mem_mem_addr,
             reg[`RegBus]        mem_reg2,
@@ -44,7 +41,6 @@ module ex_mem(
            // From CTRL module.
            input wire[5:0]     stall
        );
-
 
 always @(posedge clk) begin
     if(rst == `RstEnable) begin
@@ -57,7 +53,6 @@ always @(posedge clk) begin
         hilo_o <= {`ZeroWord, `ZeroWord};
         cnt_o <= 2'b00;
         mem_aluop <= `EXE_NOP_OP;
-        mem_alusel <= `EXE_RES_NOP;
         mem_mem_addr <= `ZeroWord;
         mem_reg2 <= `ZeroWord;
     end
@@ -72,7 +67,6 @@ always @(posedge clk) begin
         hilo_o <= hilo_i;
         cnt_o <= cnt_i;
         mem_aluop <= `EXE_NOP_OP;
-        mem_alusel <= `EXE_RES_NOP;
         mem_mem_addr <= `ZeroWord;
         mem_reg2 <= `ZeroWord;
     end
@@ -87,7 +81,6 @@ always @(posedge clk) begin
         hilo_o <= {`ZeroWord, `ZeroWord};
         cnt_o <= 2'b00;
         mem_aluop <= ex_aluop;
-        mem_alusel <= ex_alusel;
         mem_mem_addr <= ex_mem_addr;
         mem_reg2 <= ex_reg2;
     end else begin

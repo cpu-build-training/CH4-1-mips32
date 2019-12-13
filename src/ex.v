@@ -24,12 +24,6 @@ module ex(
            wire[`RegBus] mem_hi_i,
            wire[`RegBus] mem_lo_i,
            wire          mem_whilo_i,
-           wire[`AluSelBus] mem_alusel_i,
-
-           // 处于访存阶段的指令的运算结果
-           wire          mem_wreg_i,
-           wire[`RegBus]    mem_wdata_i,
-           wire[`RegAddrBus] mem_wd_i,
 
            // 第一个执行周期得到的乘法结果
            wire[`DoubleRegBus] hilo_temp_i,
@@ -76,7 +70,6 @@ module ex(
            reg             signed_div_o,
 
            // 为加载、存储指令
-           wire[`AluSelBus]    alusel_o,
            wire[`AluOpBus]     aluop_o,
            wire[`RegBus]       mem_addr_o,
            wire[`RegBus]       reg2_o
@@ -111,8 +104,6 @@ reg[`DoubleRegBus] mulres;     // 保存乘法结果
 // aluop_o 会传递到访存阶段，届时将利用其确定加载、存储类型
 assign aluop_o = aluop_i;
 
-assign alusel_o = alusel_i;
-
 // mem_addr_o 会传递到访存阶段，是加载、存储指令对应的存储器地址，此处的 reg1_i
 // 就是加载、存储指令中地址为 base 的通用寄存器的值，inst_i[15:0] 就是指令中的
 // offset。通过 mem_addr_o 的计算，读者也可以明白为何要在译码阶段 ID 模块新增输出接口 inst_o
@@ -120,16 +111,7 @@ assign mem_addr_o = reg1_i + {{16{inst_i[15]}},inst_i[15:0]};
 
 // reg2_i 是存储指令要存储的数据，或者 lwl\lwr 指令要加载到的目的寄存器的原始值，
 // 将该值通过 reg2_o 接口传递到访存阶段
-// ??? 此处应该处理一下“相关”问题
-// always @(*) begin
-//     if(mem_alusel_i == `EXE_RES_LOAD_STORE && mem_wreg_i == `WriteEnable && mem_wd_i == reg2_i) begin
-//         assign reg2_o = mem_wdata_i;
-//     end else begin
-//         assign reg2_o = reg2_i;
-//     end
-// end
-assign reg2_o = ((mem_alusel_i == `EXE_RES_LOAD_STORE) && (mem_wreg_i == `WriteEnable)&& (mem_wd_i == wd_i))? mem_wdata_i : reg2_i;
-// assign reg2_o = reg2_i;
+assign reg2_o = reg2_i;
 
 // 预计算
 
