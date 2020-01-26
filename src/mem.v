@@ -27,6 +27,11 @@ module mem(
            wire             wb_LLbit_we_i,
            wire             wb_LLbit_value_i,
 
+           // cp0
+           wire             cp0_reg_we_i,
+           wire[4:0]        cp0_reg_write_addr_i,
+           wire[`RegBus]    cp0_reg_data_i,
+
 
            // 访存阶段的结果
            output
@@ -46,7 +51,12 @@ module mem(
 
            // 新增的输出接口
            reg                  LLbit_we_o,
-           reg                  LLbit_value_o
+           reg                  LLbit_value_o,
+
+            // cp0
+           output reg           cp0_reg_we_o,
+           output reg[4:0]      cp0_reg_write_addr_o,
+           output reg[`RegBus]  cp0_reg_data_o
        );
 wire[`RegBus]   zero32;
 reg             mem_we;
@@ -94,6 +104,9 @@ always @(*) begin
         mem_ce_o <= `ChipDisable;
         LLbit_we_o <= `WriteDisable;
         LLbit_value_o <= 1'b0;
+        cp0_reg_we_o <= `WriteDisable;
+        cp0_reg_write_addr_o <= 5'b00000;
+        cp0_reg_data_o <= `ZeroWord;
     end
     else begin
         wd_o <= wd_i;
@@ -108,6 +121,9 @@ always @(*) begin
         mem_ce_o <= `ChipDisable;
         LLbit_we_o <= `WriteDisable;
         LLbit_value_o <= 1'b0;
+        cp0_reg_we_o <= cp0_reg_we_i;
+        cp0_reg_write_addr_o <= cp0_reg_write_addr_i;
+        cp0_reg_data_o <= cp0_reg_data_i;
         case (aluop_i)
             `EXE_LB_OP: begin
                 mem_addr_o <= mem_addr_i;

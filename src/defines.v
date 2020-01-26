@@ -153,6 +153,8 @@
 `define EXE_SWR_OP         8'b00101110
 `define EXE_LL_OP          8'b00110000
 `define EXE_SC_OP          8'b00111000
+`define EXE_MFC0_OP         8'b10111010
+`define EXE_MTC0_OP         8'b10111011
 
 // AluSel
 `define EXE_RES_LOGIC       3'b001
@@ -205,3 +207,14 @@
 `define DataMemNum      3 //131071      // RAM 的大小，单位是字，此处是 128K word
 `define DataMemNumLog2  17          // 实际使用的地址宽度
 `define ByteWidth       7:0         // 一个字节的宽度，是 8bit
+
+`define CP0_REG_COUNT       5'b01001
+`define CP0_REG_COMPARE     5'b01011
+`define CP0_REG_STATUS      5'b01100
+`define CP0_REG_CAUSE       5'b01101
+`define CP0_REG_EPC         5'b01110
+`define CP0_REG_PRID        5'b01111
+`define CP0_REG_CONFIG      5'b10000
+
+`define InterruptAssert     1'b1
+`define InterruptNotAssert     1'b0

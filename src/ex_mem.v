@@ -21,6 +21,12 @@ module ex_mem(
             wire[`RegBus]   ex_mem_addr,
             // 要存储的数据或者原始值
             wire[`RegBus]   ex_reg2,
+
+            // cp0
+            wire            ex_cp0_reg_we,
+            wire[4:0]            ex_cp0_reg_write_addr,
+            wire[`RegBus]   ex_cp0_reg_data,
+
            // 送到访存阶段的信息
            output
            reg[`RegAddrBus]        mem_wd,
@@ -37,6 +43,11 @@ module ex_mem(
             reg[`AluOpBus]      mem_aluop,
             reg[`RegBus]        mem_mem_addr,
             reg[`RegBus]        mem_reg2,
+
+            // cp0
+            reg             mem_cp0_reg_we,
+            reg[4:0]        mem_cp0_reg_write_addr,
+            reg[`RegBus]    mem_cp0_reg_data,
 
            // From CTRL module.
            input wire[5:0]     stall
@@ -55,6 +66,9 @@ always @(posedge clk) begin
         mem_aluop <= `EXE_NOP_OP;
         mem_mem_addr <= `ZeroWord;
         mem_reg2 <= `ZeroWord;
+        mem_cp0_reg_we <= `WriteDisable;
+        mem_cp0_reg_write_addr <= 5'b00000;
+        mem_cp0_reg_data <= `ZeroWord;
     end
     else if(stall[3] == `Stop && stall[4] == `NoStop) begin
         // 输出 NOP
@@ -69,6 +83,9 @@ always @(posedge clk) begin
         mem_aluop <= `EXE_NOP_OP;
         mem_mem_addr <= `ZeroWord;
         mem_reg2 <= `ZeroWord;
+        mem_cp0_reg_we <= `WriteDisable;
+        mem_cp0_reg_write_addr <= 5'b00000;
+        mem_cp0_reg_data <= `ZeroWord;
     end
     else if(stall[3] == `NoStop) begin
         // normal
@@ -83,6 +100,9 @@ always @(posedge clk) begin
         mem_aluop <= ex_aluop;
         mem_mem_addr <= ex_mem_addr;
         mem_reg2 <= ex_reg2;
+        mem_cp0_reg_we <= ex_cp0_reg_we;
+        mem_cp0_reg_write_addr <= ex_cp0_reg_write_addr;
+        mem_cp0_reg_data <= ex_cp0_reg_data;
     end else begin
     // keep same
         hilo_o <= hilo_i;

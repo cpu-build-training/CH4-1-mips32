@@ -13,7 +13,12 @@ module openmips(
            wire[`RegBus]     ram_data_o,
            wire                ram_we_o,
            wire[3:0]           ram_sel_o,
-           wire                ram_ce_o
+           wire                ram_ce_o,
+
+            // 6 个外部硬件中断输入
+           input wire[5:0]          int_i,
+           // 是否有定时中断发生
+           output wire          timer_int_o
        );
 // id_pc_i 模块_功能_输入or输出
 
@@ -65,6 +70,9 @@ wire[`DoubleRegBus] hilo_temp_o;
 wire[`AluOpBus]     ex_aluop_o;
 wire[`RegBus]       ex_mem_addr_o;
 wire[`RegBus]       ex_reg2_o;
+wire[4:0]           ex_cp0_reg_write_addr_o;
+wire                ex_cp0_reg_we_o;
+wire[`RegBus]       ex_cp0_reg_data_o;
 
 
 
@@ -88,6 +96,12 @@ wire[`RegBus]       mem_hi_o;
 wire[`RegBus]       mem_lo_o;
 wire                mem_LLbit_we_o;
 wire                mem_LLbit_value_o;
+wire                mem_cp0_reg_we_i;
+wire                mem_cp0_reg_we_o;
+wire[4:0]           mem_cp0_reg_write_addr_i;
+wire[4:0]           mem_cp0_reg_write_addr_o;
+wire[`RegBus]       mem_cp0_reg_data_i;
+wire[`RegBus]       mem_cp0_reg_data_o;
 
 // 连接 MEM/WB 模块的输出与回写阶段的输入的变量
 wire                wb_wreg_i;
@@ -132,6 +146,20 @@ wire                 ex_signed_div_o;
 
 // LLbit
 wire                 LLbit_LLbit_value;
+
+// CP0
+wire                cp0_we_i;
+wire[4:0]           cp0_waddr_i;
+wire[4:0]           cp0_raddr_i;
+wire[`RegBus]       cp0_data_i;
+wire[`RegBus]       cp0_data_o;
+wire[`RegBus]       cp0_status_o;
+wire[`RegBus]       cp0_count_o;
+wire[`RegBus]       cp0_compare_o;
+wire[`RegBus]       cp0_cause_o;
+wire[`RegBus]       cp0_epc_o;
+wire[`RegBus]       cp0_config_o;
+wire[`RegBus]       cp0_prid_o;
 
 // pc_reg 实例化
 pc_reg  pc_reg0(
@@ -279,7 +307,23 @@ ex ex0(
        .signed_div_o(ex_signed_div_o),
 
        .is_in_delayslot_i(ex_is_in_delayslot_i),
-       .link_address_i(ex_link_address_i)
+       .link_address_i(ex_link_address_i),
+
+       // cp0
+       .cp0_reg_data_i(cp0_data_o),
+       .cp0_reg_read_addr_o(cp0_raddr_i),
+        
+        .wb_cp0_reg_we(cp0_we_i),
+        .wb_cp0_reg_write_addr(cp0_waddr_i),
+        .wb_cp0_reg_data(cp0_data_i),
+
+        .mem_cp0_reg_we(mem_cp0_reg_we_o),
+        .mem_cp0_reg_write_addr(mem_cp0_reg_write_addr_o),
+        .mem_cp0_reg_data(mem_cp0_reg_data_o),
+
+        .cp0_reg_we_o(ex_cp0_reg_we_o),
+        .cp0_reg_write_addr_o(ex_cp0_reg_write_addr_o),
+        .cp0_reg_data_o(ex_cp0_reg_data_o)
    );
 
 // EX/MEM 实例化
@@ -316,7 +360,17 @@ ex_mem ex_mem0(
 
            // TO EX
            .cnt_o(cnt_i),
-           .hilo_o(hilo_temp_i)
+           .hilo_o(hilo_temp_i),
+
+           // cp0
+           .ex_cp0_reg_we(ex_cp0_reg_we_o),
+           .ex_cp0_reg_write_addr(ex_cp0_reg_write_addr_o),
+           .ex_cp0_reg_data(ex_cp0_reg_data_o),
+
+           .mem_cp0_reg_we(mem_cp0_reg_we_i),
+           .mem_cp0_reg_write_addr(mem_cp0_reg_write_addr_i),
+           .mem_cp0_reg_data(mem_cp0_reg_data_i)
+           
        );
 
 // MEM 实例化
@@ -356,8 +410,17 @@ mem mem0(
         .mem_we_o(ram_we_o),
         .mem_sel_o(ram_sel_o),
         .mem_data_o(ram_data_o),
-        .mem_ce_o(ram_ce_o)
+        .mem_ce_o(ram_ce_o),
         
+        // cp0
+        .cp0_reg_we_i(mem_cp0_reg_we_i),
+        .cp0_reg_write_addr_i(mem_cp0_reg_write_addr_i),
+        .cp0_reg_data_i(mem_cp0_reg_data_i),
+
+
+        .cp0_reg_we_o(mem_cp0_reg_we_o),
+        .cp0_reg_write_addr_o(mem_cp0_reg_write_addr_o),
+        .cp0_reg_data_o(mem_cp0_reg_data_o)
     );
 
 // MEM/WB 实例化
@@ -386,7 +449,16 @@ mem_wb mem_wb0(
            .wb_LLbit_we(wb_LLbit_we),
            .wb_LLbit_value(wb_LLbit_value),
 
-           .stall(stall)
+           .stall(stall),
+           
+           // cp0
+           .mem_cp0_reg_we(mem_cp0_reg_we_o),
+           .mem_cp0_reg_write_addr(mem_cp0_reg_write_addr_o),
+           .mem_cp0_reg_data(mem_cp0_reg_data_o),
+
+           .wb_cp0_reg_data(cp0_data_i),
+           .wb_cp0_reg_we(cp0_we_i),
+           .wb_cp0_reg_write_addr(cp0_waddr_i)
        );
 
 hilo_reg hilo_reg0(
@@ -426,6 +498,28 @@ LLbit_reg LLbit_reg0(
         .we(wb_LLbit_we),
         .LLbit_i(wb_LLbit_value),
         .LLbit_o(LLbit_LLbit_value)
+);
+
+cp0_reg cp0_reg0(
+        .clk(clk),
+        .rst(rst),
+        .int_i(int_i),
+        .timer_int_o(timer_int_o),
+
+        .data_i(cp0_data_i),
+        .waddr_i(cp0_waddr_i),
+        .we_i(cp0_we_i),
+
+        .raddr_i(cp0_raddr_i),
+
+        .data_o(cp0_data_o),
+        .count_o(cp0_count_o),
+        .compare_o(cp0_compare_o),
+        .status_o(cp0_status_o),
+        .cause_o(cp0_cause_o),
+        .epc_o(cp0_epc_o),
+        .config_o(cp0_config_o),
+        .prid_o(cp0_prid_o)
 );
 
 endmodule // openmips
