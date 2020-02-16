@@ -12,7 +12,6 @@ module ex(
            wire                wreg_i,
 
            // HILO
-           input
            wire[`RegBus] hi_i,
            wire[`RegBus] lo_i,
 
@@ -39,7 +38,7 @@ module ex(
            // 当前处于执行阶段的转移指令要保存的返回地址
            wire[`RegBus]        link_address_i,
            // 新增输入接口 inst_i, 其值就是当前处于执行阶段的指令
-           input wire[`RegBus]  inst_i,
+           wire[`RegBus]  inst_i,
 
            // 访存阶段的指令是否要写 CP0 中的寄存器，用来检测数据相关
            wire           mem_cp0_reg_we,
@@ -53,6 +52,10 @@ module ex(
 
            // 与 CP0 直接相连，用于读取其中指定寄存器的值
            wire[`RegBus]  cp0_reg_data_i,
+
+           // 异常
+           wire[31:0]           excepttype_i,
+           wire[`RegBus]        current_inst_address_i,
            output reg[4:0]      cp0_reg_read_addr_o,
 
            // 向流水线下一级传递，用于写 CP0 中的指定寄存器
@@ -91,8 +94,12 @@ module ex(
            // 为加载、存储指令
            wire[`AluOpBus]     aluop_o,
            wire[`RegBus]       mem_addr_o,
-           wire[`RegBus]       reg2_o
+           wire[`RegBus]       reg2_o,
 
+           // 异常
+           wire[31:0]           excepttype_o,
+           wire                 is_in_delayslot_o,
+           wire[`RegBus]        current_inst_address_o
        );
 
 // ???
@@ -120,6 +127,21 @@ reg[`DoubleRegBus] hilo_temp1;
 reg             stallreq_for_madd_msub;
 reg[`DoubleRegBus] mulres;     // 保存乘法结果
 
+// 是否有自陷异常
+reg trapassert;
+// 是否有溢出异常
+reg ovassert;
+
+// 执行阶段输出的异常信息就是译码阶段的异常信息加上自陷异常、溢出异常的信息，
+// 其中第 10bit 表示自陷，11bit 表示溢出
+assign excepttype_o = {excepttype_i[31:12], ovassert, trapassert, excepttype_i[9:8], 8'b0000_0000};
+
+// 当前指令是否在延迟槽中
+assign is_in_delayslot_o = is_in_delayslot_i;
+
+// 当前处于执行阶段指令的地址
+assign current_inst_address_o = current_inst_address_i;
+
 // aluop_o 会传递到访存阶段，届时将利用其确定加载、存储类型
 assign aluop_o = aluop_i;
 
@@ -134,14 +156,26 @@ assign reg2_o = reg2_i;
 
 // 预计算
 
-assign reg2_i_mux = ((aluop_i == `EXE_SUB_OP) || (aluop_i == `EXE_SUBU_OP) || (aluop_i == `EXE_SLT_OP)) ? (~reg2_i) + 1 : reg2_i;
+assign reg2_i_mux = ((aluop_i == `EXE_SUB_OP) ||
+                     (aluop_i == `EXE_SUBU_OP) ||
+                     (aluop_i == `EXE_SLT_OP) ||
+                     (aluop_i == `EXE_TLT_OP) ||
+                     (aluop_i == `EXE_TLTI_OP)||
+                     (aluop_i == `EXE_TGE_OP)||
+                     (aluop_i == `EXE_TGEI_OP)
+                    ) ? (~reg2_i) + 1 : reg2_i;
 
 assign result_sum = reg1_i + reg2_i_mux;
 
 // 是否溢出
 assign ov_sum = ((!reg1_i[31] && !reg2_i_mux[31]) && result_sum[31]) || ((reg1_i[31] && reg2_i_mux[31]) && (!result_sum[31]));
 
-assign reg1_lt_reg2 = ((aluop_i== `EXE_SLT_OP))? ((reg1_i[31] && !reg2_i[31]) || (!reg1_i[31] && !reg2_i[31] && result_sum[31])||(reg1_i[31] && reg2_i[31] && result_sum[31])):(reg1_i < reg2_i);
+assign reg1_lt_reg2 = ((aluop_i== `EXE_SLT_OP) ||
+                       (aluop_i== `EXE_TLT_OP)||
+                       (aluop_i== `EXE_TLTI_OP)||
+                       (aluop_i== `EXE_TGE_OP)||
+                       (aluop_i== `EXE_TGEI_OP)
+                      )? ((reg1_i[31] && !reg2_i[31]) || (!reg1_i[31] && !reg2_i[31] && result_sum[31])||(reg1_i[31] && reg2_i[31] && result_sum[31])):(reg1_i < reg2_i);
 
 assign reg1_eq_reg2 = reg1_i == reg2_i;
 assign reg1_i_not = ~reg1_i;
@@ -570,18 +604,74 @@ end
 
 always @(*) begin
     if(rst == `RstEnable) begin
-    cp0_reg_write_addr_o <= 5'b00000;
-    cp0_reg_we_o <= `WriteDisable;
-    cp0_reg_data_o <= `ZeroWord;
-    end else if (aluop_i == `EXE_MTC0_OP) begin
+        cp0_reg_write_addr_o <= 5'b00000;
+        cp0_reg_we_o <= `WriteDisable;
+        cp0_reg_data_o <= `ZeroWord;
+    end
+    else if (aluop_i == `EXE_MTC0_OP) begin
         // 是 mtc0 指令
         cp0_reg_write_addr_o <= inst_i[15:11];
         cp0_reg_we_o <= `WriteEnable;
         cp0_reg_data_o <= reg1_i;
-    end else begin
+    end
+    else begin
         cp0_reg_write_addr_o <= 5'b00000;
         cp0_reg_we_o <= `WriteDisable;
         cp0_reg_data_o <= `ZeroWord;
+    end
+end
+
+
+// 依据上面得到的比较结果，判断是否满足自陷指令的条件，从而给出变量 trapassert 的值
+always @(*) begin
+    if(rst == `RstEnable) begin
+        trapassert <= `TrapNotAssert;
+    end
+    else begin
+        trapassert <= `TrapNotAssert;
+
+        case (aluop_i)
+            // teg, teqi
+            `EXE_TEQ_OP, `EXE_TEQI_OP: begin
+                if( reg1_i == reg2_i ) begin
+                    trapassert <= `TrapAssert;
+                end
+            end
+            // tge, tgei, tgeiu, tgeu 指令
+            `EXE_TGE_OP, `EXE_TGEI_OP, `EXE_TGEIU_OP, `EXE_TGEU_OP: begin
+                if(~reg1_lt_reg2) begin
+                    trapassert <= `TrapAssert;
+                end
+            end
+            // tlt, tlti, tltiu, tltu
+            `EXE_TLT_OP, `EXE_TLTI_OP, `EXE_TLTIU_OP, `EXE_TLTU_OP: begin
+                if( reg1_lt_reg2 ) begin
+                    trapassert <= `TrapAssert;
+                end
+            end
+            // tne, tnei
+            `EXE_TNE_OP, `EXE_TNEI_OP: begin
+                if (reg1_i != reg2_i) begin
+                    trapassert <= `TrapAssert;
+                end
+            end
+            default: begin
+                trapassert <= `TrapNotAssert;
+            end
+        endcase
+    end
+end
+
+// 依据指令类型以及 ov_sum 的值，判断是否发生溢出异常，从而给出变量 ovassert 的值
+always @(*) begin
+    if(((aluop_i == `EXE_ADD_OP) || (aluop_i == `EXE_ADDI_OP) ||
+            (aluop_i == `EXE_SUB_OP)) && (ov_sum == 1'b1)) begin
+        wreg_o <= `WriteDisable;
+        ovassert <= 1'b1;
+    end
+    else begin
+        wreg_o <= wreg_i;
+        ovassert <= 1'b0;
     end
 end
 

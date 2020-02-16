@@ -15,7 +15,7 @@ module openmips(
            wire[3:0]           ram_sel_o,
            wire                ram_ce_o,
 
-            // 6 个外部硬件中断输入
+           // 6 个外部硬件中断输入
            input wire[5:0]          int_i,
            // 是否有定时中断发生
            output wire          timer_int_o
@@ -45,6 +45,9 @@ wire                id_is_in_delayslot_o;
 wire[`RegBus]       id_link_addr_o;
 wire                id_next_inst_in_delayslot_o;
 wire[`RegBus]       id_inst_o;
+wire[31:0]          id_excepttype_o;
+wire[`RegBus]       id_current_inst_addr_o;
+
 
 
 // 连接 ID/EX 模块输出与执行阶段 EX 模块的输入变量
@@ -57,6 +60,8 @@ wire[`RegAddrBus]   ex_wd_i;
 wire                ex_is_in_delayslot_i;
 wire[`RegBus]       ex_link_address_i;
 wire[`RegBus]       ex_inst_i;
+wire[31:0]          ex_excepttype_i;
+wire[`RegBus]       ex_current_inst_addr_i;
 
 // 连接执行阶段 EX 模块的输出与 EX/MEM 模块的输入的变量
 wire                ex_wreg_o;
@@ -73,6 +78,9 @@ wire[`RegBus]       ex_reg2_o;
 wire[4:0]           ex_cp0_reg_write_addr_o;
 wire                ex_cp0_reg_we_o;
 wire[`RegBus]       ex_cp0_reg_data_o;
+wire[31:0]          ex_excepttype_o;
+wire[`RegBus]       ex_current_inst_addr_o;
+wire                ex_is_in_delayslot_o;
 
 
 
@@ -83,9 +91,12 @@ wire[`RegBus]       mem_wdata_i;
 wire                mem_whilo_i;
 wire[`RegBus]       mem_hi_i;
 wire[`RegBus]       mem_lo_i;
-wire[`AluOpBus]      mem_aluop_i;
-wire[`RegBus]        mem_mem_addr_i;
-wire[`RegBus]        mem_reg2_i;
+wire[`AluOpBus]     mem_aluop_i;
+wire[`RegBus]       mem_mem_addr_i;
+wire[`RegBus]       mem_reg2_i;
+wire[31:0]          mem_excepttype_i;
+wire[`RegBus]       mem_current_inst_addr_i;
+wire                mem_is_in_delayslot_i;
 
 // 连接访存阶段 MEM 模块的输出与 MEM/WB 模块的输入变量
 wire                mem_wreg_o;
@@ -102,6 +113,9 @@ wire[4:0]           mem_cp0_reg_write_addr_i;
 wire[4:0]           mem_cp0_reg_write_addr_o;
 wire[`RegBus]       mem_cp0_reg_data_i;
 wire[`RegBus]       mem_cp0_reg_data_o;
+// To cp0
+wire                mem_is_in_delayslot_o;
+wire[`RegBus]       mem_current_inst_addr_o;
 
 // 连接 MEM/WB 模块的输出与回写阶段的输入的变量
 wire                wb_wreg_i;
@@ -131,6 +145,10 @@ wire[`RegAddrBus]   reg2_addr;
 wire                stallreq_from_id;
 wire                stallreq_from_ex;
 wire[5:0]           stall;
+wire                flush;
+wire[`RegBus]       new_pc;
+wire[`RegBus]       ctrl_cp0_epc;
+wire[31:0]          excepttype;
 
 // EX/MEM -> EX
 wire[1:0]           cnt_i;
@@ -167,7 +185,10 @@ pc_reg  pc_reg0(
             .stall(stall),
 
             .branch_flag_i(pc_branch_flag_i),
-            .branch_target_address_i(pc_branch_target_address_i)
+            .branch_target_address_i(pc_branch_target_address_i),
+
+            .flush(flush),
+            .new_pc(new_pc)
         );
 
 assign rom_addr_o = pc; // 指令存储器的输入地址就是 pc 的值
@@ -177,7 +198,9 @@ if_id if_id0(
           .clk(clk), .rst(rst), .if_pc(pc),
           .if_inst(rom_data_i), .id_pc(id_pc_i),
           .id_inst(id_inst_i),
-          .stall(stall)
+          .stall(stall),
+
+          .flush(flush)
       );
 
 id id0(
@@ -210,7 +233,10 @@ id id0(
        .link_addr_o(id_link_addr_o),
        .next_inst_in_delayslot_o(id_next_inst_in_delayslot_o),
        .branch_target_address_o(pc_branch_target_address_i),
-       .branch_flag_o(pc_branch_flag_i)
+       .branch_flag_o(pc_branch_flag_i),
+
+       .excepttype_o(id_excepttype_o),
+       .current_inst_address_o(id_current_inst_addr_o)
    );
 
 // 通用寄存器 Regfile 实例化
@@ -247,7 +273,13 @@ id_ex id_ex0(
           .next_inst_in_delayslot_i(id_next_inst_in_delayslot_o),
           .ex_is_in_delayslot(ex_is_in_delayslot_i),
           .ex_link_address(ex_link_address_i),
-          .is_in_delayslot_o(id_is_in_delayslot_i)
+          .is_in_delayslot_o(id_is_in_delayslot_i),
+
+          .flush(flush),
+          .id_excepttype(id_excepttype_o),
+          .id_current_inst_address(id_current_inst_addr_o),
+          .ex_excepttype(ex_excepttype_i),
+          .ex_current_inst_address(ex_current_inst_addr_i)
       );
 
 // EX 实例化
@@ -312,23 +344,29 @@ ex ex0(
        // cp0
        .cp0_reg_data_i(cp0_data_o),
        .cp0_reg_read_addr_o(cp0_raddr_i),
-        
-        .wb_cp0_reg_we(cp0_we_i),
-        .wb_cp0_reg_write_addr(cp0_waddr_i),
-        .wb_cp0_reg_data(cp0_data_i),
 
-        .mem_cp0_reg_we(mem_cp0_reg_we_o),
-        .mem_cp0_reg_write_addr(mem_cp0_reg_write_addr_o),
-        .mem_cp0_reg_data(mem_cp0_reg_data_o),
+       .wb_cp0_reg_we(cp0_we_i),
+       .wb_cp0_reg_write_addr(cp0_waddr_i),
+       .wb_cp0_reg_data(cp0_data_i),
 
-        .cp0_reg_we_o(ex_cp0_reg_we_o),
-        .cp0_reg_write_addr_o(ex_cp0_reg_write_addr_o),
-        .cp0_reg_data_o(ex_cp0_reg_data_o)
+       .mem_cp0_reg_we(mem_cp0_reg_we_o),
+       .mem_cp0_reg_write_addr(mem_cp0_reg_write_addr_o),
+       .mem_cp0_reg_data(mem_cp0_reg_data_o),
+
+       .cp0_reg_we_o(ex_cp0_reg_we_o),
+       .cp0_reg_write_addr_o(ex_cp0_reg_write_addr_o),
+       .cp0_reg_data_o(ex_cp0_reg_data_o),
+
+       .excepttype_i(ex_excepttype_i),
+       .current_inst_address_i(ex_current_inst_addr_i),
+       .excepttype_o(ex_excepttype_o),
+       .current_inst_address_o(ex_current_inst_addr_o),
+       .is_in_delayslot_o(ex_is_in_delayslot_o)
    );
 
 // EX/MEM 实例化
 ex_mem ex_mem0(
-           .clk(clk),  .rst(rst),
+           .clk(clk),  .rst(rst), .flush(flush),
 
            // 来自执行阶段 EX 模块的信息
            .ex_wd(ex_wd_o), .ex_wreg(ex_wreg_o),
@@ -369,8 +407,15 @@ ex_mem ex_mem0(
 
            .mem_cp0_reg_we(mem_cp0_reg_we_i),
            .mem_cp0_reg_write_addr(mem_cp0_reg_write_addr_i),
-           .mem_cp0_reg_data(mem_cp0_reg_data_i)
-           
+           .mem_cp0_reg_data(mem_cp0_reg_data_i),
+
+           .ex_excepttype(ex_excepttype_o),
+           .ex_current_inst_address(ex_current_inst_addr_o),
+           .ex_is_in_delayslot(ex_is_in_delayslot_o),
+           .mem_excepttype(mem_excepttype_i),
+           .mem_current_inst_address(mem_current_inst_addr_i),
+           .mem_is_in_delayslot(mem_is_in_delayslot_i)
+
        );
 
 // MEM 实例化
@@ -411,7 +456,7 @@ mem mem0(
         .mem_sel_o(ram_sel_o),
         .mem_data_o(ram_data_o),
         .mem_ce_o(ram_ce_o),
-        
+
         // cp0
         .cp0_reg_we_i(mem_cp0_reg_we_i),
         .cp0_reg_write_addr_i(mem_cp0_reg_write_addr_i),
@@ -420,12 +465,29 @@ mem mem0(
 
         .cp0_reg_we_o(mem_cp0_reg_we_o),
         .cp0_reg_write_addr_o(mem_cp0_reg_write_addr_o),
-        .cp0_reg_data_o(mem_cp0_reg_data_o)
+        .cp0_reg_data_o(mem_cp0_reg_data_o),
+
+        .excepttype_i(mem_excepttype_i),
+        .current_inst_address_i(mem_current_inst_addr_i),
+        .is_in_delayslot_i(mem_is_in_delayslot_i),
+
+        // TODO
+        .cp0_status_i(cp0_status_o),
+        .cp0_cause_i(cp0_cause_o),
+        .cp0_epc_i(cp0_epc_o),
+        .wb_cp0_reg_we(cp0_we_i),
+        .wb_cp0_reg_write_addr(cp0_waddr_i),
+        .wb_cp0_reg_data(cp0_data_i),
+
+        .cp0_epc_o(ctrl_cp0_epc),
+        .excepttype_o(excepttype),
+        .is_in_delayslot_o(mem_is_in_delayslot_o),
+        .current_inst_address_o(mem_current_inst_addr_o)
     );
 
 // MEM/WB 实例化
 mem_wb mem_wb0(
-           .clk(clk), .rst(rst),
+           .clk(clk), .rst(rst), .flush(flush),
 
            // 来自访存阶段 MEM 模块的信息
            .mem_wd(mem_wd_o), .mem_wreg(mem_wreg_o),
@@ -450,7 +512,7 @@ mem_wb mem_wb0(
            .wb_LLbit_value(wb_LLbit_value),
 
            .stall(stall),
-           
+
            // cp0
            .mem_cp0_reg_we(mem_cp0_reg_we_o),
            .mem_cp0_reg_write_addr(mem_cp0_reg_write_addr_o),
@@ -475,7 +537,12 @@ ctrl ctrl0(
          .rst(rst),
          .stall(stall),
          .stallreq_from_ex(stallreq_from_ex),
-         .stallreq_from_id(stallreq_from_id)
+         .stallreq_from_id(stallreq_from_id),
+
+         .cp0_epc_i(ctrl_cp0_epc),
+         .excepttype_i(excepttype),
+         .new_pc(new_pc),
+         .flush(flush)
      );
 
 div div0(
@@ -493,33 +560,37 @@ div div0(
     );
 
 LLbit_reg LLbit_reg0(
-        .clk(clk),
-        .rst(rst),
-        .we(wb_LLbit_we),
-        .LLbit_i(wb_LLbit_value),
-        .LLbit_o(LLbit_LLbit_value)
-);
+              .clk(clk),
+              .rst(rst),
+              .we(wb_LLbit_we),
+              .LLbit_i(wb_LLbit_value),
+              .LLbit_o(LLbit_LLbit_value)
+          );
 
 cp0_reg cp0_reg0(
-        .clk(clk),
-        .rst(rst),
-        .int_i(int_i),
-        .timer_int_o(timer_int_o),
+            .clk(clk),
+            .rst(rst),
+            .int_i(int_i),
+            .timer_int_o(timer_int_o),
 
-        .data_i(cp0_data_i),
-        .waddr_i(cp0_waddr_i),
-        .we_i(cp0_we_i),
+            .data_i(cp0_data_i),
+            .waddr_i(cp0_waddr_i),
+            .we_i(cp0_we_i),
 
-        .raddr_i(cp0_raddr_i),
+            .raddr_i(cp0_raddr_i),
 
-        .data_o(cp0_data_o),
-        .count_o(cp0_count_o),
-        .compare_o(cp0_compare_o),
-        .status_o(cp0_status_o),
-        .cause_o(cp0_cause_o),
-        .epc_o(cp0_epc_o),
-        .config_o(cp0_config_o),
-        .prid_o(cp0_prid_o)
-);
+            .data_o(cp0_data_o),
+            .count_o(cp0_count_o),
+            .compare_o(cp0_compare_o),
+            .status_o(cp0_status_o),
+            .cause_o(cp0_cause_o),
+            .epc_o(cp0_epc_o),
+            .config_o(cp0_config_o),
+            .prid_o(cp0_prid_o),
+
+            .excepttype_i(excepttype),
+            .current_inst_addr_i(mem_current_inst_addr_o),
+            .is_in_delayslot_i(mem_is_in_delayslot_o)
+        );
 
 endmodule // openmips

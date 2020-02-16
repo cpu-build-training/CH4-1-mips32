@@ -32,6 +32,22 @@ module mem(
            wire[4:0]        cp0_reg_write_addr_i,
            wire[`RegBus]    cp0_reg_data_i,
 
+           // 异常
+           // 来自执行阶段
+           wire[31:0]           excepttype_i,
+           wire                 is_in_delayslot_i,
+           wire[`RegBus]       current_inst_address_i,
+
+           // 来自 CP0 模块
+           wire[`RegBus]        cp0_status_i,
+           wire[`RegBus]        cp0_cause_i,
+           wire[`RegBus]        cp0_epc_i,
+
+           // 回写阶段的指令对 CP0 中寄存器的写信息
+           // 用来检测数据相关
+           wire                wb_cp0_reg_we,
+           wire[4:0]           wb_cp0_reg_write_addr,
+           wire[`RegBus]       wb_cp0_reg_data,
 
            // 访存阶段的结果
            output
@@ -53,20 +69,38 @@ module mem(
            reg                  LLbit_we_o,
            reg                  LLbit_value_o,
 
-            // cp0
-           output reg           cp0_reg_we_o,
-           output reg[4:0]      cp0_reg_write_addr_o,
-           output reg[`RegBus]  cp0_reg_data_o
+           // cp0
+           reg           cp0_reg_we_o,
+           reg[4:0]      cp0_reg_write_addr_o,
+           reg[`RegBus]  cp0_reg_data_o,
+
+           // 异常
+           reg[31:0]       excepttype_o,
+           wire[`RegBus]   cp0_epc_o,
+           wire            is_in_delayslot_o,
+           wire[`RegBus]   current_inst_address_o
        );
 wire[`RegBus]   zero32;
 reg             mem_we;
 
 // 保存 LLbit 寄存器的最新值
 reg LLbit;
+// CP0 中 Status 寄存器的最新值
+reg[`RegBus]        cp0_status;
+// CP0 中 Cause 寄存器的最新值
+reg[`RegBus]        cp0_cause;
+// CP0 中 EPC 寄存器的最新值
+reg[`RegBus]        cp0_epc;
 
 // 外部数据存储器 RAM 的读写信号
 assign mem_we_o = mem_we;
 assign zero32 = `ZeroWord;
+
+// 表示访存阶段的指令是否是延迟槽指令
+assign is_in_delayslot_o = is_in_delayslot_i;
+
+// 访存阶段指令的地址
+assign current_inst_address_o = current_inst_address_i;
 
 
 // 获取 LLbit 寄存器的最新之， 如果回写阶段的指令要写 LLbit，那么回写阶段要写入的
@@ -86,6 +120,108 @@ always @(*) begin
     end
 end
 
+/// 第一段：得到 CP0 中寄存器的最新指
+// 得到 CP0 中 Status 的最新值
+// 判断当前处于回写阶段的指令是否要写 CP0 中 Status 寄存器，如果要写，
+// 那么要写如的值就是 Status 寄存器的最新值，反之，从 CP0 模块通过 cp0_status_i 接口
+// 传入的数据就是 Status 寄存器的最新值
+always @(*) begin
+    if(rst == `RstEnable) begin
+        cp0_status <= `ZeroWord;
+    end
+    else if ((wb_cp0_reg_we == `WriteEnable) &&
+             (wb_cp0_reg_write_addr == `CP0_REG_STATUS)) begin
+        cp0_status<= wb_cp0_reg_data;
+    end
+    else begin
+        cp0_status <= cp0_status_i;
+    end
+end
+
+// 得到 CP0 中 EPC 寄存器的最新值，与上同理
+always @(*) begin
+    if(rst == `RstEnable) begin
+        cp0_epc <= `ZeroWord;
+    end
+    else if ((wb_cp0_reg_we == `WriteEnable) &&
+             (wb_cp0_reg_write_addr == `CP0_REG_EPC)) begin
+        cp0_epc <= wb_cp0_reg_data;
+    end
+    else begin
+        cp0_epc <= cp0_epc_i;
+    end
+end
+
+// 将 EPC 寄存器的最新值通过接口 cp0_epc_o 输出
+assign cp0_epc_o = cp0_epc;
+
+// 得到 CP0 中 Cause 寄存器的最新值
+// Cause 只有几个字段是可写的。
+always @(*) begin
+    if(rst == `RstEnable) begin
+        cp0_cause <= `ZeroWord;
+    end
+    else if((wb_cp0_reg_we == `WriteEnable)&&
+            (wb_cp0_reg_write_addr == `CP0_REG_CAUSE)) begin
+        // IP[1:0] 字段是可写的
+        cp0_cause[9:8] <= wb_cp0_reg_data[9:8];
+        // WP 字段
+        cp0_cause[22] <= wb_cp0_reg_data[22];
+        // IV
+        cp0_cause[23] <= wb_cp0_reg_data[23];
+    end
+    else begin
+        cp0_cause <= cp0_cause_i;
+    end
+
+end
+
+/// 第二段：给出最终的异常类型
+
+always @(*) begin
+    if(rst == `RstEnable) begin
+        excepttype_o <= `ZeroWord;
+    end
+    else begin
+        excepttype_o <= `ZeroWord;
+        if(current_inst_address_i != `ZeroWord) begin
+            if (((cp0_cause[15:8] & (cp0_status[15:8]))!= 8'h00) &&
+                    (cp0_status[1] == 1'b0)&&
+                    (cp0_status[0] == 1'b1)) begin
+                // interrupt
+                excepttype_o <= 32'h0000_0001;
+            end
+            else if (excepttype_i[8] == 1'b1) begin
+                // syscall
+                excepttype_o <= 32'h0000_0008;
+            end
+            else if (excepttype_i[9] == 1'b1) begin
+                // inst_invalid
+                excepttype_o <= 32'h0000_000a;
+            end
+            else if (excepttype_i[10] == 1'b1) begin
+                // trap
+                excepttype_o <= 32'h0000_000d;
+            end
+            else if (excepttype_i[11] == 1'b1) begin
+                // ov
+                excepttype_o <= 32'h0000_000c;
+            end
+            else if (excepttype_i[12] == 1'b1) begin
+                // eret
+                excepttype_o <= 32'h0000_000e;
+            end
+
+
+
+        end
+    end
+end
+
+// 第三段：给出对数据存储器的写操作
+// mem_we_o 输出到数据存储器，表示是否为写操作
+// 如果发生异常，那么就要取消写操作
+assign mem_we_o = mem_we & (~(|excepttype_o));
 
 // 目前是组合逻辑电路
 

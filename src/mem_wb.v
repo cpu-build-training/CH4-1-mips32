@@ -21,6 +21,9 @@ module mem_wb(
            wire[4:0] mem_cp0_reg_write_addr,
            wire[`RegBus] mem_cp0_reg_data,
 
+           // 异常
+           wire flush,
+
            // 送到回写阶段的信息
            output
            reg[`RegAddrBus]        wb_wd,
@@ -44,7 +47,7 @@ module mem_wb(
        );
 
 always @(posedge clk) begin
-    if (rst == `RstEnable) begin
+    if (rst == `RstEnable || flush == 1'b1) begin
         wb_wd <= `NOPRegAddr;
         wb_wreg <= `WriteDisable;
         wb_wdata <= `ZeroWord;

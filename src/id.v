@@ -32,6 +32,9 @@ module id(
            //    TO CTRL
            output wire stallreq,
 
+           output wire[31:0] excepttype_o,
+           output wire[`RegBus]    current_inst_address_o,
+
            // 数据前推所需要加入的新的输入
            // 来自 ex, mem 的输出
            // 处于执行阶段的指令的运算结果
@@ -57,6 +60,7 @@ module id(
 
            // 当前处于译码阶段的指令
            output wire[`RegBus]   inst_o
+
        );
 
 // reg1_data_i  从 Regfile 输入的第一个读寄存器端口的输入
@@ -94,6 +98,11 @@ reg stallreq_for_reg1_loadrelate;
 reg stallreq_for_reg2_loadrelate;
 wire pre_inst_is_load;
 
+// 是否是系统调用异常 syscall
+reg excepttype_is_syscall;
+// 是否是异常返回指令 eret
+reg excepttype_is_eret;
+
 // 保存指令执行需要的立即数
 reg[`RegBus] imm;
 
@@ -117,6 +126,13 @@ assign pre_inst_is_load = ((ex_aluop_i == `EXE_LB_OP) ||
                            //    (ex_aluop_i == `EXE_SC_OP)
                           ) ? 1'b1 : 1'b0;
 
+// excepttype_o 的低 8bit 留给外部中断，第 8bit 表示是否是 syscall 指令引起的
+// 系统调用异常，第 9bit 表示是否是无效指令引起的异常，第 12bit 表示是否是eret
+// 指令， eret 指令可以认为是一种特殊的异常 -- 返回异常
+assign excepttype_o = {19'b0, excepttype_is_eret, 2'b0, instvalid, excepttype_is_syscall, 8'b0};
+
+// 输入信号 pc_i 就是当前处于译码阶段的指令的地址
+assign current_inst_address_o = pc_i;
 
 
 // 对指令进行译码
@@ -154,6 +170,8 @@ always @(*) begin
         branch_target_address_o <= `ZeroWord;
         branch_flag_o <= `NotBranch;
         next_inst_in_delayslot_o <= `NotInDelaySlot;
+        excepttype_is_syscall <= `False_v;
+        excepttype_is_eret <= `False_v;
         case (op)
             `EXE_ORI: begin // if op is ori
                 // ori 指令需要将结果写入目的寄存器，所以 wreg_o 为 WriteEnable
@@ -665,6 +683,54 @@ always @(*) begin
                         next_inst_in_delayslot_o <= `InDelaySlot;
                         instvalid <= `InstValid;
                     end
+                    `EXE_TEQ: begin
+                        aluop_o <= `EXE_TEQ_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_TGE: begin
+                        aluop_o <= `EXE_TGE_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_TGEU:begin
+                        aluop_o <= `EXE_TGEU_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_TLT: begin
+                        aluop_o <= `EXE_TLT_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_TLTU: begin
+                        aluop_o <= `EXE_TLTU_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_TNE: begin
+                        aluop_o <= `EXE_TNE_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        reg1_read_o <= `ReadEnable;
+                        reg2_read_o <= `ReadEnable;
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_SYSCALL: begin
+                        aluop_o <= `EXE_SYSCALL_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        instvalid <= `InstValid;
+                        excepttype_is_syscall <= `True_v;
+                    end
                     default: begin
                     end
                 endcase
@@ -780,6 +846,48 @@ always @(*) begin
                             next_inst_in_delayslot_o <= `InDelaySlot;
                         end
                     end
+                    `EXE_TEQI: begin
+                        aluop_o <= `EXE_TEQI_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        reg1_read_o <= `ReadEnable;
+                        imm <= {{16{inst_i[15]}}, inst_i[15:0]};
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_TGEI:begin
+                        aluop_o <= `EXE_TGEI_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        reg1_read_o <= `ReadEnable;
+                        imm <= {{16{inst_i[15]}}, inst_i[15:0]};
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_TGEIU:begin
+                        aluop_o <= `EXE_TGEIU_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        reg1_read_o <= `ReadEnable;
+                        imm <= {{16{inst_i[15]}}, inst_i[15:0]};
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_TLTI:begin
+                        aluop_o <= `EXE_TLTI_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        reg1_read_o <= `ReadEnable;
+                        imm <= {{16{inst_i[15]}}, inst_i[15:0]};
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_TLTIU:begin
+                        aluop_o <= `EXE_TLTIU_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        reg1_read_o <= `ReadEnable;
+                        imm <= {{16{inst_i[15]}}, inst_i[15:0]};
+                        instvalid <= `InstValid;
+                    end
+                    `EXE_TNEI:begin
+                        aluop_o <= `EXE_TNEI_OP;
+                        alusel_o <= `EXE_RES_NOP;
+                        reg1_read_o <= `ReadEnable;
+                        imm <= {{16{inst_i[15]}}, inst_i[15:0]};
+                        instvalid <= `InstValid;
+                    end
                     default: begin
                     end
                 endcase
@@ -803,7 +911,13 @@ always @(*) begin
             instvalid <= `InstValid;
             reg1_read_o <= `ReadEnable;
             reg1_addr_o <= inst_i[20:16];
+        end else if (inst_i == `EXE_ERET) begin
+            aluop_o <= `EXE_ERET_OP;
+            alusel_o <= `EXE_RES_NOP;
+            instvalid <= `InstValid;
+            excepttype_is_eret <= `True_v;
         end
+
     end // if
 end // always
 

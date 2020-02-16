@@ -8,6 +8,12 @@ module pc_reg(
     // 来自译码阶段的 ID 模块的信息,
     wire branch_flag_i,
     wire[`RegBus] branch_target_address_i,
+
+    // 异常处理
+    // 流水线清除信号
+    wire flush,
+    // 异常处理例程入口地址
+    wire[`RegBus] new_pc,
     
     output reg[`InstAddrBus] pc, reg ce
 );
@@ -31,6 +37,10 @@ always @(posedge clk) begin
     // 因为这一个 always 的判断条件，依赖于上一个时钟周期结束时的赋值结果
     if (ce == `ChipDisable) begin
         pc <= 32'h0;
+    end else if(flush == 1'b1) begin
+        // 输入信号 flush 为 1 表示发生异常，将从 CTRL 模块给出的异常处理
+        // 例程入口地址 new_pc 处取指执行
+        pc <= new_pc;
     end else if(stall[0] == `NoStop) begin
         if(branch_flag_i == `Branch) begin
             pc <= branch_target_address_i;

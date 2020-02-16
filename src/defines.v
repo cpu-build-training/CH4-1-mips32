@@ -91,6 +91,21 @@
 `define EXE_SWR         6'b101110
 `define EXE_LL          6'b110000
 `define EXE_SC          6'b111000
+`define EXE_SYSCALL     6'b001100
+`define EXE_TEQ         6'b110100
+`define EXE_TEQI        5'b01100
+`define EXE_TGE         6'b110000
+`define EXE_TGEI        5'b01000
+`define EXE_TGEIU       5'b01001
+`define EXE_TGEU        6'b110001
+`define EXE_TLT         6'b110010
+`define EXE_TLTI        5'b01010
+`define EXE_TLTIU       5'b01011
+`define EXE_TLTU        6'b110011
+`define EXE_TNE         6'b110110
+`define EXE_TNEI        5'b01110
+
+`define EXE_ERET        32'b01000010_00000000_00000000_00011000
 
 // AluOp !!! 尽量不要出现重复，比如 ADD & CLZ
 `define EXE_OR_OP       8'b00100101
@@ -155,6 +170,21 @@
 `define EXE_SC_OP          8'b00111000
 `define EXE_MFC0_OP         8'b10111010
 `define EXE_MTC0_OP         8'b10111011
+`define EXE_SYSCALL_OP         8'b10001100
+`define EXE_TEQ_OP             8'b00110100
+`define EXE_TEQI_OP            8'b10101100
+`define EXE_TGE_OP             8'b10110000
+`define EXE_TGEI_OP            8'b10101000
+`define EXE_TGEIU_OP           8'b10101001
+`define EXE_TGEU_OP            8'b10110001
+`define EXE_TLT_OP             8'b10110010
+`define EXE_TLTI_OP            8'b11101010
+`define EXE_TLTIU_OP           8'b11101011
+`define EXE_TLTU_OP            8'b10110011
+`define EXE_TNE_OP             8'b10110110
+`define EXE_TNEI_OP            8'b10101110
+`define EXE_ERET_OP            8'b00101111
+
 
 // AluSel
 `define EXE_RES_LOGIC       3'b001
@@ -204,7 +234,7 @@
 
 `define DataAddrBus     31:0        // 地址总线宽度
 `define DataBus         31:0        // 数据总线宽度
-`define DataMemNum      3 //131071      // RAM 的大小，单位是字，此处是 128K word
+`define DataMemNum      500 //131071      // RAM 的大小，单位是字，此处是 128K word
 `define DataMemNumLog2  17          // 实际使用的地址宽度
 `define ByteWidth       7:0         // 一个字节的宽度，是 8bit
 
@@ -218,3 +248,9 @@
 
 `define InterruptAssert     1'b1
 `define InterruptNotAssert     1'b0
+
+`define TrapAssert          1'b1
+`define TrapNotAssert       1'b0
+
+`define False_v             1'b0
+`define True_v              1'b1

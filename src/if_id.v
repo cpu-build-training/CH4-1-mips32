@@ -2,6 +2,8 @@
 `include "defines.v"
 module if_id(
     input wire clk, wire rst, wire[`InstAddrBus] if_pc, wire[`InstBus] if_inst,
+    // CTRL
+    wire flush,
     wire[5:0] stall, // From CTRL module.
     output reg[`InstAddrBus] id_pc, reg[`InstBus] id_inst
 );
@@ -13,6 +15,11 @@ module if_id(
 always @(posedge clk) begin
     // 只是对数据做了简单的带使能的保存\传递功能
     if (rst == `RstEnable) begin
+        id_pc <= `ZeroWord;
+        id_inst <= `ZeroWord;
+    end else if(flush == 1'b1) begin
+        // flush 为 1 表示异常发生，要清楚流水线
+        // 所以复位 id_pc, id_inst 寄存器的值
         id_pc <= `ZeroWord;
         id_inst <= `ZeroWord;
     end else if(stall[1] == `Stop && stall[2] == `NoStop) begin
