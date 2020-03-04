@@ -2,8 +2,8 @@
 # Vivado v2018.3 (64-bit)
 # SW Build 2405991 on Thu Dec  6 23:36:41 MST 2018
 # IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
-# Start of session at: Fri Feb 14 12:22:17 2020
-# Process ID: 24276
+# Start of session at: Fri Feb 28 18:34:42 2020
+# Process ID: 1189090
 # Current directory: /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/vivado/vivado.runs/synth_1
 # Command line: vivado -log openmips_min_sopc_tb.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source openmips_min_sopc_tb.tcl
 # Log file: /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/vivado/vivado.runs/synth_1/openmips_min_sopc_tb.vds
@@ -14,15 +14,15 @@ Command: synth_design -top openmips_min_sopc_tb -part xc7vx485tffg1157-1
 Starting synth_design
 Attempting to get a license for feature 'Synthesis' and/or device 'xc7vx485t'
 INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7vx485t'
-INFO: [Common 17-86] Your Synthesis license expires in 29 day(s)
+INFO: [Common 17-86] Your Synthesis license expires in 15 day(s)
 INFO: Launching helper process for spawning children vivado processes
-INFO: Helper process launched with PID 24448 
+INFO: Helper process launched with PID 1189149 
 ---------------------------------------------------------------------------------
-Starting Synthesize : Time (s): cpu = 00:00:02 ; elapsed = 00:00:04 . Memory (MB): peak = 1389.059 ; gain = 81.000 ; free physical = 159 ; free virtual = 11914
+Starting Synthesize : Time (s): cpu = 00:00:02 ; elapsed = 00:00:03 . Memory (MB): peak = 1389.594 ; gain = 29.000 ; free physical = 176 ; free virtual = 8778
 ---------------------------------------------------------------------------------
 INFO: [Synth 8-6157] synthesizing module 'openmips_min_sopc_tb' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/openmips_min_sopc_tb.v:3]
 WARNING: [Synth 8-4446] all outputs are unconnected for this instance and logic may be removed [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/openmips_min_sopc_tb.v:22]
-INFO: [Synth 8-6157] synthesizing module 'openmips_min_spoc' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/openmips_min_sopc.v:3]
+INFO: [Synth 8-6157] synthesizing module 'openmips_min_sopc' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/openmips_min_sopc.v:3]
 INFO: [Synth 8-6157] synthesizing module 'openmips' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/openmips.v:3]
 INFO: [Synth 8-6157] synthesizing module 'pc_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/pc_reg.v:4]
 INFO: [Synth 8-6155] done synthesizing module 'pc_reg' (1#1) [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/pc_reg.v:4]
@@ -52,9 +52,6 @@ INFO: [Synth 8-6155] done synthesizing module 'mem_wb' (9#1) [/home/fky/code/HDL
 INFO: [Synth 8-6157] synthesizing module 'hilo_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/hilo_reg.v:3]
 INFO: [Synth 8-6155] done synthesizing module 'hilo_reg' (10#1) [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/hilo_reg.v:3]
 INFO: [Synth 8-6157] synthesizing module 'ctrl' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ctrl.v:2]
-WARNING: [Synth 8-151] case item 32'b00000000000000000000000000001010 is unreachable [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ctrl.v:36]
-WARNING: [Synth 8-151] case item 32'b00000000000000000000000000001010 is unreachable [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ctrl.v:36]
-WARNING: [Synth 8-151] case item 32'b00000000000000000000000000001010 is unreachable [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ctrl.v:36]
 INFO: [Synth 8-6155] done synthesizing module 'ctrl' (11#1) [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ctrl.v:2]
 INFO: [Synth 8-6157] synthesizing module 'div' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/div.v:2]
 INFO: [Synth 8-226] default block is never used [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/div.v:38]
@@ -67,14 +64,13 @@ WARNING: [Synth 8-350] instance 'LLbit_reg0' of module 'LLbit_reg' requires 6 co
 INFO: [Synth 8-6157] synthesizing module 'cp0_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/cp0_reg.v:3]
 INFO: [Synth 8-155] case statement is not full and has no default [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/cp0_reg.v:69]
 INFO: [Synth 8-6155] done synthesizing module 'cp0_reg' (14#1) [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/cp0_reg.v:3]
-WARNING: [Synth 8-3848] Net ex_current_inst_addr_o in module/entity openmips does not have driver. [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/openmips.v:82]
 INFO: [Synth 8-6155] done synthesizing module 'openmips' (15#1) [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/openmips.v:3]
 INFO: [Synth 8-6157] synthesizing module 'inst_rom' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/inst_rom.v:4]
 INFO: [Synth 8-3876] $readmem data file 'inst_rom.data' is read successfully [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/inst_rom.v:13]
 INFO: [Synth 8-6155] done synthesizing module 'inst_rom' (16#1) [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/inst_rom.v:4]
 INFO: [Synth 8-6157] synthesizing module 'data_ram' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/data_ram.v:3]
 INFO: [Synth 8-6155] done synthesizing module 'data_ram' (17#1) [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/data_ram.v:3]
-INFO: [Synth 8-6155] done synthesizing module 'openmips_min_spoc' (18#1) [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/openmips_min_sopc.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'openmips_min_sopc' (18#1) [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/openmips_min_sopc.v:3]
 INFO: [Synth 8-6155] done synthesizing module 'openmips_min_sopc_tb' (19#1) [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/openmips_min_sopc_tb.v:3]
 WARNING: [Synth 8-3331] design data_ram has unconnected port addr[31]
 WARNING: [Synth 8-3331] design data_ram has unconnected port addr[30]
@@ -97,13 +93,6 @@ WARNING: [Synth 8-3331] design data_ram has unconnected port addr[14]
 WARNING: [Synth 8-3331] design data_ram has unconnected port addr[13]
 WARNING: [Synth 8-3331] design data_ram has unconnected port addr[12]
 WARNING: [Synth 8-3331] design data_ram has unconnected port addr[11]
-WARNING: [Synth 8-3331] design data_ram has unconnected port addr[10]
-WARNING: [Synth 8-3331] design data_ram has unconnected port addr[9]
-WARNING: [Synth 8-3331] design data_ram has unconnected port addr[8]
-WARNING: [Synth 8-3331] design data_ram has unconnected port addr[7]
-WARNING: [Synth 8-3331] design data_ram has unconnected port addr[6]
-WARNING: [Synth 8-3331] design data_ram has unconnected port addr[5]
-WARNING: [Synth 8-3331] design data_ram has unconnected port addr[4]
 WARNING: [Synth 8-3331] design data_ram has unconnected port addr[1]
 WARNING: [Synth 8-3331] design data_ram has unconnected port addr[0]
 WARNING: [Synth 8-3331] design inst_rom has unconnected port addr[31]
@@ -121,38 +110,6 @@ WARNING: [Synth 8-3331] design inst_rom has unconnected port addr[20]
 WARNING: [Synth 8-3331] design inst_rom has unconnected port addr[19]
 WARNING: [Synth 8-3331] design inst_rom has unconnected port addr[1]
 WARNING: [Synth 8-3331] design inst_rom has unconnected port addr[0]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[31]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[30]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[29]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[28]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[27]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[26]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[25]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[24]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[23]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[22]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[21]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[20]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[19]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[18]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[17]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[16]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[15]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[14]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[13]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[12]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[11]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[10]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[9]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[8]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[7]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[6]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[5]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[4]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[3]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[2]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[1]
-WARNING: [Synth 8-3331] design ctrl has unconnected port cp0_epc_i[0]
 WARNING: [Synth 8-3331] design mem_wb has unconnected port stall[3]
 WARNING: [Synth 8-3331] design mem_wb has unconnected port stall[2]
 WARNING: [Synth 8-3331] design mem_wb has unconnected port stall[1]
@@ -176,12 +133,51 @@ WARNING: [Synth 8-3331] design mem has unconnected port excepttype_i[16]
 WARNING: [Synth 8-3331] design mem has unconnected port excepttype_i[15]
 WARNING: [Synth 8-3331] design mem has unconnected port excepttype_i[14]
 WARNING: [Synth 8-3331] design mem has unconnected port excepttype_i[13]
+WARNING: [Synth 8-3331] design mem has unconnected port excepttype_i[7]
+WARNING: [Synth 8-3331] design mem has unconnected port excepttype_i[6]
+WARNING: [Synth 8-3331] design mem has unconnected port excepttype_i[5]
+WARNING: [Synth 8-3331] design mem has unconnected port excepttype_i[4]
+WARNING: [Synth 8-3331] design mem has unconnected port excepttype_i[3]
+WARNING: [Synth 8-3331] design mem has unconnected port excepttype_i[2]
+WARNING: [Synth 8-3331] design mem has unconnected port excepttype_i[1]
+WARNING: [Synth 8-3331] design mem has unconnected port excepttype_i[0]
+WARNING: [Synth 8-3331] design ex_mem has unconnected port stall[5]
+WARNING: [Synth 8-3331] design ex_mem has unconnected port stall[2]
+WARNING: [Synth 8-3331] design ex_mem has unconnected port stall[1]
+WARNING: [Synth 8-3331] design ex_mem has unconnected port stall[0]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[31]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[30]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[29]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[28]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[27]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[26]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[25]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[24]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[23]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[22]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[21]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[20]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[19]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[18]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[17]
+WARNING: [Synth 8-3331] design ex has unconnected port inst_i[16]
+WARNING: [Synth 8-3331] design ex has unconnected port excepttype_i[11]
+WARNING: [Synth 8-3331] design ex has unconnected port excepttype_i[10]
+WARNING: [Synth 8-3331] design ex has unconnected port excepttype_i[7]
+WARNING: [Synth 8-3331] design ex has unconnected port excepttype_i[6]
+WARNING: [Synth 8-3331] design ex has unconnected port excepttype_i[5]
+WARNING: [Synth 8-3331] design ex has unconnected port excepttype_i[4]
+WARNING: [Synth 8-3331] design ex has unconnected port excepttype_i[3]
+WARNING: [Synth 8-3331] design ex has unconnected port excepttype_i[2]
+WARNING: [Synth 8-3331] design ex has unconnected port excepttype_i[1]
+WARNING: [Synth 8-3331] design ex has unconnected port excepttype_i[0]
+WARNING: [Synth 8-3331] design id_ex has unconnected port stall[5]
 INFO: [Common 17-14] Message 'Synth 8-3331' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
 ---------------------------------------------------------------------------------
-Finished Synthesize : Time (s): cpu = 00:00:05 ; elapsed = 00:00:07 . Memory (MB): peak = 1480.809 ; gain = 172.750 ; free physical = 244 ; free virtual = 11922
+Finished Synthesize : Time (s): cpu = 00:00:04 ; elapsed = 00:00:06 . Memory (MB): peak = 1480.344 ; gain = 119.750 ; free physical = 287 ; free virtual = 8776
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Constraint Validation : Time (s): cpu = 00:00:05 ; elapsed = 00:00:07 . Memory (MB): peak = 1480.809 ; gain = 172.750 ; free physical = 251 ; free virtual = 11930
+Finished Constraint Validation : Time (s): cpu = 00:00:04 ; elapsed = 00:00:06 . Memory (MB): peak = 1480.344 ; gain = 119.750 ; free physical = 294 ; free virtual = 8784
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Loading Part and Timing Information
@@ -189,7 +185,7 @@ Start Loading Part and Timing Information
 Loading part: xc7vx485tffg1157-1
 INFO: [Device 21-403] Loading part xc7vx485tffg1157-1
 ---------------------------------------------------------------------------------
-Finished Loading Part and Timing Information : Time (s): cpu = 00:00:05 ; elapsed = 00:00:07 . Memory (MB): peak = 1488.812 ; gain = 180.754 ; free physical = 252 ; free virtual = 11930
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:04 ; elapsed = 00:00:06 . Memory (MB): peak = 1488.348 ; gain = 127.754 ; free physical = 294 ; free virtual = 8783
 ---------------------------------------------------------------------------------
 INFO: [Synth 8-5546] ROM "reg1_read_o" won't be mapped to RAM because it is too sparse
 INFO: [Synth 8-5546] ROM "reg1_read_o" won't be mapped to RAM because it is too sparse
@@ -239,8 +235,8 @@ INFO: [Synth 8-5546] ROM "cause_o" won't be mapped to RAM because it is too spar
 INFO: [Synth 8-5546] ROM "epc_o" won't be mapped to RAM because it is too sparse
 INFO: [Synth 8-5546] ROM "data_o" won't be mapped to RAM because it is too sparse
 INFO: [Synth 8-5546] ROM "inst_mem" won't be mapped to RAM because it is too sparse
-WARNING: [Synth 8-327] inferring latch for variable 'reg1_o_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/id.v:933]
-WARNING: [Synth 8-327] inferring latch for variable 'reg2_o_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/id.v:969]
+WARNING: [Synth 8-327] inferring latch for variable 'reg1_o_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/id.v:935]
+WARNING: [Synth 8-327] inferring latch for variable 'reg2_o_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/id.v:971]
 WARNING: [Synth 8-327] inferring latch for variable 'excepttype_is_syscall_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/id.v:132]
 WARNING: [Synth 8-327] inferring latch for variable 'excepttype_is_eret_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/id.v:132]
 WARNING: [Synth 8-327] inferring latch for variable 'cp0_reg_read_addr_o_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ex.v:449]
@@ -250,7 +246,7 @@ WARNING: [Synth 8-327] inferring latch for variable 'cnt_o_reg' [/home/fky/code/
 WARNING: [Synth 8-327] inferring latch for variable 'stallreq_for_madd_msub_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ex.v:292]
 WARNING: [Synth 8-327] inferring latch for variable 'cp0_cause_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/mem.v:162]
 WARNING: [Synth 8-327] inferring latch for variable 'mem_data_o_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/mem.v:239]
-WARNING: [Synth 8-327] inferring latch for variable 'new_pc_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ctrl.v:31]
+WARNING: [Synth 8-327] inferring latch for variable 'new_pc_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ctrl.v:32]
 ---------------------------------------------------------------------------------------------------
                    State |                     New Encoding |                Previous Encoding 
 ---------------------------------------------------------------------------------------------------
@@ -262,7 +258,7 @@ WARNING: [Synth 8-327] inferring latch for variable 'new_pc_reg' [/home/fky/code
 INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'div'
 WARNING: [Synth 8-327] inferring latch for variable 'data_o_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/cp0_reg.v:198]
 ---------------------------------------------------------------------------------
-Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 1566.266 ; gain = 258.207 ; free physical = 168 ; free virtual = 11770
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:07 ; elapsed = 00:00:08 . Memory (MB): peak = 1565.488 ; gain = 204.895 ; free physical = 181 ; free virtual = 8656
 ---------------------------------------------------------------------------------
 
 Report RTL Partitions: 
@@ -294,25 +290,25 @@ Detailed RTL Component Info :
 	                2 Bit    Registers := 1     
 	                1 Bit    Registers := 16    
 +---RAMs : 
+	               3K Bit         RAMs := 4     
 	             1024 Bit         RAMs := 1     
-	               24 Bit         RAMs := 4     
 +---Muxes : 
 	   2 Input     65 Bit        Muxes := 5     
 	   4 Input     65 Bit        Muxes := 2     
 	   2 Input     64 Bit        Muxes := 10    
 	   3 Input     64 Bit        Muxes := 2     
 	   4 Input     64 Bit        Muxes := 1     
-	   2 Input     32 Bit        Muxes := 70    
+	   2 Input     32 Bit        Muxes := 74    
 	  11 Input     32 Bit        Muxes := 3     
 	   8 Input     32 Bit        Muxes := 1     
 	  33 Input     32 Bit        Muxes := 1     
 	  37 Input     32 Bit        Muxes := 1     
 	   6 Input     32 Bit        Muxes := 4     
 	   4 Input     32 Bit        Muxes := 8     
-	   5 Input     32 Bit        Muxes := 3     
+	   5 Input     32 Bit        Muxes := 2     
 	   3 Input     32 Bit        Muxes := 4     
 	   9 Input     32 Bit        Muxes := 1     
-	   7 Input     32 Bit        Muxes := 1     
+	   7 Input     32 Bit        Muxes := 2     
 	  73 Input     32 Bit        Muxes := 1     
 	   7 Input     24 Bit        Muxes := 1     
 	   3 Input     16 Bit        Muxes := 1     
@@ -347,9 +343,9 @@ Detailed RTL Component Info :
 	   7 Input      2 Bit        Muxes := 1     
 	   2 Input      1 Bit        Muxes := 55    
 	  37 Input      1 Bit        Muxes := 5     
-	   8 Input      1 Bit        Muxes := 5     
+	   8 Input      1 Bit        Muxes := 6     
 	  11 Input      1 Bit        Muxes := 4     
-	   5 Input      1 Bit        Muxes := 6     
+	   5 Input      1 Bit        Muxes := 5     
 	  33 Input      1 Bit        Muxes := 3     
 	   4 Input      1 Bit        Muxes := 7     
 	   6 Input      1 Bit        Muxes := 5     
@@ -470,7 +466,7 @@ Detailed RTL Component Info :
 	   4 Input     32 Bit        Muxes := 6     
 	   3 Input     32 Bit        Muxes := 1     
 	   9 Input     32 Bit        Muxes := 1     
-	   2 Input     32 Bit        Muxes := 8     
+	   2 Input     32 Bit        Muxes := 10    
 	   3 Input     16 Bit        Muxes := 1     
 	   2 Input     16 Bit        Muxes := 1     
 	   4 Input      8 Bit        Muxes := 1     
@@ -498,9 +494,10 @@ Detailed RTL Component Info :
 Module ctrl 
 Detailed RTL Component Info : 
 +---Muxes : 
-	   5 Input     32 Bit        Muxes := 1     
+	   2 Input     32 Bit        Muxes := 2     
+	   7 Input     32 Bit        Muxes := 1     
 	   2 Input      4 Bit        Muxes := 4     
-	   5 Input      1 Bit        Muxes := 1     
+	   8 Input      1 Bit        Muxes := 1     
 Module div 
 Detailed RTL Component Info : 
 +---Adders : 
@@ -561,7 +558,7 @@ Detailed RTL Component Info :
 +---Registers : 
 	               32 Bit    Registers := 1     
 +---RAMs : 
-	               24 Bit         RAMs := 4     
+	               3K Bit         RAMs := 4     
 +---Muxes : 
 	   2 Input     32 Bit        Muxes := 2     
 ---------------------------------------------------------------------------------
@@ -706,7 +703,7 @@ WARNING: [Synth 8-3332] Sequential element (hilo_temp1_reg[36]) is unused and wi
 WARNING: [Synth 8-3332] Sequential element (hilo_temp1_reg[35]) is unused and will be removed from module ex.
 INFO: [Common 17-14] Message 'Synth 8-3332' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
 ---------------------------------------------------------------------------------
-Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:16 ; elapsed = 00:00:20 . Memory (MB): peak = 1727.172 ; gain = 419.113 ; free physical = 195 ; free virtual = 11619
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:27 ; elapsed = 00:00:32 . Memory (MB): peak = 1822.988 ; gain = 462.395 ; free physical = 241 ; free virtual = 8431
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start ROM, RAM, DSP and Shift Register Reporting
@@ -748,7 +745,7 @@ No constraint files found.
 Start Timing Optimization
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Timing Optimization : Time (s): cpu = 00:00:16 ; elapsed = 00:00:20 . Memory (MB): peak = 1727.172 ; gain = 419.113 ; free physical = 195 ; free virtual = 11619
+Finished Timing Optimization : Time (s): cpu = 00:00:27 ; elapsed = 00:00:32 . Memory (MB): peak = 1822.988 ; gain = 462.395 ; free physical = 242 ; free virtual = 8432
 ---------------------------------------------------------------------------------
 
 Report RTL Partitions: 
@@ -760,7 +757,7 @@ Report RTL Partitions:
 Start Technology Mapping
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Technology Mapping : Time (s): cpu = 00:00:16 ; elapsed = 00:00:20 . Memory (MB): peak = 1727.172 ; gain = 419.113 ; free physical = 194 ; free virtual = 11618
+Finished Technology Mapping : Time (s): cpu = 00:00:27 ; elapsed = 00:00:32 . Memory (MB): peak = 1832.004 ; gain = 471.410 ; free physical = 246 ; free virtual = 8436
 ---------------------------------------------------------------------------------
 
 Report RTL Partitions: 
@@ -784,7 +781,7 @@ Start Final Netlist Cleanup
 Finished Final Netlist Cleanup
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished IO Insertion : Time (s): cpu = 00:00:17 ; elapsed = 00:00:20 . Memory (MB): peak = 1727.172 ; gain = 419.113 ; free physical = 194 ; free virtual = 11618
+Finished IO Insertion : Time (s): cpu = 00:00:28 ; elapsed = 00:00:32 . Memory (MB): peak = 1832.004 ; gain = 471.410 ; free physical = 248 ; free virtual = 8435
 ---------------------------------------------------------------------------------
 
 Report Check Netlist: 
@@ -797,7 +794,7 @@ Report Check Netlist:
 Start Renaming Generated Instances
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Instances : Time (s): cpu = 00:00:17 ; elapsed = 00:00:20 . Memory (MB): peak = 1727.172 ; gain = 419.113 ; free physical = 194 ; free virtual = 11618
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:28 ; elapsed = 00:00:32 . Memory (MB): peak = 1832.004 ; gain = 471.410 ; free physical = 248 ; free virtual = 8435
 ---------------------------------------------------------------------------------
 
 Report RTL Partitions: 
@@ -809,25 +806,25 @@ Report RTL Partitions:
 Start Rebuilding User Hierarchy
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:17 ; elapsed = 00:00:20 . Memory (MB): peak = 1727.172 ; gain = 419.113 ; free physical = 194 ; free virtual = 11618
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:28 ; elapsed = 00:00:32 . Memory (MB): peak = 1832.004 ; gain = 471.410 ; free physical = 248 ; free virtual = 8435
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Ports
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Ports : Time (s): cpu = 00:00:17 ; elapsed = 00:00:20 . Memory (MB): peak = 1727.172 ; gain = 419.113 ; free physical = 194 ; free virtual = 11618
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:28 ; elapsed = 00:00:32 . Memory (MB): peak = 1832.004 ; gain = 471.410 ; free physical = 248 ; free virtual = 8435
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Handling Custom Attributes
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Handling Custom Attributes : Time (s): cpu = 00:00:17 ; elapsed = 00:00:20 . Memory (MB): peak = 1727.172 ; gain = 419.113 ; free physical = 194 ; free virtual = 11618
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:28 ; elapsed = 00:00:32 . Memory (MB): peak = 1832.004 ; gain = 471.410 ; free physical = 248 ; free virtual = 8435
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Nets
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Nets : Time (s): cpu = 00:00:17 ; elapsed = 00:00:20 . Memory (MB): peak = 1727.172 ; gain = 419.113 ; free physical = 194 ; free virtual = 11618
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:28 ; elapsed = 00:00:32 . Memory (MB): peak = 1832.004 ; gain = 471.410 ; free physical = 248 ; free virtual = 8435
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Writing Synthesis Report
@@ -852,25 +849,25 @@ Report Instance Areas:
 |1     |top      |       |     0|
 +------+---------+-------+------+
 ---------------------------------------------------------------------------------
-Finished Writing Synthesis Report : Time (s): cpu = 00:00:17 ; elapsed = 00:00:20 . Memory (MB): peak = 1727.172 ; gain = 419.113 ; free physical = 194 ; free virtual = 11618
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:28 ; elapsed = 00:00:32 . Memory (MB): peak = 1832.004 ; gain = 471.410 ; free physical = 248 ; free virtual = 8435
 ---------------------------------------------------------------------------------
-Synthesis finished with 0 errors, 0 critical warnings and 700 warnings.
-Synthesis Optimization Runtime : Time (s): cpu = 00:00:17 ; elapsed = 00:00:20 . Memory (MB): peak = 1727.172 ; gain = 419.113 ; free physical = 194 ; free virtual = 11618
-Synthesis Optimization Complete : Time (s): cpu = 00:00:17 ; elapsed = 00:00:20 . Memory (MB): peak = 1727.180 ; gain = 419.113 ; free physical = 194 ; free virtual = 11618
+Synthesis finished with 0 errors, 0 critical warnings and 16521 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:28 ; elapsed = 00:00:32 . Memory (MB): peak = 1832.004 ; gain = 471.410 ; free physical = 248 ; free virtual = 8435
+Synthesis Optimization Complete : Time (s): cpu = 00:00:28 ; elapsed = 00:00:32 . Memory (MB): peak = 1832.012 ; gain = 471.410 ; free physical = 248 ; free virtual = 8435
 INFO: [Project 1-571] Translating synthesized netlist
 INFO: [Project 1-570] Preparing netlist for logic optimization
 INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 1793.172 ; gain = 0.000 ; free physical = 172 ; free virtual = 11534
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 1843.051 ; gain = 0.000 ; free physical = 191 ; free virtual = 8343
 INFO: [Project 1-111] Unisim Transformation Summary:
 No Unisim elements were transformed.
 
 INFO: [Common 17-83] Releasing license: Synthesis
-118 Infos, 221 Warnings, 0 Critical Warnings and 0 Errors encountered.
+118 Infos, 217 Warnings, 0 Critical Warnings and 0 Errors encountered.
 synth_design completed successfully
-synth_design: Time (s): cpu = 00:00:20 ; elapsed = 00:00:25 . Memory (MB): peak = 1793.172 ; gain = 493.117 ; free physical = 228 ; free virtual = 11590
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 1793.172 ; gain = 0.000 ; free physical = 230 ; free virtual = 11592
+synth_design: Time (s): cpu = 00:00:32 ; elapsed = 00:00:37 . Memory (MB): peak = 1843.051 ; gain = 490.461 ; free physical = 250 ; free virtual = 8401
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 1843.051 ; gain = 0.000 ; free physical = 250 ; free virtual = 8401
 WARNING: [Constraints 18-5210] No constraints selected for write.
 Resolution: This message can indicate that there are no constraints for the design, or it can indicate that the used_in flags are set such that the constraints are ignored. This later case is used when running synth_design to not write synthesis constraints to the resulting checkpoint. Instead, project constraints are read when the synthesized design is opened.
 INFO: [Common 17-1381] The checkpoint '/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/vivado/vivado.runs/synth_1/openmips_min_sopc_tb.dcp' has been generated.
 INFO: [runtcl-4] Executing : report_utilization -file openmips_min_sopc_tb_utilization_synth.rpt -pb openmips_min_sopc_tb_utilization_synth.pb
-INFO: [Common 17-206] Exiting Vivado at Fri Feb 14 12:22:52 2020...
+INFO: [Common 17-206] Exiting Vivado at Fri Feb 28 18:35:28 2020...

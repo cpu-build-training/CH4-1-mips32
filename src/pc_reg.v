@@ -14,8 +14,9 @@ module pc_reg(
     wire flush,
     // 异常处理例程入口地址
     wire[`RegBus] new_pc,
-    
-    output reg[`InstAddrBus] pc, reg ce
+
+    output reg[`InstAddrBus] pc, 
+    reg ce
 );
 
 always @ (posedge clk) begin
@@ -49,6 +50,7 @@ always @(posedge clk) begin
         pc <= pc + `InstAddrIncrement; // 3'h4?
         end
     end
+    // if stall, then pc remain the same
 end
 
 endmodule // pc_reg
