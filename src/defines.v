@@ -254,3 +254,14 @@
 
 `define False_v             1'b0
 `define True_v              1'b1
+
+// for axi
+`define Ready               1'b1
+`define NotReady            1'b0
+`define Valid               1'b1
+`define InValid             1'b0
+`define ReadFree            2'b00
+`define BusyForIF           2'b01
+`define BusyForMEM          2'b10
+`define WriteFree           1'b0
+`define WriteBusy           1'b0

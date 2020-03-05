@@ -20,7 +20,10 @@ module mem(
            wire[`RegBus]    reg2_i,
 
            // 来自外部数据存储器 RAM 的信息
-           wire[`RegBus]   mem_data_i,
+           wire             mem_data_i_valid,
+           wire[`RegBus]    mem_data_i,
+           // axi bvalid
+           wire             mem_write_valid,
 
            // 新增的输入接口
            wire             LLbit_i,
@@ -60,10 +63,12 @@ module mem(
            reg whilo_o,
            // 送到外部数据存储器 RAM 的信息
            reg[`RegBus]         mem_addr_o,
+           wire                 mem_read_ready,
            wire                 mem_we_o,
            reg[3:0]             mem_sel_o,
            reg[`RegBus]         mem_data_o,
            reg                  mem_ce_o,
+           wire                 mem_re_o,
 
            // 新增的输出接口
            reg                  LLbit_we_o,
@@ -77,8 +82,9 @@ module mem(
            // 异常
            reg[31:0]       excepttype_o,
            wire[`RegBus]   cp0_epc_o,
-           wire            is_in_delayslot_o,
-           wire[`RegBus]   current_inst_address_o
+           wire[`RegBus]   current_inst_address_o,
+           output wire            is_in_delayslot_o,
+            wire            stallreq_for_mem
        );
 wire[`RegBus]   zero32;
 reg             mem_we;
@@ -102,6 +108,14 @@ assign is_in_delayslot_o = is_in_delayslot_i;
 // 访存阶段指令的地址
 assign current_inst_address_o = current_inst_address_i;
 
+// 在读写没有完成之前，都要请求暂停
+assign stallreq_for_mem = (mem_re_o && !mem_data_i_valid) || (mem_we_o && mem_write_valid);
+
+// 转化出读使能
+assign mem_re_o = mem_ce_o && !mem_we_o;
+
+// always ready because it's a logistic module and it never stall by other reason.
+assign mem_read_ready = `Ready;
 
 // 获取 LLbit 寄存器的最新之， 如果回写阶段的指令要写 LLbit，那么回写阶段要写入的
 // 值就是 LLbit 寄存器的最新值，反之， LLbit 模块给出的值 LLbit_i 是最新值

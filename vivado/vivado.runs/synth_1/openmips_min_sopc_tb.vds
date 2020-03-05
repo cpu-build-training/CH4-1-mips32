@@ -16,7 +16,7 @@ Attempting to get a license for feature 'Synthesis' and/or device 'xc7vx485t'
 INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7vx485t'
 INFO: [Common 17-86] Your Synthesis license expires in 9 day(s)
 INFO: Launching helper process for spawning children vivado processes
-INFO: Helper process launched with PID 631924 
+INFO: Helper process launched with PID 631924
 ---------------------------------------------------------------------------------
 Starting Synthesize : Time (s): cpu = 00:00:02 ; elapsed = 00:00:03 . Memory (MB): peak = 1389.062 ; gain = 81.000 ; free physical = 569 ; free virtual = 7628
 ---------------------------------------------------------------------------------
@@ -246,9 +246,9 @@ WARNING: [Synth 8-327] inferring latch for variable 'cnt_o_reg' [/home/fky/code/
 WARNING: [Synth 8-327] inferring latch for variable 'stallreq_for_madd_msub_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ex.v:292]
 WARNING: [Synth 8-327] inferring latch for variable 'cp0_cause_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/mem.v:162]
 WARNING: [Synth 8-327] inferring latch for variable 'mem_data_o_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/mem.v:239]
-WARNING: [Synth 8-327] inferring latch for variable 'new_pc_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ctrl.v:31]
+WARNING: [Synth 8-327] inferring latch for variable 'new_pc_reg' [/home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ctrl.v:32]
 ---------------------------------------------------------------------------------------------------
-                   State |                     New Encoding |                Previous Encoding 
+                   State |                     New Encoding |                Previous Encoding
 ---------------------------------------------------------------------------------------------------
                  iSTATE1 |                               00 |                               00
                  iSTATE0 |                               01 |                               01
@@ -261,305 +261,305 @@ WARNING: [Synth 8-327] inferring latch for variable 'data_o_reg' [/home/fky/code
 Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:07 ; elapsed = 00:00:08 . Memory (MB): peak = 1566.254 ; gain = 258.191 ; free physical = 406 ; free virtual = 7482
 ---------------------------------------------------------------------------------
 
-Report RTL Partitions: 
+Report RTL Partitions:
 +-+--------------+------------+----------+
 | |RTL Partition |Replication |Instances |
 +-+--------------+------------+----------+
 +-+--------------+------------+----------+
 No constraint files found.
 ---------------------------------------------------------------------------------
-Start RTL Component Statistics 
+Start RTL Component Statistics
 ---------------------------------------------------------------------------------
-Detailed RTL Component Info : 
-+---Adders : 
-	   2 Input     64 Bit       Adders := 4     
-	   3 Input     33 Bit       Adders := 1     
-	   2 Input     32 Bit       Adders := 13    
-	   2 Input      6 Bit       Adders := 2     
-+---XORs : 
-	   2 Input     32 Bit         XORs := 1     
-	   2 Input      1 Bit         XORs := 3     
-+---Registers : 
-	               65 Bit    Registers := 1     
-	               64 Bit    Registers := 2     
-	               32 Bit    Registers := 31    
-	                8 Bit    Registers := 2     
-	                6 Bit    Registers := 1     
-	                5 Bit    Registers := 5     
-	                3 Bit    Registers := 1     
-	                2 Bit    Registers := 1     
-	                1 Bit    Registers := 16    
-+---RAMs : 
-	               3K Bit         RAMs := 4     
-	             1024 Bit         RAMs := 1     
-+---Muxes : 
-	   2 Input     65 Bit        Muxes := 5     
-	   4 Input     65 Bit        Muxes := 2     
-	   2 Input     64 Bit        Muxes := 10    
-	   3 Input     64 Bit        Muxes := 2     
-	   4 Input     64 Bit        Muxes := 1     
-	   2 Input     32 Bit        Muxes := 74    
-	  11 Input     32 Bit        Muxes := 3     
-	   8 Input     32 Bit        Muxes := 1     
-	  33 Input     32 Bit        Muxes := 2     
-	  37 Input     32 Bit        Muxes := 1     
-	   6 Input     32 Bit        Muxes := 4     
-	   4 Input     32 Bit        Muxes := 8     
-	   5 Input     32 Bit        Muxes := 2     
-	   3 Input     32 Bit        Muxes := 4     
-	   9 Input     32 Bit        Muxes := 1     
-	   7 Input     32 Bit        Muxes := 2     
-	   7 Input     24 Bit        Muxes := 1     
-	   3 Input     16 Bit        Muxes := 1     
-	   2 Input     16 Bit        Muxes := 1     
-	  11 Input      8 Bit        Muxes := 1     
-	  33 Input      8 Bit        Muxes := 1     
-	   2 Input      8 Bit        Muxes := 4     
-	   4 Input      8 Bit        Muxes := 1     
-	   8 Input      7 Bit        Muxes := 1     
-	  33 Input      6 Bit        Muxes := 2     
-	   2 Input      6 Bit        Muxes := 1     
-	   4 Input      6 Bit        Muxes := 1     
-	   2 Input      5 Bit        Muxes := 7     
-	  11 Input      5 Bit        Muxes := 1     
-	   4 Input      5 Bit        Muxes := 1     
-	  15 Input      4 Bit        Muxes := 2     
-	   8 Input      4 Bit        Muxes := 1     
-	   4 Input      4 Bit        Muxes := 3     
-	   3 Input      4 Bit        Muxes := 2     
-	   2 Input      4 Bit        Muxes := 5     
-	  33 Input      3 Bit        Muxes := 6     
-	   8 Input      3 Bit        Muxes := 3     
-	  11 Input      3 Bit        Muxes := 1     
-	   2 Input      3 Bit        Muxes := 4     
-	   5 Input      3 Bit        Muxes := 2     
-	  33 Input      2 Bit        Muxes := 1     
-	  37 Input      2 Bit        Muxes := 1     
-	   2 Input      2 Bit        Muxes := 7     
-	   3 Input      2 Bit        Muxes := 1     
-	  15 Input      2 Bit        Muxes := 1     
-	   4 Input      2 Bit        Muxes := 1     
-	   7 Input      2 Bit        Muxes := 1     
-	   2 Input      1 Bit        Muxes := 55    
-	  37 Input      1 Bit        Muxes := 5     
-	   8 Input      1 Bit        Muxes := 6     
-	  11 Input      1 Bit        Muxes := 4     
-	   5 Input      1 Bit        Muxes := 5     
-	  33 Input      1 Bit        Muxes := 3     
-	   4 Input      1 Bit        Muxes := 7     
-	   6 Input      1 Bit        Muxes := 5     
-	   3 Input      1 Bit        Muxes := 4     
-	  15 Input      1 Bit        Muxes := 5     
-	   7 Input      1 Bit        Muxes := 3     
+Detailed RTL Component Info :
++---Adders :
+	   2 Input     64 Bit       Adders := 4
+	   3 Input     33 Bit       Adders := 1
+	   2 Input     32 Bit       Adders := 13
+	   2 Input      6 Bit       Adders := 2
++---XORs :
+	   2 Input     32 Bit         XORs := 1
+	   2 Input      1 Bit         XORs := 3
++---Registers :
+	               65 Bit    Registers := 1
+	               64 Bit    Registers := 2
+	               32 Bit    Registers := 31
+	                8 Bit    Registers := 2
+	                6 Bit    Registers := 1
+	                5 Bit    Registers := 5
+	                3 Bit    Registers := 1
+	                2 Bit    Registers := 1
+	                1 Bit    Registers := 16
++---RAMs :
+	               3K Bit         RAMs := 4
+	             1024 Bit         RAMs := 1
++---Muxes :
+	   2 Input     65 Bit        Muxes := 5
+	   4 Input     65 Bit        Muxes := 2
+	   2 Input     64 Bit        Muxes := 10
+	   3 Input     64 Bit        Muxes := 2
+	   4 Input     64 Bit        Muxes := 1
+	   2 Input     32 Bit        Muxes := 74
+	  11 Input     32 Bit        Muxes := 3
+	   8 Input     32 Bit        Muxes := 1
+	  33 Input     32 Bit        Muxes := 2
+	  37 Input     32 Bit        Muxes := 1
+	   6 Input     32 Bit        Muxes := 4
+	   4 Input     32 Bit        Muxes := 8
+	   5 Input     32 Bit        Muxes := 2
+	   3 Input     32 Bit        Muxes := 4
+	   9 Input     32 Bit        Muxes := 1
+	   7 Input     32 Bit        Muxes := 2
+	   7 Input     24 Bit        Muxes := 1
+	   3 Input     16 Bit        Muxes := 1
+	   2 Input     16 Bit        Muxes := 1
+	  11 Input      8 Bit        Muxes := 1
+	  33 Input      8 Bit        Muxes := 1
+	   2 Input      8 Bit        Muxes := 4
+	   4 Input      8 Bit        Muxes := 1
+	   8 Input      7 Bit        Muxes := 1
+	  33 Input      6 Bit        Muxes := 2
+	   2 Input      6 Bit        Muxes := 1
+	   4 Input      6 Bit        Muxes := 1
+	   2 Input      5 Bit        Muxes := 7
+	  11 Input      5 Bit        Muxes := 1
+	   4 Input      5 Bit        Muxes := 1
+	  15 Input      4 Bit        Muxes := 2
+	   8 Input      4 Bit        Muxes := 1
+	   4 Input      4 Bit        Muxes := 3
+	   3 Input      4 Bit        Muxes := 2
+	   2 Input      4 Bit        Muxes := 5
+	  33 Input      3 Bit        Muxes := 6
+	   8 Input      3 Bit        Muxes := 3
+	  11 Input      3 Bit        Muxes := 1
+	   2 Input      3 Bit        Muxes := 4
+	   5 Input      3 Bit        Muxes := 2
+	  33 Input      2 Bit        Muxes := 1
+	  37 Input      2 Bit        Muxes := 1
+	   2 Input      2 Bit        Muxes := 7
+	   3 Input      2 Bit        Muxes := 1
+	  15 Input      2 Bit        Muxes := 1
+	   4 Input      2 Bit        Muxes := 1
+	   7 Input      2 Bit        Muxes := 1
+	   2 Input      1 Bit        Muxes := 55
+	  37 Input      1 Bit        Muxes := 5
+	   8 Input      1 Bit        Muxes := 6
+	  11 Input      1 Bit        Muxes := 4
+	   5 Input      1 Bit        Muxes := 5
+	  33 Input      1 Bit        Muxes := 3
+	   4 Input      1 Bit        Muxes := 7
+	   6 Input      1 Bit        Muxes := 5
+	   3 Input      1 Bit        Muxes := 4
+	  15 Input      1 Bit        Muxes := 5
+	   7 Input      1 Bit        Muxes := 3
 ---------------------------------------------------------------------------------
-Finished RTL Component Statistics 
+Finished RTL Component Statistics
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Start RTL Hierarchical Component Statistics 
+Start RTL Hierarchical Component Statistics
 ---------------------------------------------------------------------------------
-Hierarchical RTL Component report 
-Module pc_reg 
-Detailed RTL Component Info : 
-+---Adders : 
-	   2 Input     32 Bit       Adders := 1     
-+---Registers : 
-	               32 Bit    Registers := 1     
-	                1 Bit    Registers := 1     
-+---Muxes : 
-	   2 Input     32 Bit        Muxes := 2     
-	   2 Input      1 Bit        Muxes := 1     
-Module if_id 
-Detailed RTL Component Info : 
-+---Registers : 
-	               32 Bit    Registers := 2     
-+---Muxes : 
-	   2 Input      1 Bit        Muxes := 2     
-Module id 
-Detailed RTL Component Info : 
-+---Adders : 
-	   2 Input     32 Bit       Adders := 3     
-+---Muxes : 
-	   2 Input     32 Bit        Muxes := 12    
-	  11 Input     32 Bit        Muxes := 3     
-	   8 Input     32 Bit        Muxes := 1     
-	  33 Input     32 Bit        Muxes := 1     
-	  37 Input     32 Bit        Muxes := 1     
-	   6 Input     32 Bit        Muxes := 1     
-	  11 Input      8 Bit        Muxes := 1     
-	  33 Input      8 Bit        Muxes := 1     
-	   2 Input      8 Bit        Muxes := 4     
-	   8 Input      7 Bit        Muxes := 1     
-	   2 Input      5 Bit        Muxes := 4     
-	  11 Input      5 Bit        Muxes := 1     
-	   4 Input      5 Bit        Muxes := 1     
-	  33 Input      3 Bit        Muxes := 6     
-	   8 Input      3 Bit        Muxes := 3     
-	  11 Input      3 Bit        Muxes := 1     
-	   2 Input      3 Bit        Muxes := 4     
-	  33 Input      2 Bit        Muxes := 1     
-	  37 Input      2 Bit        Muxes := 1     
-	  37 Input      1 Bit        Muxes := 5     
-	   8 Input      1 Bit        Muxes := 4     
-	  11 Input      1 Bit        Muxes := 4     
-	   5 Input      1 Bit        Muxes := 3     
-	   2 Input      1 Bit        Muxes := 6     
-	  33 Input      1 Bit        Muxes := 3     
-	   4 Input      1 Bit        Muxes := 1     
-Module regfile 
-Detailed RTL Component Info : 
-+---RAMs : 
-	             1024 Bit         RAMs := 1     
-+---Muxes : 
-	   2 Input     32 Bit        Muxes := 8     
-Module id_ex 
-Detailed RTL Component Info : 
-+---Registers : 
-	               32 Bit    Registers := 6     
-	                8 Bit    Registers := 1     
-	                5 Bit    Registers := 1     
-	                3 Bit    Registers := 1     
-	                1 Bit    Registers := 3     
-+---Muxes : 
-	   2 Input      1 Bit        Muxes := 5     
-Module ex 
-Detailed RTL Component Info : 
-+---Adders : 
-	   2 Input     64 Bit       Adders := 4     
-	   2 Input     32 Bit       Adders := 4     
-	   2 Input      6 Bit       Adders := 1     
-+---XORs : 
-	   2 Input     32 Bit         XORs := 1     
-	   2 Input      1 Bit         XORs := 1     
-+---Muxes : 
-	   2 Input     64 Bit        Muxes := 7     
-	   3 Input     64 Bit        Muxes := 2     
-	   2 Input     32 Bit        Muxes := 27    
-	   4 Input     32 Bit        Muxes := 2     
-	   5 Input     32 Bit        Muxes := 2     
-	   3 Input     32 Bit        Muxes := 2     
-	  33 Input      6 Bit        Muxes := 2     
-	   2 Input      5 Bit        Muxes := 1     
-	   5 Input      3 Bit        Muxes := 2     
-	   2 Input      2 Bit        Muxes := 2     
-	   3 Input      2 Bit        Muxes := 1     
-	   2 Input      1 Bit        Muxes := 19    
-	   6 Input      1 Bit        Muxes := 1     
-	   5 Input      1 Bit        Muxes := 2     
-	   3 Input      1 Bit        Muxes := 4     
-Module ex_mem 
-Detailed RTL Component Info : 
-+---Registers : 
-	               64 Bit    Registers := 1     
-	               32 Bit    Registers := 8     
-	                8 Bit    Registers := 1     
-	                5 Bit    Registers := 2     
-	                2 Bit    Registers := 1     
-	                1 Bit    Registers := 4     
-+---Muxes : 
-	   2 Input     64 Bit        Muxes := 2     
-	   2 Input      2 Bit        Muxes := 2     
-	   2 Input      1 Bit        Muxes := 5     
-Module mem 
-Detailed RTL Component Info : 
-+---Muxes : 
-	   4 Input     32 Bit        Muxes := 6     
-	   3 Input     32 Bit        Muxes := 1     
-	   9 Input     32 Bit        Muxes := 1     
-	   2 Input     32 Bit        Muxes := 10    
-	   3 Input     16 Bit        Muxes := 1     
-	   2 Input     16 Bit        Muxes := 1     
-	   4 Input      8 Bit        Muxes := 1     
-	   2 Input      5 Bit        Muxes := 2     
-	  15 Input      4 Bit        Muxes := 2     
-	   8 Input      4 Bit        Muxes := 1     
-	   4 Input      4 Bit        Muxes := 3     
-	   3 Input      4 Bit        Muxes := 2     
-	   2 Input      4 Bit        Muxes := 1     
-	  15 Input      2 Bit        Muxes := 1     
-	   2 Input      1 Bit        Muxes := 1     
-	  15 Input      1 Bit        Muxes := 5     
-Module mem_wb 
-Detailed RTL Component Info : 
-+---Registers : 
-	               32 Bit    Registers := 4     
-	                5 Bit    Registers := 2     
-	                1 Bit    Registers := 5     
-+---Muxes : 
-	   2 Input      1 Bit        Muxes := 2     
-Module hilo_reg 
-Detailed RTL Component Info : 
-+---Registers : 
-	               32 Bit    Registers := 2     
-Module ctrl 
-Detailed RTL Component Info : 
-+---Muxes : 
-	   2 Input     32 Bit        Muxes := 2     
-	   7 Input     32 Bit        Muxes := 1     
-	   2 Input      4 Bit        Muxes := 4     
-	   8 Input      1 Bit        Muxes := 1     
-Module div 
-Detailed RTL Component Info : 
-+---Adders : 
-	   3 Input     33 Bit       Adders := 1     
-	   2 Input     32 Bit       Adders := 3     
-	   2 Input      6 Bit       Adders := 1     
-+---XORs : 
-	   2 Input      1 Bit         XORs := 2     
-+---Registers : 
-	               65 Bit    Registers := 1     
-	               64 Bit    Registers := 1     
-	               32 Bit    Registers := 1     
-	                6 Bit    Registers := 1     
-	                1 Bit    Registers := 1     
-+---Muxes : 
-	   2 Input     65 Bit        Muxes := 5     
-	   4 Input     65 Bit        Muxes := 2     
-	   2 Input     64 Bit        Muxes := 1     
-	   4 Input     64 Bit        Muxes := 1     
-	   2 Input     32 Bit        Muxes := 2     
-	   2 Input      6 Bit        Muxes := 1     
-	   4 Input      6 Bit        Muxes := 1     
-	   4 Input      2 Bit        Muxes := 1     
-	   2 Input      2 Bit        Muxes := 3     
-	   2 Input      1 Bit        Muxes := 2     
-	   4 Input      1 Bit        Muxes := 6     
-Module LLbit_reg 
-Detailed RTL Component Info : 
-+---Registers : 
-	                1 Bit    Registers := 1     
-+---Muxes : 
-	   2 Input      1 Bit        Muxes := 1     
-Module cp0_reg 
-Detailed RTL Component Info : 
-+---Adders : 
-	   2 Input     32 Bit       Adders := 2     
-+---Registers : 
-	               32 Bit    Registers := 6     
-	                1 Bit    Registers := 1     
-+---Muxes : 
-	   2 Input     32 Bit        Muxes := 8     
-	   6 Input     32 Bit        Muxes := 3     
-	   3 Input     32 Bit        Muxes := 1     
-	   7 Input     32 Bit        Muxes := 1     
-	   7 Input     24 Bit        Muxes := 1     
-	   7 Input      2 Bit        Muxes := 1     
-	   2 Input      1 Bit        Muxes := 11    
-	   6 Input      1 Bit        Muxes := 4     
-	   7 Input      1 Bit        Muxes := 3     
-	   8 Input      1 Bit        Muxes := 1     
-Module inst_rom 
-Detailed RTL Component Info : 
-+---Muxes : 
-	  33 Input     32 Bit        Muxes := 1     
-	   2 Input     32 Bit        Muxes := 1     
-Module data_ram 
-Detailed RTL Component Info : 
-+---Registers : 
-	               32 Bit    Registers := 1     
-+---RAMs : 
-	               3K Bit         RAMs := 4     
-+---Muxes : 
-	   2 Input     32 Bit        Muxes := 2     
+Hierarchical RTL Component report
+Module pc_reg
+Detailed RTL Component Info :
++---Adders :
+	   2 Input     32 Bit       Adders := 1
++---Registers :
+	               32 Bit    Registers := 1
+	                1 Bit    Registers := 1
++---Muxes :
+	   2 Input     32 Bit        Muxes := 2
+	   2 Input      1 Bit        Muxes := 1
+Module if_id
+Detailed RTL Component Info :
++---Registers :
+	               32 Bit    Registers := 2
++---Muxes :
+	   2 Input      1 Bit        Muxes := 2
+Module id
+Detailed RTL Component Info :
++---Adders :
+	   2 Input     32 Bit       Adders := 3
++---Muxes :
+	   2 Input     32 Bit        Muxes := 12
+	  11 Input     32 Bit        Muxes := 3
+	   8 Input     32 Bit        Muxes := 1
+	  33 Input     32 Bit        Muxes := 1
+	  37 Input     32 Bit        Muxes := 1
+	   6 Input     32 Bit        Muxes := 1
+	  11 Input      8 Bit        Muxes := 1
+	  33 Input      8 Bit        Muxes := 1
+	   2 Input      8 Bit        Muxes := 4
+	   8 Input      7 Bit        Muxes := 1
+	   2 Input      5 Bit        Muxes := 4
+	  11 Input      5 Bit        Muxes := 1
+	   4 Input      5 Bit        Muxes := 1
+	  33 Input      3 Bit        Muxes := 6
+	   8 Input      3 Bit        Muxes := 3
+	  11 Input      3 Bit        Muxes := 1
+	   2 Input      3 Bit        Muxes := 4
+	  33 Input      2 Bit        Muxes := 1
+	  37 Input      2 Bit        Muxes := 1
+	  37 Input      1 Bit        Muxes := 5
+	   8 Input      1 Bit        Muxes := 4
+	  11 Input      1 Bit        Muxes := 4
+	   5 Input      1 Bit        Muxes := 3
+	   2 Input      1 Bit        Muxes := 6
+	  33 Input      1 Bit        Muxes := 3
+	   4 Input      1 Bit        Muxes := 1
+Module regfile
+Detailed RTL Component Info :
++---RAMs :
+	             1024 Bit         RAMs := 1
++---Muxes :
+	   2 Input     32 Bit        Muxes := 8
+Module id_ex
+Detailed RTL Component Info :
++---Registers :
+	               32 Bit    Registers := 6
+	                8 Bit    Registers := 1
+	                5 Bit    Registers := 1
+	                3 Bit    Registers := 1
+	                1 Bit    Registers := 3
++---Muxes :
+	   2 Input      1 Bit        Muxes := 5
+Module ex
+Detailed RTL Component Info :
++---Adders :
+	   2 Input     64 Bit       Adders := 4
+	   2 Input     32 Bit       Adders := 4
+	   2 Input      6 Bit       Adders := 1
++---XORs :
+	   2 Input     32 Bit         XORs := 1
+	   2 Input      1 Bit         XORs := 1
++---Muxes :
+	   2 Input     64 Bit        Muxes := 7
+	   3 Input     64 Bit        Muxes := 2
+	   2 Input     32 Bit        Muxes := 27
+	   4 Input     32 Bit        Muxes := 2
+	   5 Input     32 Bit        Muxes := 2
+	   3 Input     32 Bit        Muxes := 2
+	  33 Input      6 Bit        Muxes := 2
+	   2 Input      5 Bit        Muxes := 1
+	   5 Input      3 Bit        Muxes := 2
+	   2 Input      2 Bit        Muxes := 2
+	   3 Input      2 Bit        Muxes := 1
+	   2 Input      1 Bit        Muxes := 19
+	   6 Input      1 Bit        Muxes := 1
+	   5 Input      1 Bit        Muxes := 2
+	   3 Input      1 Bit        Muxes := 4
+Module ex_mem
+Detailed RTL Component Info :
++---Registers :
+	               64 Bit    Registers := 1
+	               32 Bit    Registers := 8
+	                8 Bit    Registers := 1
+	                5 Bit    Registers := 2
+	                2 Bit    Registers := 1
+	                1 Bit    Registers := 4
++---Muxes :
+	   2 Input     64 Bit        Muxes := 2
+	   2 Input      2 Bit        Muxes := 2
+	   2 Input      1 Bit        Muxes := 5
+Module mem
+Detailed RTL Component Info :
++---Muxes :
+	   4 Input     32 Bit        Muxes := 6
+	   3 Input     32 Bit        Muxes := 1
+	   9 Input     32 Bit        Muxes := 1
+	   2 Input     32 Bit        Muxes := 10
+	   3 Input     16 Bit        Muxes := 1
+	   2 Input     16 Bit        Muxes := 1
+	   4 Input      8 Bit        Muxes := 1
+	   2 Input      5 Bit        Muxes := 2
+	  15 Input      4 Bit        Muxes := 2
+	   8 Input      4 Bit        Muxes := 1
+	   4 Input      4 Bit        Muxes := 3
+	   3 Input      4 Bit        Muxes := 2
+	   2 Input      4 Bit        Muxes := 1
+	  15 Input      2 Bit        Muxes := 1
+	   2 Input      1 Bit        Muxes := 1
+	  15 Input      1 Bit        Muxes := 5
+Module mem_wb
+Detailed RTL Component Info :
++---Registers :
+	               32 Bit    Registers := 4
+	                5 Bit    Registers := 2
+	                1 Bit    Registers := 5
++---Muxes :
+	   2 Input      1 Bit        Muxes := 2
+Module hilo_reg
+Detailed RTL Component Info :
++---Registers :
+	               32 Bit    Registers := 2
+Module ctrl
+Detailed RTL Component Info :
++---Muxes :
+	   2 Input     32 Bit        Muxes := 2
+	   7 Input     32 Bit        Muxes := 1
+	   2 Input      4 Bit        Muxes := 4
+	   8 Input      1 Bit        Muxes := 1
+Module div
+Detailed RTL Component Info :
++---Adders :
+	   3 Input     33 Bit       Adders := 1
+	   2 Input     32 Bit       Adders := 3
+	   2 Input      6 Bit       Adders := 1
++---XORs :
+	   2 Input      1 Bit         XORs := 2
++---Registers :
+	               65 Bit    Registers := 1
+	               64 Bit    Registers := 1
+	               32 Bit    Registers := 1
+	                6 Bit    Registers := 1
+	                1 Bit    Registers := 1
++---Muxes :
+	   2 Input     65 Bit        Muxes := 5
+	   4 Input     65 Bit        Muxes := 2
+	   2 Input     64 Bit        Muxes := 1
+	   4 Input     64 Bit        Muxes := 1
+	   2 Input     32 Bit        Muxes := 2
+	   2 Input      6 Bit        Muxes := 1
+	   4 Input      6 Bit        Muxes := 1
+	   4 Input      2 Bit        Muxes := 1
+	   2 Input      2 Bit        Muxes := 3
+	   2 Input      1 Bit        Muxes := 2
+	   4 Input      1 Bit        Muxes := 6
+Module LLbit_reg
+Detailed RTL Component Info :
++---Registers :
+	                1 Bit    Registers := 1
++---Muxes :
+	   2 Input      1 Bit        Muxes := 1
+Module cp0_reg
+Detailed RTL Component Info :
++---Adders :
+	   2 Input     32 Bit       Adders := 2
++---Registers :
+	               32 Bit    Registers := 6
+	                1 Bit    Registers := 1
++---Muxes :
+	   2 Input     32 Bit        Muxes := 8
+	   6 Input     32 Bit        Muxes := 3
+	   3 Input     32 Bit        Muxes := 1
+	   7 Input     32 Bit        Muxes := 1
+	   7 Input     24 Bit        Muxes := 1
+	   7 Input      2 Bit        Muxes := 1
+	   2 Input      1 Bit        Muxes := 11
+	   6 Input      1 Bit        Muxes := 4
+	   7 Input      1 Bit        Muxes := 3
+	   8 Input      1 Bit        Muxes := 1
+Module inst_rom
+Detailed RTL Component Info :
++---Muxes :
+	  33 Input     32 Bit        Muxes := 1
+	   2 Input     32 Bit        Muxes := 1
+Module data_ram
+Detailed RTL Component Info :
++---Registers :
+	               32 Bit    Registers := 1
++---RAMs :
+	               3K Bit         RAMs := 4
++---Muxes :
+	   2 Input     32 Bit        Muxes := 2
 ---------------------------------------------------------------------------------
 Finished RTL Hierarchical Component Statistics
 ---------------------------------------------------------------------------------
@@ -576,7 +576,7 @@ No constraint files found.
 ---------------------------------------------------------------------------------
 Start Cross Boundary and Area Optimization
 ---------------------------------------------------------------------------------
-Warning: Parallel synthesis criteria is not met 
+Warning: Parallel synthesis criteria is not met
 INFO: [Synth 8-5546] ROM "aluop_o" won't be mapped to RAM because it is too sparse
 INFO: [Synth 8-5587] ROM size for "aluop_o" is below threshold of ROM address width. It will be mapped to LUTs
 INFO: [Synth 8-5545] ROM "aluop_o" won't be mapped to RAM because address size (32) is larger than maximum supported(25)
@@ -710,23 +710,23 @@ Start ROM, RAM, DSP and Shift Register Reporting
 
 ROM:
 +------------+------------+---------------+----------------+
-|Module Name | RTL Object | Depth x Width | Implemented As | 
+|Module Name | RTL Object | Depth x Width | Implemented As |
 +------------+------------+---------------+----------------+
-|id          | aluop_o    | 64x8          | LUT            | 
-|id          | alusel_o   | 64x3          | LUT            | 
-|id          | aluop_o    | 64x8          | LUT            | 
-|id          | alusel_o   | 64x3          | LUT            | 
+|id          | aluop_o    | 64x8          | LUT            |
+|id          | alusel_o   | 64x3          | LUT            |
+|id          | aluop_o    | 64x8          | LUT            |
+|id          | alusel_o   | 64x3          | LUT            |
 +------------+------------+---------------+----------------+
 
 
 DSP: Preliminary Mapping  Report (see note below)
 +------------+----------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
-|Module Name | DSP Mapping    | A Size | B Size | C Size | D Size | P Size | AREG | BREG | CREG | DREG | ADREG | MREG | PREG | 
+|Module Name | DSP Mapping    | A Size | B Size | C Size | D Size | P Size | AREG | BREG | CREG | DREG | ADREG | MREG | PREG |
 +------------+----------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
-|ex          | A*B            | 18     | 16     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
-|ex          | (PCIN>>17)+A*B | 16     | 16     | -      | -      | 30     | 0    | 0    | -    | -    | -     | 0    | 0    | 
-|ex          | A*B            | 18     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
-|ex          | (PCIN>>17)+A*B | 18     | 16     | -      | -      | 47     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|ex          | A*B            | 18     | 16     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    |
+|ex          | (PCIN>>17)+A*B | 16     | 16     | -      | -      | 30     | 0    | 0    | -    | -    | -     | 0    | 0    |
+|ex          | A*B            | 18     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    |
+|ex          | (PCIN>>17)+A*B | 18     | 16     | -      | -      | 47     | 0    | 0    | -    | -    | -     | 0    | 0    |
 +------------+----------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
 
 Note: The table above is a preliminary report that shows the DSPs inferred at the current stage of the synthesis flow. Some DSP may be reimplemented as non DSP primitives later in the synthesis flow. Multiple instantiated DSPs are reported only once.
@@ -734,7 +734,7 @@ Note: The table above is a preliminary report that shows the DSPs inferred at th
 Finished ROM, RAM, DSP and Shift Register Reporting
 ---------------------------------------------------------------------------------
 
-Report RTL Partitions: 
+Report RTL Partitions:
 +-+--------------+------------+----------+
 | |RTL Partition |Replication |Instances |
 +-+--------------+------------+----------+
@@ -747,7 +747,7 @@ Start Timing Optimization
 Finished Timing Optimization : Time (s): cpu = 00:00:22 ; elapsed = 00:00:25 . Memory (MB): peak = 1823.746 ; gain = 515.684 ; free physical = 443 ; free virtual = 7355
 ---------------------------------------------------------------------------------
 
-Report RTL Partitions: 
+Report RTL Partitions:
 +-+--------------+------------+----------+
 | |RTL Partition |Replication |Instances |
 +-+--------------+------------+----------+
@@ -759,7 +759,7 @@ Start Technology Mapping
 Finished Technology Mapping : Time (s): cpu = 00:00:22 ; elapsed = 00:00:25 . Memory (MB): peak = 1832.762 ; gain = 524.699 ; free physical = 442 ; free virtual = 7354
 ---------------------------------------------------------------------------------
 
-Report RTL Partitions: 
+Report RTL Partitions:
 +-+--------------+------------+----------+
 | |RTL Partition |Replication |Instances |
 +-+--------------+------------+----------+
@@ -783,7 +783,7 @@ Finished Final Netlist Cleanup
 Finished IO Insertion : Time (s): cpu = 00:00:23 ; elapsed = 00:00:25 . Memory (MB): peak = 1832.762 ; gain = 524.699 ; free physical = 442 ; free virtual = 7354
 ---------------------------------------------------------------------------------
 
-Report Check Netlist: 
+Report Check Netlist:
 +------+------------------+-------+---------+-------+------------------+
 |      |Item              |Errors |Warnings |Status |Description       |
 +------+------------------+-------+---------+-------+------------------+
@@ -796,7 +796,7 @@ Start Renaming Generated Instances
 Finished Renaming Generated Instances : Time (s): cpu = 00:00:23 ; elapsed = 00:00:25 . Memory (MB): peak = 1832.762 ; gain = 524.699 ; free physical = 442 ; free virtual = 7354
 ---------------------------------------------------------------------------------
 
-Report RTL Partitions: 
+Report RTL Partitions:
 +-+--------------+------------+----------+
 | |RTL Partition |Replication |Instances |
 +-+--------------+------------+----------+
@@ -829,19 +829,19 @@ Finished Renaming Generated Nets : Time (s): cpu = 00:00:23 ; elapsed = 00:00:25
 Start Writing Synthesis Report
 ---------------------------------------------------------------------------------
 
-Report BlackBoxes: 
+Report BlackBoxes:
 +-+--------------+----------+
 | |BlackBox name |Instances |
 +-+--------------+----------+
 +-+--------------+----------+
 
-Report Cell Usage: 
+Report Cell Usage:
 +-+-----+------+
 | |Cell |Count |
 +-+-----+------+
 +-+-----+------+
 
-Report Instance Areas: 
+Report Instance Areas:
 +------+---------+-------+------+
 |      |Instance |Module |Cells |
 +------+---------+-------+------+

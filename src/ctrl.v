@@ -3,6 +3,8 @@ module ctrl(
            input wire rst,
            wire stallreq_from_id,
            wire stallreq_from_ex,
+           wire stallreq_from_mem,
+           wire stallreq_from_if,
            // 来自 MEM
            wire[31:0]   excepttype_i,
            wire[`RegBus]    cp0_epc_i,
@@ -12,13 +14,18 @@ module ctrl(
            reg               flush,
            reg[5:0] stall
        );
+
 always @(*) begin
     if(rst == `RstEnable)begin
         stall <= 6'b0;
+    end else if (stallreq_from_mem == `Stop) begin
+        stall <= 6'b011111;
     end else if (stallreq_from_ex == `Stop) begin
         stall <= 6'b001111;
     end else if (stallreq_from_id == `Stop) begin
         stall <= 6'b000111;
+    end else if (stallreq_from_if == `Stop) begin
+        stall <= 6'b000011;
     end else begin
         stall <= 6'b0;
     end
