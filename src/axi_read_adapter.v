@@ -18,7 +18,7 @@ module axi_read_adapter(
          wire[1:0]   arlock,
          wire[3:0]   arcache,
          wire[2:0]   arprot,
-         reg        arvalid,
+         output reg        arvalid,
          input
          wire        arready,
 
@@ -27,7 +27,7 @@ module axi_read_adapter(
          wire[3:0]    rid,
          wire[31:0]   rdata,
          wire[1:0]    rresp,
-         wire         rlast,
+         input wire         rlast,
          wire         rvalid,
          output
          reg         rready,
@@ -36,19 +36,19 @@ module axi_read_adapter(
 
          input
          wire[31:0]       pc,
-         wire             pc_re,
+        input wire             pc_re,
          // 从 IF 过来的，是否可以接受输入的信号
          wire             inst_read_ready,
          output
          wire[31:0]        inst,
          // 去 IF ，表示数据是否 valid
-         reg              inst_valid,
+         output reg              inst_valid,
 
          // from/to mem
          input
          wire             mem_re,
-         wire[31:0]       mem_addr,
          wire             mem_data_read_ready,
+         wire[31:0]       mem_addr,
          output
          reg              mem_data_valid,
          wire[31:0]       mem_data
@@ -168,13 +168,13 @@ always @(*)
     if (!reset)
       // 如果需要 reset，所有输出为 0
       // axi master out buses
-      inst_valid <= `InValid;
+      inst_valid = `InValid;
     else if (pc_re == `Valid && rvalid == `Valid && read_channel_state == `BusyForIF )
       // 数据到了
-      inst_valid <= `Valid;
+      inst_valid = `Valid;
     else
       // 无关状态
-      inst_valid <= `InValid;
+      inst_valid = `InValid;
   end
 
 // 送往 mem 是否 valid
@@ -182,15 +182,13 @@ always @(*)
 always @(*)
   begin
     if(reset == `RstEnable)
-      mem_data_valid <= `InValid;
+      mem_data_valid = `InValid;
     else if (mem_re == `Valid && rvalid == `Valid && read_channel_state == `BusyForMEM)
       // 只有为 MEM 服务且信号正常时，才会 valid
-      mem_data_valid <= `Valid;
+      mem_data_valid = `Valid;
     else
-      mem_data_valid <= `InValid;
+      mem_data_valid = `InValid;
   end
-
-assign awaddr = mem_addr;
 
 
 endmodule // axi_read_adapter

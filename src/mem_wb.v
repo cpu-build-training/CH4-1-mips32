@@ -11,6 +11,7 @@ module mem_wb(
            wire[`RegBus]         mem_hi,
            wire[`RegBus]         mem_lo,
            wire mem_whilo,
+           wire[`RegBus]        mem_current_address,
 
            // LLbit
            wire    mem_LLbit_we,
@@ -42,6 +43,9 @@ module mem_wb(
            reg[4:0]         wb_cp0_reg_write_addr,
            reg[`RegBus]     wb_cp0_reg_data,
 
+            // DEBUG
+            wire[`RegBus]   wb_current_address,
+
            // From CTRL module.
            input wire[5:0]     stall
        );
@@ -59,6 +63,7 @@ always @(posedge clk) begin
         wb_cp0_reg_we <= `WriteDisable;
         wb_cp0_reg_write_addr <= 5'b00000;
         wb_cp0_reg_data <= `ZeroWord;
+        wb_current_address <= `ZeroWord;
     end
     else if(stall[4] == `Stop && stall[5] == `NoStop) begin
         wb_wd <= `NOPRegAddr;
@@ -72,6 +77,7 @@ always @(posedge clk) begin
         wb_cp0_reg_we <= `WriteDisable;
         wb_cp0_reg_write_addr <= 5'b00000;
         wb_cp0_reg_data <= `ZeroWord;
+        // wb_current_address <= `ZeroWord;
     end
     else if(stall[4] == `NoStop ) begin
         wb_wd <=  mem_wd;
@@ -85,6 +91,7 @@ always @(posedge clk) begin
         wb_cp0_reg_we <= mem_cp0_reg_we;
         wb_cp0_reg_write_addr <= mem_cp0_reg_write_addr;
         wb_cp0_reg_data <= mem_cp0_reg_data;
+        wb_current_address <= mem_current_address;
     end
 end
 endmodule // mem_wb

@@ -82,10 +82,9 @@ module mem(
            // 异常
            reg[31:0]       excepttype_o,
            wire[`RegBus]   cp0_epc_o,
-           wire            is_in_delayslot_o,
            wire[`RegBus]   current_inst_address_o,
-
-           wire            stallreq_for_mem
+           output wire            is_in_delayslot_o,
+            wire            stallreq_for_mem
        );
 wire[`RegBus]   zero32;
 reg             mem_we;

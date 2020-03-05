@@ -2,21 +2,21 @@
 
 
 module pc_reg(
-    input wire clk, wire rst, 
-    wire[5:0] stall, // From CTRL mudule
+    input wire clk, wire rst,
+    input wire[5:0] stall, // From CTRL mudule
 
     // 来自译码阶段的 ID 模块的信息,
-    wire branch_flag_i,
-    wire[`RegBus] branch_target_address_i,
+    input wire branch_flag_i,
+    input wire[`RegBus] branch_target_address_i,
 
     // 异常处理
     // 流水线清除信号
-    wire flush,
+    input wire flush,
     // 异常处理例程入口地址
-    wire[`RegBus] new_pc,
+    input wire[`RegBus] new_pc,
 
-    output reg[`InstAddrBus] pc, 
-    reg ce
+    output reg[`InstAddrBus] pc,
+    output reg ce
 );
 
 always @ (posedge clk) begin
