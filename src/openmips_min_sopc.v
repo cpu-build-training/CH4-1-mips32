@@ -32,7 +32,7 @@ openmips openmips0(
     .int_i(int), .timer_int_o(timer_int),
 
     .rom_addr_o(inst_addr), 
-    .rom_data_i(inst),
+    .rom_data_i_le(inst),
     .rom_ce_o(rom_ce),
 
     .ram_data_i(ram_data_i),

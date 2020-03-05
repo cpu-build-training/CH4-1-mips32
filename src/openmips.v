@@ -4,7 +4,7 @@ module openmips(
            input
            wire        clk,    wire rst,
 
-           input wire[`RegBus]     rom_data_i,
+           input wire[`RegBus]     rom_data_i_le,
            output  wire[`RegBus]   rom_addr_o,
            output wire             rom_ce_o,
 
@@ -21,6 +21,11 @@ module openmips(
            output wire          timer_int_o
        );
 // id_pc_i 模块_功能_输入or输出
+
+wire[`RegBus]       rom_data_i = {rom_data_i_le[7:0],rom_data_i_le[15:8], 
+                                rom_data_i_le[23:16], rom_data_i_le[31:24]};
+// wire[`RegBus]       ram_data_i_be;
+
 
 // 送入 PC 有关跳转的信号
 wire[`RegBus] pc_branch_target_address_i;

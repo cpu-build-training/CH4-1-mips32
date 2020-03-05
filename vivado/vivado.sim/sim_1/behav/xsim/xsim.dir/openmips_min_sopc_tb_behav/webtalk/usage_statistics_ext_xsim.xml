@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<webTalkData  fileName='usage_statistics_ext_xsim.xml'  majorVersion='1' minorVersion='0' timeStamp='Fri Feb 14 11:43:26 2020'>
+<webTalkData  fileName='usage_statistics_ext_xsim.xml'  majorVersion='1' minorVersion='0' timeStamp='Wed Mar  4 23:46:54 2020'>
 <section name="__ROOT__" level="0" order="1" description="">
  <section name="software_version_and_target_device" level="1" order="1" description="">
   <keyValuePair key="beta" value="FALSE" description="" />
   <keyValuePair key="build_version" value="2405991" description="" />
-  <keyValuePair key="date_generated" value="Fri Feb 14 11:43:25 2020" description="" />
+  <keyValuePair key="date_generated" value="Wed Mar  4 23:46:54 2020" description="" />
   <keyValuePair key="os_platform" value="LIN64" description="" />
   <keyValuePair key="product_version" value="XSIM v2018.3 (64-bit)" description="" />
   <keyValuePair key="project_id" value="a72e3593239d4a3f8a1c12087294bb2a" description="" />
-  <keyValuePair key="project_iteration" value="243" description="" />
+  <keyValuePair key="project_iteration" value="282" description="" />
   <keyValuePair key="random_id" value="fb68579c-6221-466f-8cc9-f6d7cd8f2d2a" description="" />
   <keyValuePair key="registration_id" value="211698858_0_0_907" description="" />
   <keyValuePair key="route_design" value="FALSE" description="" />
@@ -20,7 +20,7 @@
  </section>
  <section name="user_environment" level="1" order="2" description="">
   <keyValuePair key="cpu_name" value="Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz" description="" />
-  <keyValuePair key="cpu_speed" value="3434.273 MHz" description="" />
+  <keyValuePair key="cpu_speed" value="3291.106 MHz" description="" />
   <keyValuePair key="os_name" value="Arch" description="" />
   <keyValuePair key="os_release" value="Arch Linux" description="" />
   <keyValuePair key="system_ram" value="16.000 GB" description="" />
@@ -35,7 +35,7 @@
   <section name="usage" level="2" order="2" description="">
    <keyValuePair key="iteration" value="1" description="" />
    <keyValuePair key="runtime" value="4 us" description="" />
-   <keyValuePair key="simulation_memory" value="120460_KB" description="" />
+   <keyValuePair key="simulation_memory" value="120464_KB" description="" />
    <keyValuePair key="simulation_time" value="0.03_sec" description="" />
    <keyValuePair key="trace_waveform" value="true" description="" />
   </section>
