@@ -1,6 +1,6 @@
 // 全局的宏定义
-`define RstEnable       1'b1    // 复位信号有效
-`define RstDisable      1'b0
+`define RstEnable       1'b0    // 复位信号有效
+`define RstDisable      1'b1
 `define ChipEnable      1'b1    // 芯片使能
 `define ChipDisable     1'b0
 `define WriteEnable     1'b1    // 写使能

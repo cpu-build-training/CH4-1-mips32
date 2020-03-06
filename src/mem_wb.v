@@ -44,7 +44,7 @@ module mem_wb(
            reg[`RegBus]     wb_cp0_reg_data,
 
             // DEBUG
-            wire[`RegBus]   wb_current_address,
+           reg[`RegBus]   wb_current_address,
 
            // From CTRL module.
            input wire[5:0]     stall

@@ -37,7 +37,8 @@ always @(posedge clk) begin
     // 而在这里使用 ce 和 非阻塞复制，就是为了产生一个周期的延迟效果。
     // 因为这一个 always 的判断条件，依赖于上一个时钟周期结束时的赋值结果
     if (ce == `ChipDisable) begin
-        pc <= 32'h0;
+        // 如同手册里所写
+        pc <= 32'hbfc00000;
     end else if(flush == 1'b1) begin
         // 输入信号 flush 为 1 表示发生异常，将从 CTRL 模块给出的异常处理
         // 例程入口地址 new_pc 处取指执行

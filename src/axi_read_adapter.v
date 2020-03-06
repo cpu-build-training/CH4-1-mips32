@@ -118,7 +118,8 @@ always @(posedge clk)
       begin
         read_channel_state <= `ReadFree;
         araddr <= 32'b0;
-        arvalid <= 1'b0;
+        arvalid <= `InValid;
+        rready <= `NotReady;
       end
     else if (read_channel_state != `ReadFree
              && rvalid == `Valid)
@@ -147,6 +148,7 @@ always @(posedge clk)
             read_channel_state <= `BusyForIF;
             araddr <= pc;
             arvalid <= `Valid;
+            rready <= inst_read_ready;
           end
         // or remain free
       end

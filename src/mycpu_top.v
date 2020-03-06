@@ -1,9 +1,9 @@
 `include "defines.v"
-module axi_adapter(
+module mycpu_top(
 
          input
-         wire clk,
-         wire reset,
+         wire aclk,
+         wire aresetn,
          wire[5:0] int_i,
          // write address channel signals
          output
@@ -85,7 +85,7 @@ wire          inst_ready;
 wire          mem_data_ready;
 
 axi_write_adapter axi_write_adapter0(
-                    .clk(clk), .reset(reset),
+                    .clk(aclk), .reset(aresetn),
 
                     .awid(awid),
                     .awaddr(awaddr),
@@ -117,8 +117,8 @@ axi_write_adapter axi_write_adapter0(
 
 
 axi_read_adapter axi_read_adapter0(
-                   .clk(clk),
-                   .reset(reset),
+                   .clk(aclk),
+                   .reset(aresetn),
                    .arid(arid),
                    .araddr(araddr),
                    .arlen(arlen),
@@ -151,7 +151,7 @@ axi_read_adapter axi_read_adapter0(
 
 
 openmips openmips0(
-           .clk(clk),.rst(reset),
+           .clk(aclk),.rst(aresetn),
 
            .rom_data_i_le(rom_data),
            .rom_data_valid(inst_valid),
@@ -176,4 +176,4 @@ openmips openmips0(
            .debug_wb_rf_wdata(debug_wb_rf_wdata)
          );
 
-endmodule // axi_adapter
+endmodule
