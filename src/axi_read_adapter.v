@@ -11,38 +11,43 @@ module axi_read_adapter(
          // read address channel signals
          output
          wire[3:0]   arid,
-         reg[31:0]  araddr,
-         wire[3:0]  arlen,
+         reg[31:0]   araddr,
+         wire[3:0]   arlen,
          wire[2:0]   arsize,
          wire[1:0]   arburst,
          wire[1:0]   arlock,
          wire[3:0]   arcache,
          wire[2:0]   arprot,
-         output reg        arvalid,
+         output reg  arvalid,
          input
          wire        arready,
 
          // read data channel signals
          input
-         wire[3:0]    rid,
-         wire[31:0]   rdata,
-         wire[1:0]    rresp,
-         input wire         rlast,
-         wire         rvalid,
+         wire[3:0]      rid,
+         wire[31:0]     rdata,
+         wire[1:0]     rresp,
+         input wire     rlast,
+         wire           rvalid,
          output
-         reg         rready,
+         reg            rready,
 
          // from/to if_pc
 
          input
-         wire[31:0]       pc,
-        input wire             pc_re,
+         wire[31:0]     pc,
+         input wire     pc_re,
+         // 送往 pc, 表示是否该地址已经读取完毕，可以跳转到下一地址
+         // 只存在一个周期。
+         // 由它来控制 pc 的行为
+         output reg    pc_ready,
          // 从 IF 过来的，是否可以接受输入的信号
          wire             inst_read_ready,
          output
          wire[31:0]        inst,
          // 去 IF ，表示数据是否 valid
-         output reg              inst_valid,
+         output reg       inst_valid,
+         output wire[`RegBus]      current_inst_address,
 
          // from/to mem
          input
@@ -97,6 +102,15 @@ assign arprot = 3'b001;
 assign mem_data = rdata;
 assign inst = rdata;
 
+
+assign current_inst_address = current_address;
+
+// 发现因为流水线时序的问题，不得不把 if_id 变成组合逻辑（提前一个时钟周期）
+// 让 pc 增加发生在 arvalid 出现时，不过这样，当数据传递的时候，pc 是下一个时钟周期的
+// 这会影响到后面的执行结果
+// 所以必须保存着当前的 address
+reg[`RegBus] current_address;
+
 // read ready
 // 按照状态，与 IF 或者 MEM 的 valid 信号相接
 
@@ -120,16 +134,25 @@ always @(posedge clk)
         araddr <= 32'b0;
         arvalid <= `InValid;
         rready <= `NotReady;
+        pc_ready <= `NotReady;
+        current_address <= `ZeroWord;
       end
     else if (read_channel_state != `ReadFree
              && rvalid == `Valid)
       begin
         if (read_channel_state == `BusyForIF && inst_read_ready == `Ready)
-          // 在此时数据向 IF 进行了传输，状态归位
-          read_channel_state <= `ReadFree;
+          begin
+            // 在此时数据向 IF 进行了传输，状态归位
+            // $display("read data: %x\n", rdata);
+            read_channel_state <= `ReadFree;
+            pc_ready <= `NotReady;
+            current_address <= `ZeroWord;
+          end
         else if (read_channel_state == `BusyForMEM && mem_data_read_ready == `Ready)
-          // TODO: 判断
-          read_channel_state <= `ReadFree;
+          begin
+            read_channel_state <= `ReadFree;
+            current_address <= `ZeroWord;
+          end
       end
     else if (read_channel_state == `ReadFree)
       begin
@@ -137,10 +160,12 @@ always @(posedge clk)
         if (mem_re == `Valid)
           begin
             // for mem, start to read
+            $display("read channel activated, address = %x", mem_addr);
             read_channel_state <= `BusyForMEM;
             araddr <= mem_addr;
             arvalid <= `Valid;
             rready <= mem_data_read_ready;
+            current_address <= mem_addr;
           end
         else if (pc_re == `Valid)
           begin
@@ -149,6 +174,7 @@ always @(posedge clk)
             araddr <= pc;
             arvalid <= `Valid;
             rready <= inst_read_ready;
+            current_address <= pc;
           end
         // or remain free
       end
@@ -156,10 +182,15 @@ always @(posedge clk)
 
     if (arready == `Ready && read_channel_state != `ReadFree && arvalid == `Valid)
       begin
+        // 如果在某个上升沿，addr ready 了，就停掉 valid
+        pc_ready <= `Ready;
         araddr <= 32'b0;
         arvalid <= `InValid;
       end
-    // 如果在某个上升沿，addr ready 了，就停掉 valid
+    else
+      begin
+        pc_ready <= `NotReady;
+      end
   end
 
 

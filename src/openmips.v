@@ -10,6 +10,8 @@ module openmips(
          output wire             rom_ce_o,
          wire                    inst_ready,
          wire                    mem_data_ready,
+         wire                    pc_ready,
+         input wire[`RegBus]     current_inst_address,
 
 
          input wire[`RegBus]      ram_data_i,
@@ -36,8 +38,9 @@ module openmips(
        );
 // id_pc_i 模块_功能_输入or输出
 
-wire[`RegBus]       rom_data_i = {rom_data_i_le[7:0],rom_data_i_le[15:8],
-                                rom_data_i_le[23:16], rom_data_i_le[31:24]};
+
+// 竟然是大端序
+wire[`RegBus]       rom_data_i = rom_data_i_le;
 // wire[`RegBus]       ram_data_i_be;
 
 
@@ -200,10 +203,22 @@ wire[`RegBus]       cp0_epc_o;
 wire[`RegBus]       cp0_config_o;
 wire[`RegBus]       cp0_prid_o;
 
+
+reg stall_pc;
+always @(*)
+  begin
+    if (rst == `RstEnable)
+      stall_pc = `Stop;
+    else if (pc_ready == `Ready || pc_branch_flag_i == `Branch)
+      stall_pc = `NoStop;
+    else
+      stall_pc = `Stop;
+  end
+
 // pc_reg 实例化
 pc_reg  pc_reg0(
           .clk(clk), .rst(rst), .pc(pc), .ce(rom_ce_o),
-          .stall(stall),
+          .stall(stall_pc),
 
           .branch_flag_i(pc_branch_flag_i),
           .branch_target_address_i(pc_branch_target_address_i),
@@ -221,7 +236,7 @@ assign debug_wb_rf_wnum = wb_wd_i;
 
 // IF/ID 实例化
 if_id if_id0(
-        .clk(clk), .rst(rst), .if_pc(pc),
+        .clk(clk), .rst(rst), .if_pc(current_inst_address),
         .if_inst(rom_data_i), .id_pc(id_pc_i),
         .id_inst(id_inst_i),
         .stall(stall),

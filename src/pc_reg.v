@@ -3,7 +3,7 @@
 
 module pc_reg(
     input wire clk, wire rst,
-    input wire[5:0] stall, // From CTRL mudule
+    input wire stall, // From CTRL mudule
 
     // 来自译码阶段的 ID 模块的信息,
     input wire branch_flag_i,
@@ -43,7 +43,7 @@ always @(posedge clk) begin
         // 输入信号 flush 为 1 表示发生异常，将从 CTRL 模块给出的异常处理
         // 例程入口地址 new_pc 处取指执行
         pc <= new_pc;
-    end else if(stall[0] == `NoStop) begin
+    end else if(stall == `NoStop) begin
         if(branch_flag_i == `Branch) begin
             pc <= branch_target_address_i;
         end else begin

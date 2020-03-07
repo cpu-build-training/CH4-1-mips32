@@ -90,6 +90,7 @@ always @(posedge clk)
     else if(we == `Valid && write_channel_state == `WriteFree)
       begin
         // free -> busy
+        $display("write channel active, addr = %x, data = %x", awaddr,wdata );
         write_channel_state <= `WriteBusy;
         awvalid <= `Valid;
         wvalid <= `Valid;
