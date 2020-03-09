@@ -11,7 +11,7 @@ module axi_read_adapter(
          // read address channel signals
          output
          wire[3:0]   arid,
-         reg[31:0]   araddr,
+         wire[31:0]   araddr,
          wire[3:0]   arlen,
          wire[2:0]   arsize,
          wire[1:0]   arburst,
@@ -42,9 +42,12 @@ module axi_read_adapter(
          // 由它来控制 pc 的行为
          output reg    pc_ready,
          // 从 IF 过来的，是否可以接受输入的信号
-         wire             inst_read_ready,
+         input wire             inst_read_ready,
+         // inst must can remember(store),
+         // when get signal from memory but if_id are not ready to recive,
+         // inst and inst_valid must keep it's value, wait for ready signal
          output
-         wire[31:0]        inst,
+         reg[31:0]        inst,
          // 去 IF ，表示数据是否 valid
          output reg       inst_valid,
          output wire[`RegBus]      current_inst_address,
@@ -56,7 +59,7 @@ module axi_read_adapter(
          wire[31:0]       mem_addr,
          output
          reg              mem_data_valid,
-         wire[31:0]       mem_data
+         reg[31:0]       mem_data
        );
 /////////////////////////////////////////////////////////////
 //
@@ -90,6 +93,8 @@ module axi_read_adapter(
 //     pc 和 mem 有可能同时需要读取数据，根据流水线的推论，需要优先 mem。
 /////////////////////////////////////////////////////////////
 
+reg[`RegBus] unmapped_address;
+
 assign arid = 4'b0;
 assign arlen = 4'b0;
 assign arsize = 3'b010;
@@ -98,10 +103,9 @@ assign arlock = 2'b0;
 assign arcache = 4'b0;
 assign arprot = 3'b001;
 
-// read data
-assign mem_data = rdata;
-assign inst = rdata;
-
+assign araddr =  (unmapped_address[31:29] == 3'b100 ||
+                  unmapped_address[31:29] == 3'b101
+                 )? { 3'b0,unmapped_address[28:0]} : unmapped_address;
 
 assign current_inst_address = current_address;
 
@@ -117,7 +121,6 @@ reg[`RegBus] current_address;
 // end else if ((mem_re && !rvalid) || (mem_we && !wvalid)) begin
 // mem_data_ready <= 1'b0;
 
-
 reg[1:0] read_channel_state;
 
 // 决定 arvalid 的状态和 araddress 的值
@@ -131,29 +134,32 @@ always @(posedge clk)
     if (reset == `RstEnable)
       begin
         read_channel_state <= `ReadFree;
-        araddr <= 32'b0;
+        unmapped_address <= 32'b0;
         arvalid <= `InValid;
-        rready <= `NotReady;
         pc_ready <= `NotReady;
         current_address <= `ZeroWord;
       end
-    else if (read_channel_state != `ReadFree
-             && rvalid == `Valid)
+    else if  (read_channel_state == `BusyForIF)
+      // state: BusyForIF
       begin
-        if (read_channel_state == `BusyForIF && inst_read_ready == `Ready)
+        if (rvalid == `Valid && inst_read_ready == `Ready )
           begin
+
             // 在此时数据向 IF 进行了传输，状态归位
             // $display("read data: %x\n", rdata);
             read_channel_state <= `ReadFree;
-            pc_ready <= `NotReady;
             current_address <= `ZeroWord;
           end
-        else if (read_channel_state == `BusyForMEM && mem_data_read_ready == `Ready)
+      end
+    else if (read_channel_state == `BusyForMEM && mem_data_read_ready == `Ready)
+      begin
+        if (rvalid==`Valid && mem_data_read_ready == `Ready)
           begin
             read_channel_state <= `ReadFree;
             current_address <= `ZeroWord;
           end
       end
+
     else if (read_channel_state == `ReadFree)
       begin
         // 当 free 时
@@ -162,18 +168,16 @@ always @(posedge clk)
             // for mem, start to read
             $display("read channel activated, address = %x", mem_addr);
             read_channel_state <= `BusyForMEM;
-            araddr <= mem_addr;
+            unmapped_address <= mem_addr;
             arvalid <= `Valid;
-            rready <= mem_data_read_ready;
             current_address <= mem_addr;
           end
         else if (pc_re == `Valid)
           begin
             // for if, start to read
             read_channel_state <= `BusyForIF;
-            araddr <= pc;
+            unmapped_address <= pc;
             arvalid <= `Valid;
-            rready <= inst_read_ready;
             current_address <= pc;
           end
         // or remain free
@@ -184,7 +188,7 @@ always @(posedge clk)
       begin
         // 如果在某个上升沿，addr ready 了，就停掉 valid
         pc_ready <= `Ready;
-        araddr <= 32'b0;
+        unmapped_address <= 32'b0;
         arvalid <= `InValid;
       end
     else
@@ -199,15 +203,73 @@ always @(posedge clk)
 always @(*)
   begin
     if (!reset)
-      // 如果需要 reset，所有输出为 0
-      // axi master out buses
-      inst_valid = `InValid;
-    else if (pc_re == `Valid && rvalid == `Valid && read_channel_state == `BusyForIF )
-      // 数据到了
-      inst_valid = `Valid;
+      begin
+        // 如果需要 reset，所有输出为 0
+        // axi master out buses
+        inst_valid = `InValid;
+        inst = `ZeroWord;
+        mem_data = `ZeroWord;
+        mem_data_valid = `InValid;
+      end
+    else if (read_channel_state == `BusyForIF)
+      begin
+        // in this state we should treat inst_valid and inst properly,
+        // otherwise is in `BusyForMem` state
+        if(inst_valid == `Valid && inst_read_ready == `NotReady)
+          begin
+            // should wait for inst_read_ready
+            // we latch
+            inst_valid = inst_valid;
+            inst = inst;
+          end
+        else
+          begin
+            inst_valid = rvalid;
+            inst = rdata;
+          end
+        mem_data = `ZeroWord;
+        mem_data_valid = `InValid;
+      end
+    else if (read_channel_state == `BusyForMEM)
+      begin
+        // in this state we should treat mem_data and mem_data_valid properly,
+        // otherwise is in `BusyForIF` state
+        if(mem_data_valid == `Valid && mem_data_read_ready == `NotReady)
+          begin
+            // should wait for mem_data_read_ready
+            // we latch
+            mem_data_valid = mem_data_valid;
+            mem_data = mem_data;
+          end
+        else
+          begin
+            mem_data = rdata;
+            mem_data_valid = rvalid;
+          end
+
+        inst_valid = `InValid;
+        inst = `ZeroWord;
+      end
     else
-      // 无关状态
-      inst_valid = `InValid;
+      begin
+        // in `Free`
+        inst_valid = `InValid;
+        inst = `ZeroWord;
+        mem_data = `ZeroWord;
+        mem_data_valid = `InValid;
+      end
+    // else if ((rvalid == `Valid && read_channel_state == `BusyForIF )
+    //          ||(read_channel_state == `BusyForIF && inst_read_ready == `NotReady))
+    //   // 有两种可能，一种是 valid 来了，需要保持一致
+    //   //  另一种是 还在等待 if_id ready
+    //   // 数据到了
+    //   begin
+    //     inst_valid = `Valid;
+    //     inst = inst;
+    //   end
+    // else
+    //   // 无关状态
+    //   inst_valid = rvalid;
   end
 
 // 送往 mem 是否 valid
@@ -221,6 +283,27 @@ always @(*)
       mem_data_valid = `Valid;
     else
       mem_data_valid = `InValid;
+  end
+
+// rready
+always @(*)
+  begin
+    if (reset == `RstEnable)
+      begin
+        rready = `NotReady;
+      end
+    else if (read_channel_state == `ReadFree)
+      begin
+        rready = `NotReady;
+      end
+    else if (read_channel_state == `BusyForIF)
+      begin
+        rready = inst_read_ready;
+      end
+    else if (read_channel_state == `BusyForMEM)
+      begin
+        rready = mem_data_read_ready;
+      end
   end
 
 

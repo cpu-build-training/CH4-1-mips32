@@ -115,6 +115,12 @@ assign imm_sll2_signedext = {{14{inst_i[15]}}, inst_i[15:0], 2'b00};
 // inst_o 的值就是译码阶段的指令
 assign inst_o = inst_i;
 assign stallreq = stallreq_for_reg1_loadrelate | stallreq_for_reg2_loadrelate;
+
+// TODO
+// 当读内存可以在一个周期内解决，确实可以通过判断之前的指令来判断是否应该暂停流水线（只暂停一个周期）
+// 但是当读内存的时间不固定以后，此方法失效，必须通过 AXI 或者 mem 给出的信号来判断当前是否有相关问题
+// 只要 mem 没有读完，必须一直暂停流水线
+// 不过也很有意思的是，mem 读的时候本身就暂停了流水线，这个相关问题应该也不存在了
 assign pre_inst_is_load = ((ex_aluop_i == `EXE_LB_OP) ||
                            (ex_aluop_i == `EXE_LBU_OP)||
                            (ex_aluop_i == `EXE_LH_OP) ||

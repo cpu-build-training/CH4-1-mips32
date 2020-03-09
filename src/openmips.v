@@ -10,12 +10,11 @@ module openmips(
          output wire             rom_ce_o,
          wire                    inst_ready,
          wire                    mem_data_ready,
-         wire                    pc_ready,
+         input wire                    pc_ready,
          input wire[`RegBus]     current_inst_address,
-
-
-         input wire[`RegBus]      ram_data_i,
-         input wire                     ram_write_valid,
+         input wire[`RegBus]     ram_data_i,
+         input wire              ram_write_ready,
+         input wire              ram_read_valid,
          output
          wire[`RegBus]     ram_addr_o,
          wire[`RegBus]     ram_data_o,
@@ -107,7 +106,7 @@ wire                ex_is_in_delayslot_o;
 
 
 // 连接 EX/MEM 模块的输出与访存阶段 MEM 模块的输入的变量
-wire[4:0]           mem_wreg_i;
+wire                mem_wreg_i;
 wire[`RegAddrBus]   mem_wd_i;
 wire[`RegBus]       mem_wdata_i;
 wire                mem_whilo_i;
@@ -204,20 +203,24 @@ wire[`RegBus]       cp0_config_o;
 wire[`RegBus]       cp0_prid_o;
 
 
+wire full;
 reg stall_pc;
 always @(*)
   begin
     if (rst == `RstEnable)
       stall_pc = `Stop;
-    else if (pc_ready == `Ready || pc_branch_flag_i == `Branch)
+    else if ((pc_ready == `Ready && !full) || pc_branch_flag_i == `Branch)
       stall_pc = `NoStop;
     else
       stall_pc = `Stop;
   end
 
+wire ce;
+// 我好像一直都在弄错 rom_ce_o 的含义
+assign rom_ce_o = ce & !full;
 // pc_reg 实例化
 pc_reg  pc_reg0(
-          .clk(clk), .rst(rst), .pc(pc), .ce(rom_ce_o),
+          .clk(clk), .rst(rst), .pc(pc), .ce(ce),
           .stall(stall_pc),
 
           .branch_flag_i(pc_branch_flag_i),
@@ -244,7 +247,8 @@ if_id if_id0(
         .inst_valid(rom_data_valid),
         .inst_ready(inst_ready),
         .stallreq_for_if(stallreq_from_if),
-        .flush(flush)
+        .flush(flush),
+        .full(full)
       );
 
 id id0(
@@ -469,8 +473,8 @@ mem mem0(
       // 来自 EX/MEM 模块的信息
       .wd_i(mem_wd_i), .wreg_i(mem_wreg_i),
       .wdata_i(mem_wdata_i),
-      .mem_write_valid(ram_write_valid),
-      .mem_data_i_valid(ram_write_valid),
+      .mem_write_ready(ram_write_ready),
+      .mem_data_i_valid(ram_read_valid),
       .mem_read_ready(mem_data_ready),
       .stallreq_for_mem(stallreq_from_mem),
 

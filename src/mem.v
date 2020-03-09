@@ -6,7 +6,7 @@ module mem(
          // 来自执行阶段的信息
          input
          wire[`RegAddrBus]       wd_i,
-         input wire                    wreg_i,
+         input wire              wreg_i,
          wire[`RegBus]           wdata_i,
 
 
@@ -20,10 +20,12 @@ module mem(
          wire[`RegBus]    reg2_i,
 
          // 来自外部数据存储器 RAM 的信息
+         // 读取的 data 是否 valid
          input wire             mem_data_i_valid,
          wire[`RegBus]    mem_data_i,
          // axi bvalid
-         input wire             mem_write_valid,
+         // 写入是否 ready
+         input wire             mem_write_ready,
 
          // 新增的输入接口
          wire             LLbit_i,
@@ -63,7 +65,7 @@ module mem(
          output reg whilo_o,
          // 送到外部数据存储器 RAM 的信息
          reg[`RegBus]         mem_addr_o,
-         output wire                 mem_read_ready,
+         output wire          mem_read_ready,
          wire                 mem_we_o,
          reg[3:0]             mem_sel_o,
          reg[`RegBus]         mem_data_o,
@@ -109,7 +111,7 @@ assign is_in_delayslot_o = is_in_delayslot_i;
 assign current_inst_address_o = current_inst_address_i;
 
 // 在读写没有完成之前，都要请求暂停
-assign stallreq_for_mem = (mem_re_o && !mem_data_i_valid) || (mem_we_o && mem_write_valid);
+assign stallreq_for_mem = (mem_we_o && !mem_write_ready) || (mem_re_o && !mem_data_i_valid);
 
 // 转化出读使能
 assign mem_re_o = mem_ce_o && !mem_we_o;

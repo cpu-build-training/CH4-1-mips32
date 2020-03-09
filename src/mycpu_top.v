@@ -80,10 +80,11 @@ wire[`RegBus] ram_data_o;
 wire          ram_we;
 wire          ram_re;
 wire[3:0]          ram_sel;
-wire          ram_write_valid;
+wire          ram_write_ready;
 wire          inst_ready;
 wire          mem_data_ready;
 wire          pc_ready;
+wire          ram_read_ready;
 wire[`RegBus] current_inst_address;
 
 axi_write_adapter axi_write_adapter0(
@@ -113,7 +114,7 @@ axi_write_adapter axi_write_adapter0(
                     .we(ram_we),
                     .address(ram_addr),
                     .select(ram_sel),
-                    .mem_write_valid(ram_write_valid)
+                    .mem_write_done(ram_write_ready)
                   );
 
 
@@ -150,7 +151,7 @@ axi_read_adapter axi_read_adapter0(
                    .mem_re(ram_re),
                    .mem_addr(ram_addr),
                    .mem_data_read_ready(mem_data_ready),
-                   .mem_data_valid(ram_write_valid),
+                   .mem_data_valid(ram_read_ready),
                    .mem_data(ram_data_i)
                  );
 
@@ -173,9 +174,11 @@ openmips openmips0(
            .ram_we_o(ram_we),
            .ram_sel_o(ram_sel),
            .ram_re_o(ram_re),
-           .ram_write_valid(ram_write_valid),
-
+           .ram_write_ready(ram_write_ready),
+           .ram_read_valid(ram_read_ready),
            .int_i(int_i),
+           .timer_int_o(),
+           .ram_ce_o(),
 
            .debug_wb_pc(debug_wb_pc),
            .debug_wb_rf_wen(debug_wb_rf_wen),

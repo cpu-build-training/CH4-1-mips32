@@ -199,7 +199,7 @@
 // 与指令存储器 ROM 有关的宏定义
 `define InstAddrBus     31:0    // ROM 的地址总线宽度
 `define InstBus         31:0    // ROM 的数据总线宽度
-`define InstAddrIncrement    4'h4    // PC 自动增加时的大小，这里采用字节寻址
+`define InstAddrIncrement    32'h4    // PC 自动增加时的大小，这里采用字节寻址
 `define InstMemNum      131071      // ROM 的实际大小为 128KB
 `define InstMemNumLog2  17          // ROM 实际使用的地址线宽度
 
@@ -264,4 +264,4 @@
 `define BusyForIF           2'b01
 `define BusyForMEM          2'b10
 `define WriteFree           1'b0
-`define WriteBusy           1'b0
+`define WriteBusy           1'b1

@@ -48,7 +48,7 @@ always @(posedge clk) begin
             pc <= branch_target_address_i;
         end else begin
         //  按照字节寻址
-        pc <= pc + `InstAddrIncrement; // 3'h4?
+        pc <= pc + `InstAddrIncrement;
         end
     end
     // if stall, then pc remain the same
