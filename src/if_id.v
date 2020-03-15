@@ -13,12 +13,19 @@ module if_id(
          // if inst is a valid signal
          input wire inst_valid,
 
+         // if pc is
+
+         // if pc is ready to recive branch signal
+         input wire pc_ready,
+         // if in branch
+         input wire branch_flag,
          output reg[`InstAddrBus] id_pc,
          reg[`InstBus] id_inst,
          // if we need to stall due to axi wait
          output reg             stallreq_for_if,
+         output reg             stallreq_for_ex,
          // if ready to receive inst
-         output reg inst_ready,
+         output wire inst_ready,
          // tell pc don't request because if cannot receive any more.if_inst
          output wire full
        );
@@ -35,14 +42,20 @@ module if_id(
 // id_pc 译码阶段的指令对应的地址
 // id_inst 译码阶段的指令
 
-always @(*)
+// 指令仅在 inst_valid 情况下有意义
+wire[`RegBus] if_pc_filtered;
+wire[`RegBus] if_inst_filtered;
+
+assign if_pc_filtered = inst_valid? if_pc: `ZeroWord;
+assign if_inst_filtered = inst_valid? if_inst: `ZeroWord;
+
+always @(posedge clk)
   begin
     // 只是对数据做了简单的带使能的保存\传递功能
     if (rst == `RstEnable)
       begin
         id_pc <= `ZeroWord;
         id_inst <= `ZeroWord;
-        inst_ready <= `NotReady;
       end
     else if(flush == 1'b1)
       begin
@@ -50,7 +63,14 @@ always @(*)
         // 所以复位 id_pc, id_inst 寄存器的值
         id_pc <= `ZeroWord;
         id_inst <= `ZeroWord;
-        inst_ready <= `NotReady;
+      end
+    else if (stall[1] == `NoStop && pc_ready== `Ready && full == 1'b1 && branch_flag == 1'b1)
+      begin
+        // 这说明此时向后输出的信号是 full 中的，马上 full 的值也要消失了，
+        // id_pc <= saved ? saved_pc : if_pc_filtered;
+        // id_inst <= saved? saved_inst : if_inst_filtered;
+        id_pc <= if_pc_filtered;
+        id_inst <= if_inst_filtered;
       end
     else if(stall[1] == `Stop && stall[2] == `NoStop && inst_valid == `InValid)
       begin
@@ -59,21 +79,30 @@ always @(*)
         // $display("if_inst = %x, valid = %d, stall!", if_inst, inst_valid);
         id_pc <= `ZeroWord;
         id_inst <= `ZeroWord;
-        inst_ready <= `Ready;
+      end
+    else if(stall[1] == `Stop && stall[2] == `Stop && full == 1'b0 && branch_flag == 1'b1 && pc_ready== `Ready)
+      begin
+        id_pc <= if_pc_filtered;
+        id_inst <= if_inst_filtered;
+      end
+    else if(stall[1] == `Stop && stall[2] == `Stop && inst_valid == `Valid && id_inst == `ZeroWord)
+      begin
+
+        id_pc <= if_pc_filtered;
+        id_inst <= if_inst_filtered;
+
       end
     else if(stall[1] ==  `Stop && stall[2] == `NoStop && inst_valid == `Valid && inst_ready == `Ready)
       begin
         //  now if_* have the right value;
-        id_pc <= saved ? saved_pc : if_pc;
-        id_inst <= saved? saved_inst : if_inst;
-        inst_ready <= `Ready;
+        id_pc <= saved ? saved_pc : if_pc_filtered;
+        id_inst <= saved? saved_inst : if_inst_filtered;
       end
     else if(stall[1] == `NoStop)
       begin
         // 这时两个阶段都为继续，正常工作
-        id_pc <= saved ? saved_pc : if_pc;
-        id_inst <= saved? saved_inst : if_inst;
-        inst_ready <= `Ready;
+        id_pc <= saved ? saved_pc : if_pc_filtered;
+        id_inst <= saved? saved_inst : if_inst_filtered;
       end
     else
       begin
@@ -95,14 +124,13 @@ always @(*)
             // 但恐怕目前这种不严格的判断，会导致，如果 id_inst 目前已经有合法的值，这样会被冲刷掉
             // 但其实目前应该可以假设，mem 锁住流水线的时候，id 没有东西
             // 这里是 mem 暂停流水线时的情况
-            id_pc <=if_pc;
-            id_inst <= if_inst;
+            // id_pc <=if_pc_filtered;
+            // id_inst <= if_inst_filtered;
 
           end
         else
           begin
             // 这里要利用好 ready 信号，控制 axi，不要使之转换到 Free 状态
-            inst_ready <= `NotReady;
           end
       end
     // 其余情况下，保持输出不变
@@ -112,36 +140,44 @@ reg last_inst_valid;
 reg[`RegBus] saved_inst;
 reg saved;
 reg[`RegBus] saved_pc;
+assign inst_ready = !full;
 
-always @(posedge clk) begin
-    if(rst == `RstEnable) begin
+always @(posedge clk)
+  begin
+    if(rst == `RstEnable)
+      begin
         saved_inst <= `ZeroWord;
         saved_pc <= `ZeroWord;
         saved <= 1'b0;
-    end
-    else if(stall[1] ==  `Stop && stall[2] == `NoStop && inst_valid == `Valid && inst_ready == `Ready) begin
-        // stop id but not laters
-        saved <= 1'b0;
-    end else if (stall[1] == `NoStop) begin
-        saved <= 1'b0;
-    end else if (stall[1] == `Stop && stall[2] == `Stop && inst_valid == `Valid) begin
+      end
+    else if (stall[1] == `Stop && stall[2] == `Stop && inst_valid == `Valid && id_inst != `ZeroWord)
+      begin
         // 此时应该保存
         saved_inst <= if_inst;
         saved_pc <= if_pc;
         saved <= 1'b1;
-    end
+      end
+    else if (stall[1] == `Stop && stall[2] == `Stop)
+      begin
 
-end
-
-always @(posedge clk) begin
-    if(rst == `RstEnable)
-        last_inst_valid <= `InValid;
+      end
     else
-        last_inst_valid <= inst_valid;
-end
+      saved <= 1'b0;
+
+  end
+
+always @(posedge clk)
+  begin
+    if(rst == `RstEnable)
+      last_inst_valid <= `InValid;
+    else
+      last_inst_valid <= inst_valid;
+  end
 
 assign full = saved;
 
+// 这个信号表示　if_id 没有数据了，将提供空指令
+// if_id 如果收到这个信号，应该保持指令为空
 always @(*)
   begin
     if(rst == `RstEnable)
@@ -150,5 +186,19 @@ always @(*)
       stallreq_for_if <= `NoStop;
     else
       stallreq_for_if <= `Stop;
+
+
   end
+
+
+always @(*)
+  begin
+    if(rst == `RstEnable)
+      stallreq_for_ex <= `NoStop;
+    else if(!branch_flag|| (branch_flag && pc_ready))
+      stallreq_for_ex <= `NoStop;
+    else
+      stallreq_for_ex <= `Stop;
+  end
+
 endmodule // if_id

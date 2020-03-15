@@ -24,6 +24,10 @@ module id_ex(
          wire[`RegBus]    id_current_inst_address,
          wire[31:0]       id_excepttype,
 
+         // fix
+         input wire branch_flag,
+         input wire pc_ready,
+
          // 传到执行阶段的信息
          output
          reg[`AluOpBus]      ex_aluop,
@@ -96,7 +100,7 @@ always @(posedge clk)
         ex_current_inst_address <= `ZeroWord;
         // ??? 为什么少了一项
       end
-    else if(stall[2] == `NoStop)
+    else if(stall[2] == `NoStop || (stall[2] == `Stop && pc_ready == `Ready && branch_flag == 1'b1))
       begin
         ex_aluop <= id_aluop;
         ex_alusel <= id_alusel;

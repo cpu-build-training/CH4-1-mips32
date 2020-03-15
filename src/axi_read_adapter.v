@@ -184,10 +184,17 @@ always @(posedge clk)
       end
     // else remain the same state
 
-    if (arready == `Ready && read_channel_state != `ReadFree && arvalid == `Valid)
+    if (arready == `Ready && read_channel_state == `BusyForIF && arvalid == `Valid)
       begin
-        // 如果在某个上升沿，addr ready 了，就停掉 valid
+        // 如果在某个上升沿，addr ready 了，就停掉 valid，关于 IF
         pc_ready <= `Ready;
+        unmapped_address <= 32'b0;
+        arvalid <= `InValid;
+      end
+    else if
+    (arready == `Ready && read_channel_state == `BusyForMEM && arvalid == `Valid)
+      begin
+        // about MEM
         unmapped_address <= 32'b0;
         arvalid <= `InValid;
       end

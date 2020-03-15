@@ -209,15 +209,17 @@ always @(*)
   begin
     if (rst == `RstEnable)
       stall_pc = `Stop;
-    else if ((pc_ready == `Ready && !full) || pc_branch_flag_i == `Branch)
+    else if ((pc_ready == `Ready))
       stall_pc = `NoStop;
     else
       stall_pc = `Stop;
   end
 
+wire stallreq_from_if_for_ex;
 wire ce;
 // 我好像一直都在弄错 rom_ce_o 的含义
-assign rom_ce_o = ce & !full;
+// 目前这个是 pc_re 的意思，表示 valid
+assign rom_ce_o = ce;
 // pc_reg 实例化
 pc_reg  pc_reg0(
           .clk(clk), .rst(rst), .pc(pc), .ce(ce),
@@ -244,9 +246,12 @@ if_id if_id0(
         .id_inst(id_inst_i),
         .stall(stall),
 
+        .branch_flag(pc_branch_flag_i),
         .inst_valid(rom_data_valid),
         .inst_ready(inst_ready),
+        .pc_ready(!stall_pc),
         .stallreq_for_if(stallreq_from_if),
+        .stallreq_for_ex(stallreq_from_if_for_ex),
         .flush(flush),
         .full(full)
       );
@@ -327,7 +332,11 @@ id_ex id_ex0(
         .id_excepttype(id_excepttype_o),
         .id_current_inst_address(id_current_inst_addr_o),
         .ex_excepttype(ex_excepttype_i),
-        .ex_current_inst_address(ex_current_inst_addr_i)
+        .ex_current_inst_address(ex_current_inst_addr_i),
+
+        // fix
+        .branch_flag(pc_branch_flag_i),
+        .pc_ready(pc_ready)
       );
 
 // EX 实例化
@@ -589,10 +598,12 @@ hilo_reg hilo_reg0(
            .lo_o(hilo_lo_o)
          );
 
+wire stallreq_from_ex_sum = stallreq_from_ex || stallreq_from_if_for_ex;
+
 ctrl ctrl0(
        .rst(rst),
        .stall(stall),
-       .stallreq_from_ex(stallreq_from_ex),
+       .stallreq_from_ex(stallreq_from_ex_sum),
        .stallreq_from_id(stallreq_from_id),
        .stallreq_from_if(stallreq_from_if),
        .stallreq_from_mem(stallreq_from_mem),
