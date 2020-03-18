@@ -337,7 +337,7 @@ always @(*)
               alusel_o = `EXE_RES_JUMP_BRANCH;
               reg1_read_o = `ReadEnable;
               instvalid = `InstValid;
-              if((reg1_o[31] == 1'b1) && (reg1_o == `ZeroWord))
+              if((reg1_o[31] == 1'b1) || (reg1_o == `ZeroWord))
                 begin
                   branch_target_address_o = pc_plus_4 + imm_sll2_signedext;
                   branch_flag_o = `Branch;
@@ -910,6 +910,7 @@ always @(*)
                     aluop_o = `EXE_BGEZAL_OP;
                     alusel_o = `EXE_RES_JUMP_BRANCH;
                     reg1_read_o = `ReadEnable;
+                    instvalid = `InstValid;
                     link_addr_o = pc_plus_8;
                     wd_o = 5'b11111;
                     if(reg1_o[31] == 1'b0)
@@ -921,7 +922,7 @@ always @(*)
                   end
                 `EXE_BLTZ:
                   begin
-                    aluop_o = `EXE_BGEZAL_OP;
+                    aluop_o = `EXE_BLTZ_OP;
                     alusel_o = `EXE_RES_JUMP_BRANCH;
                     reg1_read_o = `ReadEnable;
                     instvalid = `InstValid;
@@ -935,7 +936,7 @@ always @(*)
                 `EXE_BLTZAL:
                   begin
                     wreg_o = `WriteEnable;
-                    aluop_o = `EXE_BGEZAL_OP;
+                    aluop_o = `EXE_BLTZAL_OP;
                     alusel_o = `EXE_RES_JUMP_BRANCH;
                     reg1_read_o = `ReadEnable;
                     link_addr_o = pc_plus_8;
