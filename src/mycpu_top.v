@@ -86,6 +86,7 @@ wire          mem_data_ready;
 wire          pc_ready;
 wire          ram_read_ready;
 wire[`RegBus] current_inst_address;
+wire flush;
 
 axi_write_adapter axi_write_adapter0(
                     .clk(aclk), .reset(aresetn),
@@ -122,6 +123,7 @@ axi_write_adapter axi_write_adapter0(
 axi_read_adapter axi_read_adapter0(
                    .clk(aclk),
                    .reset(aresetn),
+                   .flush(flush),
                    .arid(arid),
                    .araddr(araddr),
                    .arlen(arlen),
@@ -158,6 +160,7 @@ axi_read_adapter axi_read_adapter0(
 
 openmips openmips0(
            .clk(aclk),.rst(aresetn),
+           .flush_o(flush),
 
            .rom_data_i_le(rom_data),
            .rom_data_valid(inst_valid),

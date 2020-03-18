@@ -29,6 +29,9 @@ module openmips(
          // 是否有定时中断发生
          output wire          timer_int_o,
 
+         // flush
+         output wire flush_o,
+
          // debug use
          wire[31:0]      debug_wb_pc,
          wire[3:0]       debug_wb_rf_wen,
@@ -169,6 +172,8 @@ wire                stallreq_from_ex;
 wire                stallreq_from_mem;
 wire[5:0]           stall;
 wire                flush;
+assign flush_o = flush;
+
 wire[`RegBus]       new_pc;
 wire[`RegBus]       ctrl_cp0_epc;
 wire[31:0]          excepttype;

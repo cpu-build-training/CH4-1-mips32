@@ -22,6 +22,9 @@ module axi_read_adapter(
          input
          wire        arready,
 
+         // input
+         input wire  flush,
+
          // read data channel signals
          input
          wire[3:0]      rid,
@@ -95,6 +98,11 @@ module axi_read_adapter(
 
 reg[`RegBus] unmapped_address;
 
+// 因为 CPU flush 的时候，这个模块还在等待读的结果，所以不能很快完成
+// 因此需要记忆住这个指令是需要丢弃的
+// 所以如果 inst_valid 后，这个指令是 flush，并且 Read_for_IF，就传递空指令
+reg have_to_flush;
+
 assign arid = 4'b0;
 assign arlen = 4'b0;
 assign arsize = 3'b010;
@@ -107,7 +115,8 @@ assign araddr =  (unmapped_address[31:29] == 3'b100 ||
                   unmapped_address[31:29] == 3'b101
                  )? { 3'b0,unmapped_address[28:0]} : unmapped_address;
 
-assign current_inst_address = current_address;
+// flush 后取消这个指令
+assign current_inst_address = have_to_flush? `ZeroWord: current_address;
 
 // 发现因为流水线时序的问题，不得不把 if_id 变成组合逻辑（提前一个时钟周期）
 // 让 pc 增加发生在 arvalid 出现时，不过这样，当数据传递的时候，pc 是下一个时钟周期的
@@ -123,7 +132,7 @@ reg[`RegBus] current_address;
 
 reg[1:0] read_channel_state;
 
-// 决定 arvalid 的状态和 araddress 的值
+// 决定 araddress 的值
 // araddress 由 pc 给出
 // 在收到对方的 rready 后，需要变为 invalid
 // 且在数据到来之前，不能重复发送信号
@@ -150,6 +159,12 @@ always @(posedge clk)
             read_channel_state <= `ReadFree;
             current_address <= `ZeroWord;
           end
+        else if (flush == 1'b1) begin
+          // 正在等待读的时候，flush 来了
+          // 改动在后面了
+
+
+        end
       end
     else if (read_channel_state == `BusyForMEM && mem_data_read_ready == `Ready)
       begin
@@ -204,6 +219,16 @@ always @(posedge clk)
       end
   end
 
+// flush
+always @(posedge clk) begin
+  if (reset == `RstEnable ) begin
+    have_to_flush <= 1'b0;
+  end else if (read_channel_state == `ReadFree) begin
+    have_to_flush <= 1'b0;
+  end else if (flush == 1'b1) begin
+    have_to_flush <= 1'b1;
+  end
+end
 
 // 送往 if 是否 valid
 // 将会有可能决定对方流水线暂停与否
@@ -222,7 +247,13 @@ always @(*)
       begin
         // in this state we should treat inst_valid and inst properly,
         // otherwise is in `BusyForMem` state
-        if(inst_valid == `Valid && inst_read_ready == `NotReady)
+        if(have_to_flush==1'b1) begin
+        // flush
+        // 一直持续到本次读结束
+        inst_valid = rvalid;
+        inst = `ZeroWord;
+
+        end else if (inst_valid == `Valid && inst_read_ready == `NotReady)
           begin
             // should wait for inst_read_ready
             // we latch

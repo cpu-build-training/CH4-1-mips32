@@ -44,23 +44,23 @@ always @(*) begin
         case (excepttype_i)
             32'h0000_0001:begin
                 // 中断
-                new_pc = 32'h0000_0020;
+                new_pc = 32'hBFC0_0380;
             end
             32'h000_0008: begin
                 // 系统调用异常 syscall
-                new_pc = 32'h0000_0040;
+                new_pc = 32'hBFC0_0380;
             end
             32'h0000_000a: begin
                 // 无效指令异常
-                new_pc = 32'h0000_0040;
+                new_pc = 32'hBFC0_0380;
             end
             32'h0000_000d: begin
                 // 自陷异常
-                new_pc = 32'h0000_0040;
+                new_pc = 32'hBFC0_0380;
             end
             32'h0000_000c: begin
                 // 溢出异常
-                new_pc = 32'h0000_0040;
+                new_pc = 32'hBFC0_0380;
             end
             32'h0000_000e: begin
                 // 异常返回指令 eret
