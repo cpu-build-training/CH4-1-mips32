@@ -172,7 +172,7 @@
 `define EXE_MFC0_OP         8'b10111010
 `define EXE_MTC0_OP         8'b10111011
 `define EXE_SYSCALL_OP         8'b10001100
-`define EXE_BREAK_OP           8'b10001100
+`define EXE_BREAK_OP           8'b10001101
 `define EXE_TEQ_OP             8'b00110100
 `define EXE_TEQI_OP            8'b10101100
 `define EXE_TGE_OP             8'b10110000

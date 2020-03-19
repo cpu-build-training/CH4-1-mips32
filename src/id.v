@@ -819,7 +819,7 @@ always @(*)
                   end
                 `EXE_BREAK:
                   begin
-                    aluop_o = `EXE_SYSCALL_OP;
+                    aluop_o = `EXE_BREAK_OP;
                     alusel_o = `EXE_RES_NOP;
                     instvalid = `InstValid;
                     excepttype_is_break = `True_v;
