@@ -92,6 +92,7 @@
 `define EXE_LL          6'b110000
 `define EXE_SC          6'b111000
 `define EXE_SYSCALL     6'b001100
+`define EXE_BREAK       6'b001101
 `define EXE_TEQ         6'b110100
 `define EXE_TEQI        5'b01100
 `define EXE_TGE         6'b110000
@@ -171,6 +172,7 @@
 `define EXE_MFC0_OP         8'b10111010
 `define EXE_MTC0_OP         8'b10111011
 `define EXE_SYSCALL_OP         8'b10001100
+`define EXE_BREAK_OP           8'b10001100
 `define EXE_TEQ_OP             8'b00110100
 `define EXE_TEQI_OP            8'b10101100
 `define EXE_TGE_OP             8'b10110000

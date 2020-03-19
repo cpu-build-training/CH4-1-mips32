@@ -50,6 +50,10 @@ always @(*) begin
                 // 系统调用异常 syscall
                 new_pc = 32'hBFC0_0380;
             end
+            32'h0000_0009: begin
+                // 断点异常 break
+                new_pc = 32'hBFC0_0380;
+            end
             32'h0000_000a: begin
                 // 无效指令异常
                 new_pc = 32'hBFC0_0380;
