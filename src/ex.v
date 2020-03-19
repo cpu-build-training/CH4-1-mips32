@@ -134,7 +134,7 @@ reg ovassert;
 
 // 执行阶段输出的异常信息就是译码阶段的异常信息加上自陷异常、溢出异常的信息，
 // 其中第 10bit 表示自陷，11bit 表示溢出
-assign excepttype_o = {excepttype_i[31:12], ovassert, trapassert, excepttype_i[9:8], 8'b0000_0000};
+assign excepttype_o = {excepttype_i[31:12], ovassert, trapassert, excepttype_i[10:8], 7'b0000_000};
 
 // 当前指令是否在延迟槽中
 assign is_in_delayslot_o = is_in_delayslot_i;

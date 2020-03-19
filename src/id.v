@@ -102,6 +102,8 @@ wire pre_inst_is_load;
 reg excepttype_is_syscall;
 // 是否是异常返回指令 eret
 reg excepttype_is_eret;
+// 是否为断点异常 break
+reg excepttype_is_break;
 
 // 保存指令执行需要的立即数
 reg[`RegBus] imm;
@@ -135,7 +137,7 @@ assign pre_inst_is_load = ((ex_aluop_i == `EXE_LB_OP) ||
 // excepttype_o 的低 8bit 留给外部中断，第 8bit 表示是否是 syscall 指令引起的
 // 系统调用异常，第 9bit 表示是否是无效指令引起的异常，第 12bit 表示是否是eret
 // 指令， eret 指令可以认为是一种特殊的异常 -- 返回异常
-assign excepttype_o = {19'b0, excepttype_is_eret, 2'b0, instvalid, excepttype_is_syscall, 8'b0};
+assign excepttype_o = {19'b0, excepttype_is_eret, 1'b0, excepttype_is_break, instvalid, excepttype_is_syscall, 8'b0};
 
 // 输入信号 pc_i 就是当前处于译码阶段的指令的地址
 assign current_inst_address_o = pc_i;
@@ -181,6 +183,7 @@ always @(*)
         next_inst_in_delayslot_o = `NotInDelaySlot;
         excepttype_is_syscall = `False_v;
         excepttype_is_eret = `False_v;
+        excepttype_is_break = `False_v;
         case (op)
           `EXE_ORI:
             begin // if op is ori
@@ -813,6 +816,13 @@ always @(*)
                     alusel_o = `EXE_RES_NOP;
                     instvalid = `InstValid;
                     excepttype_is_syscall = `True_v;
+                  end
+                `EXE_BREAK:
+                  begin
+                    aluop_o = `EXE_BREAK_OP;
+                    alusel_o = `EXE_RES_NOP;
+                    instvalid = `InstValid;
+                    excepttype_is_break = `True_v;
                   end
                 default:
                   begin

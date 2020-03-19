@@ -229,12 +229,17 @@ always @(*)
                 // interrupt
                 excepttype_o = 32'h0000_0001;
               end
-            else if (excepttype_i[8] == 1'b1)
+            else if (excepttype_i[7] == 1'b1)
               begin
                 // syscall
                 excepttype_o = 32'h0000_0008;
               end
             else if (excepttype_i[9] == 1'b1)
+              begin
+                // break
+                excepttype_o = 32'h0000_0009;
+              end  
+            else if (excepttype_i[8] == 1'b1)
               begin
                 // inst_invalid
                 excepttype_o = 32'h0000_000a;

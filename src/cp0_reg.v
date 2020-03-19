@@ -145,6 +145,28 @@ always @(posedge clk)
               // Cause.ExcCode
               cause_o[6:2] <= 5'b01000;
             end
+          32'h0000_0009:
+            begin
+              // 断点异常 break
+              if (status_o[1] == 1'b0)
+                begin
+                  if(is_in_delayslot_i == `InDelaySlot)
+                    begin
+                      epc_o <= current_inst_addr_i - 4;
+                      // Cause 寄存器的 BD 字段
+                      cause_o[31] <= 1'b1;
+                    end
+                  else
+                    begin
+                      epc_o <= current_inst_addr_i;
+                      cause_o[31] <= 1'b0;
+                    end
+
+                end                // Status.EXL
+              status_o[1] <= 1'b1;
+              // Cause.ExcCode
+              cause_o[6:2] <= 5'b01001;
+            end
           32'h0000_000a:
             begin
               // 无效指令
