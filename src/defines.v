@@ -267,3 +267,15 @@
 `define BusyForMEM          2'b10
 `define WriteFree           1'b0
 `define WriteBusy           1'b1
+
+// Exception Related
+// 在mem及之前各类型异常对应的标志位在excepttype中的下标
+`define INTERRUPT_IDX       7:0
+`define SYSCALL_IDX         8
+`define INSTINVALID_IDX     9
+`define BREAK_IDX           10
+`define ERET_IDX            11
+`define TRAP_IDX            12
+`define OVERFLOW_IDX        13
+`define ADEL_IDX            14
+`define ADES_IDX            15
