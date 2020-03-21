@@ -19,10 +19,10 @@ inst_rom.Ss: $(SOURCE)
 	$(V)sed -e 's/#.*//' $< > $@
 
 $(OBJECTS): inst_rom.Ss
-	$(V)$(CC) -EB -mips32 $< -o $(OBJECTS)
+	$(V)$(CC) -mips32 $< -o $(OBJECTS)
 
 inst_rom.om: ram.ld $(OBJECTS)
-	$(V)$(LD) -T ram.ld -EB $(OBJECTS) -o $@
+	$(V)$(LD) -T ram.ld $(OBJECTS) -o $@
 
 inst_rom.bin: inst_rom.om
 	$(V)$(OBJCOPY) --only-section=.text -O verilog $< $@

@@ -1,6 +1,6 @@
 // 全局的宏定义
-`define RstEnable       1'b1    // 复位信号有效
-`define RstDisable      1'b0
+`define RstEnable       1'b0    // 复位信号有效
+`define RstDisable      1'b1
 `define ChipEnable      1'b1    // 芯片使能
 `define ChipDisable     1'b0
 `define WriteEnable     1'b1    // 写使能
@@ -89,6 +89,24 @@
 `define EXE_SW          6'b101011
 `define EXE_SWL         6'b101010
 `define EXE_SWR         6'b101110
+`define EXE_LL          6'b110000
+`define EXE_SC          6'b111000
+`define EXE_SYSCALL     6'b001100
+`define EXE_BREAK       6'b001101
+`define EXE_TEQ         6'b110100
+`define EXE_TEQI        5'b01100
+`define EXE_TGE         6'b110000
+`define EXE_TGEI        5'b01000
+`define EXE_TGEIU       5'b01001
+`define EXE_TGEU        6'b110001
+`define EXE_TLT         6'b110010
+`define EXE_TLTI        5'b01010
+`define EXE_TLTIU       5'b01011
+`define EXE_TLTU        6'b110011
+`define EXE_TNE         6'b110110
+`define EXE_TNEI        5'b01110
+
+`define EXE_ERET        32'b01000010_00000000_00000000_00011000
 
 // AluOp !!! 尽量不要出现重复，比如 ADD & CLZ
 `define EXE_OR_OP       8'b00100101
@@ -149,6 +167,26 @@
 `define EXE_SW_OP           8'b10101011
 `define EXE_SWL_OP          8'b10101010
 `define EXE_SWR_OP         8'b00101110
+`define EXE_LL_OP          8'b00110000
+`define EXE_SC_OP          8'b00111000
+`define EXE_MFC0_OP         8'b10111010
+`define EXE_MTC0_OP         8'b10111011
+`define EXE_SYSCALL_OP         8'b10001100
+`define EXE_BREAK_OP           8'b10001101
+`define EXE_TEQ_OP             8'b00110100
+`define EXE_TEQI_OP            8'b10101100
+`define EXE_TGE_OP             8'b10110000
+`define EXE_TGEI_OP            8'b10101000
+`define EXE_TGEIU_OP           8'b10101001
+`define EXE_TGEU_OP            8'b10110001
+`define EXE_TLT_OP             8'b10110010
+`define EXE_TLTI_OP            8'b11101010
+`define EXE_TLTIU_OP           8'b11101011
+`define EXE_TLTU_OP            8'b10110011
+`define EXE_TNE_OP             8'b10110110
+`define EXE_TNEI_OP            8'b10101110
+`define EXE_ERET_OP            8'b00101111
+
 
 // AluSel
 `define EXE_RES_LOGIC       3'b001
@@ -163,7 +201,7 @@
 // 与指令存储器 ROM 有关的宏定义
 `define InstAddrBus     31:0    // ROM 的地址总线宽度
 `define InstBus         31:0    // ROM 的数据总线宽度
-`define InstAddrIncrement    4'h4    // PC 自动增加时的大小，这里采用字节寻址
+`define InstAddrIncrement    32'h4    // PC 自动增加时的大小，这里采用字节寻址
 `define InstMemNum      131071      // ROM 的实际大小为 128KB
 `define InstMemNumLog2  17          // ROM 实际使用的地址线宽度
 
@@ -198,6 +236,56 @@
 
 `define DataAddrBus     31:0        // 地址总线宽度
 `define DataBus         31:0        // 数据总线宽度
-`define DataMemNum      3 //131071      // RAM 的大小，单位是字，此处是 128K word
+`define DataMemNum      500 //131071      // RAM 的大小，单位是字，此处是 128K word
 `define DataMemNumLog2  17          // 实际使用的地址宽度
 `define ByteWidth       7:0         // 一个字节的宽度，是 8bit
+
+`define CP0_REG_COUNT       5'b01001
+`define CP0_REG_COMPARE     5'b01011
+`define CP0_REG_STATUS      5'b01100
+`define CP0_REG_CAUSE       5'b01101
+`define CP0_REG_EPC         5'b01110
+`define CP0_REG_PRID        5'b01111
+`define CP0_REG_CONFIG      5'b10000
+
+`define InterruptAssert     1'b1
+`define InterruptNotAssert     1'b0
+
+`define TrapAssert          1'b1
+`define TrapNotAssert       1'b0
+
+`define False_v             1'b0
+`define True_v              1'b1
+
+// for axi
+`define Ready               1'b1
+`define NotReady            1'b0
+`define Valid               1'b1
+`define InValid             1'b0
+`define ReadFree            2'b00
+`define BusyForIF           2'b01
+`define BusyForMEM          2'b10
+`define WriteFree           1'b0
+`define WriteBusy           1'b1
+
+// Exception Related
+// 在mem及之前各类型异常对应的标志位在excepttype中的下标
+`define INTERRUPT_IDX       7:0
+`define SYSCALL_IDX         8
+`define INSTINVALID_IDX     9
+`define BREAK_IDX           10
+`define ERET_IDX            11
+`define TRAP_IDX            12
+`define OVERFLOW_IDX        13
+`define ADEL_IDX            14
+`define ADES_IDX            15
+
+`define INTERRUPT_FINAL     32'h0000_0001
+`define SYSCALL_FINAL       32'h0000_0008
+`define INSTINVALID_FINAL   32'h0000_000a
+`define BREAK_FINAL         32'h0000_0009
+`define ERET_FINAL          32'h0000_000e
+`define TRAP_FINAL          32'h0000_000d
+`define OVERFLOW_FINAL      32'h0000_000c
+`define ADEL_FINAL          32'h0000_000f
+`define ADES_FINAL          32'h0000_0010
