@@ -403,7 +403,8 @@ always @(*)
               aluop_o = `EXE_LW_OP;
               alusel_o = `EXE_RES_LOAD_STORE;
               reg1_read_o = `ReadEnable;
-              reg2_read_o = `ReadEnable;
+              // lw 应该不需要读这个
+              // reg2_read_o = `ReadEnable;
               wd_o = inst_i[20:16];
               instvalid = `InstValid;
             end

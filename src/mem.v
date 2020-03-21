@@ -238,7 +238,7 @@ always @(*)
               begin
                 // break
                 excepttype_o = 32'h0000_0009;
-              end  
+              end
             else if (excepttype_i[8] == 1'b1)
               begin
                 // inst_invalid
