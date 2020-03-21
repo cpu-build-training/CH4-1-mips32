@@ -1,6 +1,6 @@
 // 最小 SOPC 实现
 `include "defines.v"
-module openmips_min_spoc(
+module openmips_min_sopc(
     input wire clk,
     wire rst
 );
@@ -18,11 +18,21 @@ wire[`DataBus]          ram_data_i;
 wire                    ram_we_o;
 wire                    ram_ce_o;
 
+wire[3:0]       mem_sel_i;
+wire[5:0]       int;
+wire            timer_int;
+
+assign int = {5'b00000, timer_int};
+
 
 // 实例化 OpenMIPS
 openmips openmips0(
-    .clk(clk), .rst(rst),
-    .rom_addr_o(inst_addr), .rom_data_i(inst),
+    .clk(clk), .rst(rst), 
+    // 时钟中断输入 & 中断输出
+    .int_i(int), .timer_int_o(timer_int),
+
+    .rom_addr_o(inst_addr), 
+    .rom_data_i_le(inst),
     .rom_ce_o(rom_ce),
 
     .ram_data_i(ram_data_i),

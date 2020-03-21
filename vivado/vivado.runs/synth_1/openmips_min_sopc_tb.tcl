@@ -31,8 +31,14 @@ set_property ip_cache_permissions {read write} [current_project]
 read_mem /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/testAsm/inst_rom.data
 read_verilog -library xil_defaultlib {
   /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/defines.v
+  /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/LLbit_reg.v
+  /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/cp0_reg.v
+  /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ctrl.v
+  /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/data_ram.v
+  /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/div.v
   /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ex.v
   /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/ex_mem.v
+  /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/hilo_reg.v
   /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/id.v
   /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/id_ex.v
   /home/fky/code/HDL/VIVADO_PROJECT/CH4-1-mips32/src/if_id.v

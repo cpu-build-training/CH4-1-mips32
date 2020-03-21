@@ -19,7 +19,7 @@ initial begin
 end
 
 // 实例化
-openmips_min_spoc openmips_min_sopc0(
+openmips_min_sopc openmips_min_sopc0(
     .clk(CLOCK_50),
     .rst(rst)
 );

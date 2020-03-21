@@ -2,14 +2,23 @@
 
 
 module pc_reg(
-    input wire clk, wire rst, 
-    wire[5:0] stall, // From CTRL mudule
+    input wire clk, wire rst,
+    input wire stall, // From CTRL mudule
 
     // 来自译码阶段的 ID 模块的信息,
-    wire branch_flag_i,
-    wire[`RegBus] branch_target_address_i,
-    
-    output reg[`InstAddrBus] pc, reg ce
+    input wire branch_flag_i,
+    input wire[`RegBus] branch_target_address_i,
+
+    // 异常处理
+    // 流水线清除信号
+    input wire flush,
+    // 异常处理例程入口地址
+    input wire[`RegBus] new_pc,
+
+    output reg[`InstAddrBus] pc,
+    output reg ce,
+
+    output reg[`RegBus] excepttype_o
 );
 
 always @ (posedge clk) begin
@@ -30,15 +39,26 @@ always @(posedge clk) begin
     // 而在这里使用 ce 和 非阻塞复制，就是为了产生一个周期的延迟效果。
     // 因为这一个 always 的判断条件，依赖于上一个时钟周期结束时的赋值结果
     if (ce == `ChipDisable) begin
-        pc <= 32'h0;
-    end else if(stall[0] == `NoStop) begin
+        // 如同手册里所写
+        pc <= 32'hbfc00000;
+        excepttype_o = 32'b0;
+    end else if(flush == 1'b1) begin
+        // 输入信号 flush 为 1 表示发生异常，将从 CTRL 模块给出的异常处理
+        // 例程入口地址 new_pc 处取指执行
+        pc <= new_pc;
+        if(pc[1:0] != 2'b0)  // 若地址未按字对齐则产生AdEL异常
+            excepttype_o[`ADEL_IDX] = 1'b1;
+    end else if(stall == `NoStop) begin
         if(branch_flag_i == `Branch) begin
             pc <= branch_target_address_i;
         end else begin
-        //  按照字节寻址
-        pc <= pc + `InstAddrIncrement; // 3'h4?
+            //  按照字节寻址
+            pc <= pc + `InstAddrIncrement;
         end
+        if(pc[1:0] != 2'b0)  // 若地址未按字对齐则产生AdEL异常
+            excepttype_o[`ADEL_IDX] = 1'b1;
     end
+    // if stall, then pc remain the same
 end
 
 endmodule // pc_reg
