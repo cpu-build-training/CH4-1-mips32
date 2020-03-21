@@ -279,3 +279,13 @@
 `define OVERFLOW_IDX        13
 `define ADEL_IDX            14
 `define ADES_IDX            15
+
+`define INTERRUPT_FINAL     32'h0000_0001
+`define SYSCALL_FINAL       32'h0000_0008
+`define INSTINVALID_FINAL   32'h0000_000a
+`define BREAK_FINAL         32'h0000_0009
+`define ERET_FINAL          32'h0000_000e
+`define TRAP_FINAL          32'h0000_000d
+`define OVERFLOW_FINAL      32'h0000_000c
+`define ADEL_FINAL          32'h0000_000f
+`define ADES_FINAL          32'h0000_0010

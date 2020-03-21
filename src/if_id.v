@@ -27,7 +27,12 @@ module if_id(
          // if ready to receive inst
          output wire inst_ready,
          // tell pc don't request because if cannot receive any more.if_inst
-         output wire full
+         output wire full,
+
+         // PC传来的异常类型
+         input wire[`RegBus] pc_excepttype,
+         // 传向ID的异常
+         output reg[`RegBus] id_excepttype
        );
 
 

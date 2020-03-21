@@ -254,6 +254,14 @@ always @(*)
                 // ov
                 excepttype_o = 32'h0000_000c;
               end
+            else if(excepttype_i[`ADEL_IDX] == 1'b1)
+              begin
+                excepttype_o = `ADEL_FINAL;
+              end
+            else if(excepttype_i[`ADES_IDX] == 1'b1)
+              begin
+                excepttype_o = `ADES_FINAL;
+              end
             else if (excepttype_i[`ERET_IDX] == 1'b1)
               begin
                 // eret

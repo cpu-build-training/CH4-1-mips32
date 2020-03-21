@@ -66,6 +66,12 @@ always @(*) begin
                 // 溢出异常
                 new_pc = 32'hBFC0_0380;
             end
+            `ADEL_FINAL: begin
+                new_pc = 32'hBFC0_0380;
+            end
+            `ADES_FINAL: begin
+                new_pc = 32'hBFC0_0380;
+            end
             32'h0000_000e: begin
                 // 异常返回指令 eret
                 new_pc = cp0_epc_i;

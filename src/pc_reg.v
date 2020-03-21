@@ -16,7 +16,9 @@ module pc_reg(
     input wire[`RegBus] new_pc,
 
     output reg[`InstAddrBus] pc,
-    output reg ce
+    output reg ce,
+
+    output reg[`RegBus] excepttype_o
 );
 
 always @ (posedge clk) begin
@@ -39,17 +41,22 @@ always @(posedge clk) begin
     if (ce == `ChipDisable) begin
         // 如同手册里所写
         pc <= 32'hbfc00000;
+        excepttype_o = 32'b0;
     end else if(flush == 1'b1) begin
         // 输入信号 flush 为 1 表示发生异常，将从 CTRL 模块给出的异常处理
         // 例程入口地址 new_pc 处取指执行
         pc <= new_pc;
+        if(pc[1:0] != 2'b0)  // 若地址未按字对齐则产生AdEL异常
+            excepttype_o[`ADEL_IDX] = 1'b1;
     end else if(stall == `NoStop) begin
         if(branch_flag_i == `Branch) begin
             pc <= branch_target_address_i;
         end else begin
-        //  按照字节寻址
-        pc <= pc + `InstAddrIncrement;
+            //  按照字节寻址
+            pc <= pc + `InstAddrIncrement;
         end
+        if(pc[1:0] != 2'b0)  // 若地址未按字对齐则产生AdEL异常
+            excepttype_o[`ADEL_IDX] = 1'b1;
     end
     // if stall, then pc remain the same
 end
