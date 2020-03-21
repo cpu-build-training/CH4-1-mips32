@@ -266,6 +266,7 @@ id id0(
 
      // 来自 Regfile 模块的输入
      .reg1_data_i(reg1_data), .reg2_data_i(reg2_data),
+     .excepttype_i(`ZeroWord),
 
      // 送到 regfile 模块的信息
      .reg1_read_o(reg1_read), .reg2_read_o(reg2_read),

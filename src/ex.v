@@ -786,15 +786,36 @@ always @(*)
 // 根据指令类型以及 mem_addr_o 的值，判断是否发生地址未对齐异常
 always @(*)
   begin
-    if((aluop_i == `EXE_LH_OP || aluop_i == `EXE_LHU_OP) && mem_addr_o[0] != 1'b0) begin
-      excepttype_cur_stage[`ADEL_IDX] = 1'b1;
-    end else if(aluop_i == `EXE_LW_OP && mem_addr_o[1:0] != 2'b0) begin
-      excepttype_cur_stage[`ADEL_IDX] = 1'b1;
-    end else if(aluop_i == `EXE_SH_OP && mem_addr_o[0] != 1'b0) begin
-      excepttype_cur_stage[`ADES_IDX] = 1'b1;
-    end else if(aluop_i == `EXE_SW_OP && mem_addr_o[1:0] != 2'b0) begin
-      excepttype_cur_stage[`ADES_IDX] = 1'b1;
-    end
+    if((aluop_i == `EXE_LH_OP || aluop_i == `EXE_LHU_OP) && mem_addr_o[0] != 1'b0)
+      begin
+        excepttype_cur_stage[`ADEL_IDX] = 1'b1;
+      end
+    else if(aluop_i == `EXE_LW_OP && mem_addr_o[1:0] != 2'b0)
+      begin
+        excepttype_cur_stage[`ADEL_IDX] = 1'b1;
+      end
+    else if(aluop_i == `EXE_SH_OP && mem_addr_o[0] != 1'b0)
+      begin
+        excepttype_cur_stage[`ADES_IDX] = 1'b1;
+      end
+    else if(aluop_i == `EXE_SW_OP && mem_addr_o[1:0] != 2'b0)
+      begin
+        excepttype_cur_stage[`ADES_IDX] = 1'b1;
+      end
+    else
+      begin
+        excepttype_cur_stage[`ADES_IDX] = 1'b0;
+        excepttype_cur_stage[`ADEL_IDX] = 1'b0;
+      end
+  end
+
+always@(*)
+  begin
+    if(rst == `RstEnable)
+      begin
+        excepttype_cur_stage = `ZeroWord;
+      end
+
   end
 
 endmodule // ex

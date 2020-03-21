@@ -238,7 +238,7 @@ always @(*)
               begin
                 // break
                 excepttype_o = 32'h0000_0009;
-              end  
+              end
             else if (excepttype_i[`INSTINVALID_IDX] == 1'b1)
               begin
                 // inst_invalid
@@ -298,6 +298,24 @@ always @(*)
         cp0_reg_we_o = `WriteDisable;
         cp0_reg_write_addr_o = 5'b00000;
         cp0_reg_data_o = `ZeroWord;
+      end
+    if (excepttype_i[`ADES_IDX]==1'b1 && excepttype_i[`ADEL_IDX]== 1'b1)
+      begin
+        wd_o = wd_i;
+        wreg_o = wreg_i;
+        wdata_o = wdata_i;
+        hi_o = hi_i;
+        lo_o = lo_i;
+        whilo_o = whilo_i;
+        mem_addr_o = `ZeroWord;
+        mem_we = `WriteDisable;
+        mem_sel_o = 4'b1111;
+        mem_ce_o = `ChipDisable;
+        LLbit_we_o = `WriteDisable;
+        LLbit_value_o = 1'b0;
+        cp0_reg_we_o = cp0_reg_we_i;
+        cp0_reg_write_addr_o = cp0_reg_write_addr_i;
+        cp0_reg_data_o = cp0_reg_data_i;
       end
     else
       begin
