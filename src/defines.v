@@ -247,6 +247,7 @@
 `define CP0_REG_EPC         5'b01110
 `define CP0_REG_PRID        5'b01111
 `define CP0_REG_CONFIG      5'b10000
+`define CP0_REG_BADVADDR    5'b01000
 
 `define InterruptAssert     1'b1
 `define InterruptNotAssert     1'b0
