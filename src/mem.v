@@ -122,7 +122,8 @@ assign mem_read_ready = `Ready;
 
 // 传给cp0,只有在有异常的时候才有用
 // 只有LH,LHU,LW,SH,SW产生地址未对齐异常,而对应的badvaddr就是前面传过来的mem_addr_i
-assign badvaddr_o = mem_addr_i;
+// 如果 pc 有异常，说明是 pc 读取地址错误，需要保存的地址是 pc 中的内容
+assign badvaddr_o = (current_inst_address_i[1:0] == 2'b00)? mem_addr_i:current_inst_address_i;
 
 // 获取 LLbit 寄存器的最新之， 如果回写阶段的指令要写 LLbit，那么回写阶段要写入的
 // 值就是 LLbit 寄存器的最新值，反之， LLbit 模块给出的值 LLbit_i 是最新值

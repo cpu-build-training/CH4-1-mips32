@@ -170,10 +170,9 @@ always @(*)
         branch_flag_o = `NotBranch;
         next_inst_in_delayslot_o = `NotInDelaySlot;
       end
-    else
+    else if (pc_i[1:0] != 2'b00)
       begin
-        // 没有进入 case 的代码相当于设定默认值
-        aluop_o = `EXE_NOP_OP; // ???
+        aluop_o = `EXE_NOP_OP;
         alusel_o = `EXE_RES_NOP;
         wd_o = inst_i[15:11];
         wreg_o = `WriteDisable;
@@ -190,6 +189,29 @@ always @(*)
         excepttype_cur_stage[`SYSCALL_IDX] = `False_v;
         excepttype_cur_stage[`ERET_IDX] = `False_v;
         excepttype_cur_stage[`BREAK_IDX] = `False_v;
+        excepttype_cur_stage[`ADEL_IDX] = `True_v;
+      end
+    else
+      begin
+        // 没有进入 case 的代码相当于设定默认值
+        aluop_o = `EXE_NOP_OP;
+        alusel_o = `EXE_RES_NOP;
+        wd_o = inst_i[15:11];
+        wreg_o = `WriteDisable;
+        instvalid = `InstInvalid;
+        reg1_read_o = `ReadDisable;
+        reg2_read_o = `ReadDisable;
+        reg1_addr_o = inst_i[25:21];
+        reg2_addr_o = inst_i[20:16];
+        imm         = `ZeroWord;
+        link_addr_o = `ZeroWord;
+        branch_target_address_o = `ZeroWord;
+        branch_flag_o = `NotBranch;
+        next_inst_in_delayslot_o = `NotInDelaySlot;
+        excepttype_cur_stage[`SYSCALL_IDX] = `False_v;
+        excepttype_cur_stage[`ERET_IDX] = `False_v;
+        excepttype_cur_stage[`BREAK_IDX] = `False_v;
+        excepttype_cur_stage[`ADEL_IDX] = `False_v;
         case (op)
           `EXE_ORI:
             begin // if op is ori
@@ -320,11 +342,12 @@ always @(*)
               reg1_read_o = `ReadEnable;
               reg2_read_o = `ReadEnable;
               instvalid = `InstValid;
+              // 不管是否跳转都要标明下一条指令是否为延迟槽
+              next_inst_in_delayslot_o = `InDelaySlot;
               if(reg1_o == reg2_o)
                 begin
                   branch_target_address_o = pc_plus_4 + imm_sll2_signedext;
                   branch_flag_o = `Branch;
-                  next_inst_in_delayslot_o = `InDelaySlot;
                 end
             end
           `EXE_BGTZ:
@@ -333,11 +356,12 @@ always @(*)
               alusel_o = `EXE_RES_JUMP_BRANCH;
               reg1_read_o = `ReadEnable;
               instvalid = `InstValid;
+              // 不管是否跳转都要标明下一条指令是否为延迟槽
+              next_inst_in_delayslot_o = `InDelaySlot;
               if((reg1_o[31] == 1'b0) && (reg1_o != `ZeroWord))
                 begin
                   branch_target_address_o = pc_plus_4 + imm_sll2_signedext;
                   branch_flag_o = `Branch;
-                  next_inst_in_delayslot_o = `InDelaySlot;
                 end
             end
           `EXE_BLEZ:
@@ -346,11 +370,12 @@ always @(*)
               alusel_o = `EXE_RES_JUMP_BRANCH;
               reg1_read_o = `ReadEnable;
               instvalid = `InstValid;
+              // 不管是否跳转都要标明下一条指令是否为延迟槽
+              next_inst_in_delayslot_o = `InDelaySlot;
               if((reg1_o[31] == 1'b1) || (reg1_o == `ZeroWord))
                 begin
                   branch_target_address_o = pc_plus_4 + imm_sll2_signedext;
                   branch_flag_o = `Branch;
-                  next_inst_in_delayslot_o = `InDelaySlot;
                 end
             end
           `EXE_BNE:
@@ -360,11 +385,12 @@ always @(*)
               reg1_read_o = `ReadEnable;
               reg2_read_o = `ReadEnable;
               instvalid = `InstValid;
+              // 不管是否跳转都要标明下一条指令是否为延迟槽
+              next_inst_in_delayslot_o = `InDelaySlot;
               if(reg1_o != reg2_o)
                 begin
                   branch_target_address_o = pc_plus_4 + imm_sll2_signedext;
                   branch_flag_o = `Branch;
-                  next_inst_in_delayslot_o = `InDelaySlot;
                 end
             end
           `EXE_LB:
@@ -913,11 +939,11 @@ always @(*)
                     alusel_o = `EXE_RES_JUMP_BRANCH;
                     reg1_read_o = `ReadEnable;
                     instvalid = `InstValid;
+                    next_inst_in_delayslot_o = `InDelaySlot;
                     if(reg1_o[31] == 1'b0)
                       begin
                         branch_target_address_o = pc_plus_4 + imm_sll2_signedext;
                         branch_flag_o = `Branch;
-                        next_inst_in_delayslot_o = `InDelaySlot;
                       end
                   end
                 `EXE_BGEZAL:
@@ -929,11 +955,11 @@ always @(*)
                     instvalid = `InstValid;
                     link_addr_o = pc_plus_8;
                     wd_o = 5'b11111;
+                    next_inst_in_delayslot_o = `InDelaySlot;
                     if(reg1_o[31] == 1'b0)
                       begin
                         branch_target_address_o = pc_plus_4 + imm_sll2_signedext;
                         branch_flag_o = `Branch;
-                        next_inst_in_delayslot_o = `InDelaySlot;
                       end
                   end
                 `EXE_BLTZ:
@@ -942,11 +968,11 @@ always @(*)
                     alusel_o = `EXE_RES_JUMP_BRANCH;
                     reg1_read_o = `ReadEnable;
                     instvalid = `InstValid;
+                    next_inst_in_delayslot_o = `InDelaySlot;
                     if(reg1_o[31] == 1'b1)
                       begin
                         branch_target_address_o = pc_plus_4 + imm_sll2_signedext;
                         branch_flag_o = `Branch;
-                        next_inst_in_delayslot_o = `InDelaySlot;
                       end
                   end
                 `EXE_BLTZAL:
@@ -958,11 +984,11 @@ always @(*)
                     link_addr_o = pc_plus_8;
                     wd_o = 5'b11111;
                     instvalid = `InstValid;
+                    next_inst_in_delayslot_o = `InDelaySlot;
                     if(reg1_o[31] == 1'b1)
                       begin
                         branch_target_address_o = pc_plus_4 + imm_sll2_signedext;
                         branch_flag_o = `Branch;
-                        next_inst_in_delayslot_o = `InDelaySlot;
                       end
                   end
                 `EXE_TEQI:
@@ -1047,7 +1073,7 @@ always @(*)
             instvalid = `InstValid;
             excepttype_cur_stage[`ERET_IDX] = `True_v;
           end
-        
+
         excepttype_cur_stage[`INSTINVALID_IDX] = instvalid;
       end // if
   end // always

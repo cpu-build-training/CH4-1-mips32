@@ -252,6 +252,9 @@ if_id if_id0(
         .id_inst(id_inst_i),
         .stall(stall),
 
+        .id_next_in_delay_slot(id_next_inst_in_delayslot_o),
+        .id_in_delay_slot(id_is_in_delayslot_i),
+
         .branch_flag(pc_branch_flag_i),
         .inst_valid(rom_data_valid),
         .inst_ready(inst_ready),
@@ -330,10 +333,10 @@ id_ex id_ex0(
 
         .id_link_address(id_link_addr_o),
         .id_is_in_delayslot(id_is_in_delayslot_o),
-        .next_inst_in_delayslot_i(id_next_inst_in_delayslot_o),
+        // .next_inst_in_delayslot_i(id_next_inst_in_delayslot_o),
         .ex_is_in_delayslot(ex_is_in_delayslot_i),
         .ex_link_address(ex_link_address_i),
-        .is_in_delayslot_o(id_is_in_delayslot_i),
+        // .is_in_delayslot_o(id_is_in_delayslot_i),
 
         .flush(flush),
         .id_excepttype(id_excepttype_o),

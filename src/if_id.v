@@ -32,7 +32,13 @@ module if_id(
          // PC传来的异常类型
          input wire[`RegBus] pc_excepttype,
          // 传向ID的异常
-         output reg[`RegBus] id_excepttype
+         output reg[`RegBus] id_excepttype,
+
+         // 来自 id
+         input wire id_next_in_delay_slot,
+
+         // 当前指令是否在延迟槽中
+         output reg id_in_delay_slot
        );
 
 
@@ -50,6 +56,8 @@ module if_id(
 // 指令仅在 inst_valid 情况下有意义
 wire[`RegBus] if_pc_filtered;
 wire[`RegBus] if_inst_filtered;
+
+reg in_delay_slot;
 
 assign if_pc_filtered = inst_valid? if_pc: `ZeroWord;
 assign if_inst_filtered = inst_valid? if_inst: `ZeroWord;
@@ -204,6 +212,35 @@ always @(*)
       stallreq_for_ex <= `NoStop;
     else
       stallreq_for_ex <= `Stop;
+  end
+
+always @(posedge clk)
+  begin
+    if (rst == `RstEnable)
+      begin
+        in_delay_slot<=`False_v;
+
+      end
+    else if (id_next_in_delay_slot == 1'b1)
+      begin
+        // 一旦收到了，先保存着，在 valid 以后再释放
+        in_delay_slot <= id_next_in_delay_slot;
+      end
+    else if (inst_valid == `Valid)
+      begin
+        in_delay_slot<=id_next_in_delay_slot;
+
+      end
+    else
+      begin
+
+      end
+
+    // 为了产生一个周期的延迟，和其他数据同步。
+    if(rst == `RstEnable)
+      id_in_delay_slot <= `False_v;
+    else
+      id_in_delay_slot <= (inst_valid == `Valid)? in_delay_slot:`False_v;
   end
 
 endmodule // if_id
