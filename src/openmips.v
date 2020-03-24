@@ -140,6 +140,7 @@ wire[`RegBus]       mem_cp0_reg_data_o;
 // To cp0
 wire                mem_is_in_delayslot_o;
 wire[`RegBus]       mem_current_inst_addr_o;
+wire[`RegBus]       mem_badvaddr_o;
 
 // 连接 MEM/WB 模块的输出与回写阶段的输入的变量
 wire                wb_wreg_i;
@@ -550,7 +551,8 @@ mem mem0(
       .cp0_epc_o(ctrl_cp0_epc),
       .excepttype_o(excepttype),
       .is_in_delayslot_o(mem_is_in_delayslot_o),
-      .current_inst_address_o(mem_current_inst_addr_o)
+      .current_inst_address_o(mem_current_inst_addr_o),
+      .badvaddr_o(mem_badvaddr_o)
     );
 
 // MEM/WB 实例化
@@ -652,8 +654,9 @@ cp0_reg cp0_reg0(
           .data_i(cp0_data_i),
           .waddr_i(cp0_waddr_i),
           .we_i(cp0_we_i),
-
           .raddr_i(cp0_raddr_i),
+
+          .badvaddr_i(mem_badvaddr_o),
 
           .data_o(cp0_data_o),
           .count_o(cp0_count_o),

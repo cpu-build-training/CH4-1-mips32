@@ -10,7 +10,7 @@ module cp0_reg(
          wire[`RegBus] data_i,
          
          // 访存时用的地址,出现异常时要保存到BadVAddr
-         wire[`RegBus] mem_addr_i,
+         wire[`RegBus] badvaddr_i,
 
          wire[5:0]   int_i,
 
@@ -146,7 +146,6 @@ always @(posedge clk)
                       epc_o <= current_inst_addr_i;
                       cause_o[31] <= 1'b0;
                     end
-
                 end                // Status.EXL
               status_o[1] <= 1'b1;
               // Cause.ExcCode
@@ -258,7 +257,7 @@ always @(posedge clk)
               status_o[1] <= 1'b1;
               // Cause.ExcCode
               cause_o[6:2] <= 5'b00100;
-              badvaddr_o <= mem_addr_i;
+              badvaddr_o <= badvaddr_i;
             end
           `ADES_FINAL:
             begin
@@ -278,7 +277,7 @@ always @(posedge clk)
               status_o[1] <= 1'b1;
               // Cause.ExcCode
               cause_o[6:2] <= 5'b00101;
-              badvaddr_o <= mem_addr_i;
+              badvaddr_o <= badvaddr_i;
             end
           32'h0000_000e:
             begin
@@ -331,6 +330,10 @@ always @(*)
           `CP0_REG_CONFIG:
             begin
               data_o = config_o;
+            end
+          `CP0_REG_BADVADDR:
+            begin
+              data_o = badvaddr_o;
             end
           default:
             begin

@@ -69,7 +69,7 @@ module mem(
          wire                 mem_we_o,
          reg[3:0]             mem_sel_o,
          reg[`RegBus]         mem_data_o,
-         output reg                  mem_ce_o,
+         output reg           mem_ce_o,
          wire                 mem_re_o,
 
          // 新增的输出接口
@@ -85,8 +85,9 @@ module mem(
          reg[31:0]       excepttype_o,
          wire[`RegBus]   cp0_epc_o,
          wire[`RegBus]   current_inst_address_o,
-         output wire            is_in_delayslot_o,
-         output wire            stallreq_for_mem
+         output wire     is_in_delayslot_o,
+         output wire     stallreq_for_mem,
+         wire[`RegBus]   badvaddr_o
        );
 wire[`RegBus]   zero32;
 reg             mem_we;
@@ -118,6 +119,10 @@ assign mem_re_o = mem_ce_o && !mem_we_o;
 
 // always ready because it's a logistic module and it never stall by other reason.
 assign mem_read_ready = `Ready;
+
+// 传给cp0,只有在有异常的时候才有用
+// 只有LH,LHU,LW,SH,SW产生地址未对齐异常,而对应的badvaddr就是前面传过来的mem_addr_i
+assign badvaddr_o = mem_addr_i;
 
 // 获取 LLbit 寄存器的最新之， 如果回写阶段的指令要写 LLbit，那么回写阶段要写入的
 // 值就是 LLbit 寄存器的最新值，反之， LLbit 模块给出的值 LLbit_i 是最新值
