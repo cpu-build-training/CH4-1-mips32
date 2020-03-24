@@ -181,7 +181,7 @@ always @(posedge clk)
         if (mem_re == `Valid)
           begin
             // for mem, start to read
-            $display("read channel activated, address = %x", mem_addr);
+            // $display("read channel activated, address = %x", mem_addr);
             read_channel_state <= `BusyForMEM;
             unmapped_address <= mem_addr;
             arvalid <= `Valid;
