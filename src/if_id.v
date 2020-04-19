@@ -175,7 +175,9 @@ always @(posedge clk)
 
       end
     else
-      saved <= 1'b0;
+      begin
+        saved <= 1'b0;
+      end
 
   end
 
@@ -194,11 +196,11 @@ assign full = saved;
 always @(*)
   begin
     if(rst == `RstEnable)
-      stallreq_for_if <= `NoStop;
+      stallreq_for_if = `NoStop;
     else if (inst_valid)
-      stallreq_for_if <= `NoStop;
+      stallreq_for_if = `NoStop;
     else
-      stallreq_for_if <= `Stop;
+      stallreq_for_if = `Stop;
 
 
   end
@@ -207,11 +209,11 @@ always @(*)
 always @(*)
   begin
     if(rst == `RstEnable)
-      stallreq_for_ex <= `NoStop;
+      stallreq_for_ex = `NoStop;
     else if(!branch_flag|| (branch_flag && pc_ready))
-      stallreq_for_ex <= `NoStop;
+      stallreq_for_ex = `NoStop;
     else
-      stallreq_for_ex <= `Stop;
+      stallreq_for_ex = `Stop;
   end
 
 always @(posedge clk)

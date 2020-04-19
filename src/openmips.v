@@ -10,6 +10,7 @@ module openmips(
          output wire             rom_ce_o,
          wire                    inst_ready,
          wire                    mem_data_ready,
+         wire                    mem_addr_read_ready,
          input wire                    pc_ready,
          input wire[`RegBus]     current_inst_address,
          input wire[`RegBus]     ram_data_i,
@@ -527,7 +528,8 @@ mem mem0(
       .mem_sel_o(ram_sel_o),
       .mem_data_o(ram_data_o),
       .mem_ce_o(ram_ce_o),
-      .mem_re_o(ram_re_o),
+      .mem_re_o_filtered(ram_re_o),
+      .mem_addr_read_ready(mem_addr_read_ready),
 
       // cp0
       .cp0_reg_we_i(mem_cp0_reg_we_i),

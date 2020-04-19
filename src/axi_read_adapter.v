@@ -62,7 +62,10 @@ module axi_read_adapter(
          wire[31:0]       mem_addr,
          output
          reg              mem_data_valid,
-         reg[31:0]       mem_data
+         reg[31:0]       mem_data,
+         // 消除锁存器以后，传出的信号延迟了一个周期，导致当读取完毕，状态为 free 时，上一次
+         //  的 mem_re 还没有消除，所以增加这个信号用来告诉 mem 提前把 mem_re 变成 0；
+         output reg      mem_addr_read_ready
        );
 /////////////////////////////////////////////////////////////
 //
@@ -147,6 +150,7 @@ always @(posedge clk)
         arvalid <= `InValid;
         pc_ready <= `NotReady;
         current_address <= `ZeroWord;
+        mem_addr_read_ready <= `NotReady;
       end
     else if  (read_channel_state == `BusyForIF)
       // state: BusyForIF
@@ -157,14 +161,12 @@ always @(posedge clk)
             // 在此时数据向 IF 进行了传输，状态归位
             // $display("read data: %x\n", rdata);
             read_channel_state <= `ReadFree;
-            current_address <= `ZeroWord;
           end
-        else if (flush == 1'b1) begin
-          // 正在等待读的时候，flush 来了
-          // 改动在后面了
-
-
-        end
+        else if (flush == 1'b1)
+          begin
+            // 正在等待读的时候，flush 来了
+            // 改动在后面了
+          end
       end
     else if (read_channel_state == `BusyForMEM && mem_data_read_ready == `Ready)
       begin
@@ -174,7 +176,6 @@ always @(posedge clk)
             current_address <= `ZeroWord;
           end
       end
-
     else if (read_channel_state == `ReadFree)
       begin
         // 当 free 时
@@ -195,7 +196,11 @@ always @(posedge clk)
             arvalid <= `Valid;
             current_address <= pc;
           end
-        // or remain free
+        else
+          begin
+            // or remain free
+            current_address <= `ZeroWord;
+          end
       end
     // else remain the same state
 
@@ -212,27 +217,35 @@ always @(posedge clk)
         // about MEM
         unmapped_address <= 32'b0;
         arvalid <= `InValid;
+        mem_addr_read_ready <= `Ready;
       end
     else
       begin
+        mem_addr_read_ready <= `NotReady;
         pc_ready <= `NotReady;
       end
   end
 
 // flush
-always @(posedge clk) begin
-  if (reset == `RstEnable ) begin
-    have_to_flush <= 1'b0;
-  end else if (read_channel_state == `ReadFree) begin
-    have_to_flush <= 1'b0;
-  end else if (flush == 1'b1) begin
-    have_to_flush <= 1'b1;
+always @(posedge clk)
+  begin
+    if (reset == `RstEnable )
+      begin
+        have_to_flush <= 1'b0;
+      end
+    else if (read_channel_state == `ReadFree)
+      begin
+        have_to_flush <= 1'b0;
+      end
+    else if (flush == 1'b1)
+      begin
+        have_to_flush <= 1'b1;
+      end
   end
-end
 
 // 送往 if 是否 valid
 // 将会有可能决定对方流水线暂停与否
-always @(*)
+always @(posedge clk)
   begin
     if (!reset)
       begin
@@ -247,18 +260,20 @@ always @(*)
       begin
         // in this state we should treat inst_valid and inst properly,
         // otherwise is in `BusyForMem` state
-        if(have_to_flush==1'b1) begin
-        // flush
-        // 一直持续到本次读结束
-        inst_valid = rvalid;
-        inst = `ZeroWord;
+        if(have_to_flush==1'b1)
+          begin
+            // flush
+            // 一直持续到本次读结束
+            inst_valid = rvalid;
+            inst = `ZeroWord;
 
-        end else if (inst_valid == `Valid && inst_read_ready == `NotReady)
+          end
+        else if (inst_valid == `Valid && inst_read_ready == `NotReady)
           begin
             // should wait for inst_read_ready
-            // we latch
-            inst_valid = inst_valid;
-            inst = inst;
+            // inst_valid = inst_valid;
+            // 是这里产生了锁存吗？
+            // inst = inst;
           end
         else
           begin
@@ -276,8 +291,8 @@ always @(*)
           begin
             // should wait for mem_data_read_ready
             // we latch
-            mem_data_valid = mem_data_valid;
-            mem_data = mem_data;
+            // mem_data_valid = mem_data_valid;
+            // mem_data = mem_data;
           end
         else
           begin
@@ -296,6 +311,19 @@ always @(*)
         mem_data = `ZeroWord;
         mem_data_valid = `InValid;
       end
+
+
+    // ! 将语句移到这里是因为出现了多驱动的问题
+    // ! 这里代码有点多余
+    // 送往 mem 是否 valid
+    // 将会有可能决定对方流水线暂停与否
+    if(reset == `RstEnable)
+      mem_data_valid = `InValid;
+    else if (rvalid == `Valid && read_channel_state == `BusyForMEM)
+      // 只有为 MEM 服务且信号正常时，才会 valid
+      mem_data_valid = `Valid;
+    else
+      mem_data_valid = `InValid;
     // else if ((rvalid == `Valid && read_channel_state == `BusyForIF )
     //          ||(read_channel_state == `BusyForIF && inst_read_ready == `NotReady))
     //   // 有两种可能，一种是 valid 来了，需要保持一致
@@ -310,18 +338,10 @@ always @(*)
     //   inst_valid = rvalid;
   end
 
-// 送往 mem 是否 valid
-// 将会有可能决定对方流水线暂停与否
-always @(*)
-  begin
-    if(reset == `RstEnable)
-      mem_data_valid = `InValid;
-    else if (mem_re == `Valid && rvalid == `Valid && read_channel_state == `BusyForMEM)
-      // 只有为 MEM 服务且信号正常时，才会 valid
-      mem_data_valid = `Valid;
-    else
-      mem_data_valid = `InValid;
-  end
+// always @(*)
+// begin
+
+// end
 
 // rready
 always @(*)
