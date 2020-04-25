@@ -309,9 +309,14 @@ always @(*)
         hilo_temp_o = {`ZeroWord, `ZeroWord};
         cnt_o = 2'b00;
         stallreq_for_madd_msub = `NoStop;
+        hilo_temp1 = {`ZeroWord, `ZeroWord};
       end
     else
       begin
+        cnt_o = 2'b00;
+        stallreq_for_madd_msub = `NoStop;
+        hilo_temp_o = {`ZeroWord, `ZeroWord};
+        hilo_temp1 = {`ZeroWord, `ZeroWord};
         case (aluop_i)
           `EXE_MADD_OP, `EXE_MADDU_OP:
             begin
@@ -339,6 +344,7 @@ always @(*)
                   // 执行阶段第一个时钟周期
                   hilo_temp_o = ~mulres + 1;
                   cnt_o = 2'b01;
+                  hilo_temp1 = {`ZeroWord, `ZeroWord};
                   stallreq_for_madd_msub = `Stop;
                 end
               else if(cnt_i == 2'b01)
@@ -352,7 +358,6 @@ always @(*)
             end
           default:
             begin
-
               hilo_temp_o = {`ZeroWord, `ZeroWord};
               cnt_o = 2'b00;
               stallreq_for_madd_msub = `NoStop;
@@ -478,10 +483,13 @@ always @(*)
     if(rst == `RstEnable)
       begin
         moveres = `ZeroWord;
+        cp0_reg_read_addr_o = 5'b00000;
       end
     else
       begin
         moveres = `ZeroWord;
+        // 要从 CP0 中读取的寄存器的地址
+        cp0_reg_read_addr_o = 5'b00000;
         case (aluop_i)
           `EXE_MFHI_OP:
             begin
@@ -611,7 +619,18 @@ always @(*)
           wreg_o = wreg_i;
         end
     endcase
-
+    // 依据指令类型以及 ov_sum 的值，判断是否发生溢出异常，从而给出变量 ovassert 的值
+    if(((aluop_i == `EXE_ADD_OP) || (aluop_i == `EXE_ADDI_OP) ||
+        (aluop_i == `EXE_SUB_OP)) && (ov_sum == 1'b1))
+      begin
+        wreg_o = `WriteDisable;
+        excepttype_cur_stage[`OVERFLOW_IDX] = 1'b1;
+      end
+    else
+      begin
+        wreg_o = wreg_i;
+        excepttype_cur_stage[`OVERFLOW_IDX] = 1'b0;
+      end
     case (alusel_i)
       `EXE_RES_LOGIC:
         begin
@@ -719,74 +738,55 @@ always @(*)
 // 依据上面得到的比较结果，判断是否满足自陷指令的条件，从而给出变量 trapassert 的值
 always @(*)
   begin
+
+    excepttype_cur_stage = `ZeroWord;
+    excepttype_cur_stage[`TRAP_IDX] = `TrapNotAssert;
+
+    case (aluop_i)
+      // teg, teqi
+      `EXE_TEQ_OP, `EXE_TEQI_OP:
+        begin
+          if( reg1_i == reg2_i )
+            begin
+              excepttype_cur_stage[`TRAP_IDX] = `TrapAssert;
+            end
+        end
+      // tge, tgei, tgeiu, tgeu 指令
+      `EXE_TGE_OP, `EXE_TGEI_OP, `EXE_TGEIU_OP, `EXE_TGEU_OP:
+        begin
+          if(~reg1_lt_reg2)
+            begin
+              excepttype_cur_stage[`TRAP_IDX] = `TrapAssert;
+            end
+        end
+      // tlt, tlti, tltiu, tltu
+      `EXE_TLT_OP, `EXE_TLTI_OP, `EXE_TLTIU_OP, `EXE_TLTU_OP:
+        begin
+          if( reg1_lt_reg2 )
+            begin
+              excepttype_cur_stage[`TRAP_IDX] = `TrapAssert;
+            end
+        end
+      // tne, tnei
+      `EXE_TNE_OP, `EXE_TNEI_OP:
+        begin
+          if (reg1_i != reg2_i)
+            begin
+              excepttype_cur_stage[`TRAP_IDX] = `TrapAssert;
+            end
+        end
+      default:
+        begin
+          excepttype_cur_stage[`TRAP_IDX] = `TrapNotAssert;
+        end
+    endcase
+
+    // 根据指令类型以及 mem_addr_o 的值，判断是否发生地址未对齐异常
     if(rst == `RstEnable)
       begin
-        excepttype_cur_stage[`TRAP_IDX] = `TrapNotAssert;
+        excepttype_cur_stage = `ZeroWord;
       end
-    else
-      begin
-        excepttype_cur_stage[`TRAP_IDX] = `TrapNotAssert;
-
-        case (aluop_i)
-          // teg, teqi
-          `EXE_TEQ_OP, `EXE_TEQI_OP:
-            begin
-              if( reg1_i == reg2_i )
-                begin
-                  excepttype_cur_stage[`TRAP_IDX] = `TrapAssert;
-                end
-            end
-          // tge, tgei, tgeiu, tgeu 指令
-          `EXE_TGE_OP, `EXE_TGEI_OP, `EXE_TGEIU_OP, `EXE_TGEU_OP:
-            begin
-              if(~reg1_lt_reg2)
-                begin
-                  excepttype_cur_stage[`TRAP_IDX] = `TrapAssert;
-                end
-            end
-          // tlt, tlti, tltiu, tltu
-          `EXE_TLT_OP, `EXE_TLTI_OP, `EXE_TLTIU_OP, `EXE_TLTU_OP:
-            begin
-              if( reg1_lt_reg2 )
-                begin
-                  excepttype_cur_stage[`TRAP_IDX] = `TrapAssert;
-                end
-            end
-          // tne, tnei
-          `EXE_TNE_OP, `EXE_TNEI_OP:
-            begin
-              if (reg1_i != reg2_i)
-                begin
-                  excepttype_cur_stage[`TRAP_IDX] = `TrapAssert;
-                end
-            end
-          default:
-            begin
-              excepttype_cur_stage[`TRAP_IDX] = `TrapNotAssert;
-            end
-        endcase
-      end
-  end
-
-// 依据指令类型以及 ov_sum 的值，判断是否发生溢出异常，从而给出变量 ovassert 的值
-always @(*)
-  begin
-    if(((aluop_i == `EXE_ADD_OP) || (aluop_i == `EXE_ADDI_OP) ||
-        (aluop_i == `EXE_SUB_OP)) && (ov_sum == 1'b1))
-      begin
-        wreg_o = `WriteDisable;
-        excepttype_cur_stage[`OVERFLOW_IDX] = 1'b1;
-      end
-    else
-      begin
-        wreg_o = wreg_i;
-        excepttype_cur_stage[`OVERFLOW_IDX] = 1'b0;
-      end
-  end
-// 根据指令类型以及 mem_addr_o 的值，判断是否发生地址未对齐异常
-always @(*)
-  begin
-    if((aluop_i == `EXE_LH_OP || aluop_i == `EXE_LHU_OP) && mem_addr_o[0] != 1'b0)
+    else if((aluop_i == `EXE_LH_OP || aluop_i == `EXE_LHU_OP) && mem_addr_o[0] != 1'b0)
       begin
         excepttype_cur_stage[`ADEL_IDX] = 1'b1;
       end
@@ -809,13 +809,9 @@ always @(*)
       end
   end
 
-always@(*)
+
+always @(*)
   begin
-    if(rst == `RstEnable)
-      begin
-        excepttype_cur_stage = `ZeroWord;
-      end
 
   end
-
 endmodule // ex

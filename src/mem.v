@@ -2,6 +2,7 @@
 `include "defines.v"
 
 module mem(
+         input wire clk,
          input wire rst,
          // 来自执行阶段的信息
          input
@@ -23,6 +24,8 @@ module mem(
          // 读取的 data 是否 valid
          input wire             mem_data_i_valid,
          wire[`RegBus]    mem_data_i,
+         // 表示已经不需要再传输 mem_re
+         (*mark_debug="true"*)input wire        mem_addr_read_ready,
          // axi bvalid
          // 写入是否 ready
          input wire             mem_write_ready,
@@ -70,7 +73,7 @@ module mem(
          reg[3:0]             mem_sel_o,
          reg[`RegBus]         mem_data_o,
          output reg           mem_ce_o,
-         wire                 mem_re_o,
+         wire                 mem_re_o_filtered,
 
          // 新增的输出接口
          reg                  LLbit_we_o,
@@ -101,8 +104,11 @@ reg[`RegBus]        cp0_cause;
 // CP0 中 EPC 寄存器的最新值
 reg[`RegBus]        cp0_epc;
 
+(*mark_debug="true"*)wire mem_re_o;
+
 // 外部数据存储器 RAM 的读写信号
-assign mem_we_o = mem_we;
+// 不小心 multi-driver 了
+// assign mem_we_o = mem_we;
 assign zero32 = `ZeroWord;
 
 // 表示访存阶段的指令是否是延迟槽指令
@@ -116,6 +122,42 @@ assign stallreq_for_mem = (mem_we_o && !mem_write_ready) || (mem_re_o && !mem_da
 
 // 转化出读使能
 assign mem_re_o = mem_ce_o && !mem_we_o;
+
+(*mark_debug="true"*)reg no_need_for_mem_re;
+
+assign mem_re_o_filtered = no_need_for_mem_re? `InValid: mem_re_o;
+
+// always @(posedge mem_addr_read_ready or negedge mem_re_o or negedge rst or posedge rst) begin
+//   if (rst == `RstEnable) begin
+//     no_need_for_mem_re = 1'b0;
+//   end else if(mem_re_o == `Valid && mem_addr_read_ready == `Ready) begin
+//   // 刚开始发出信号的时候
+//     no_need_for_mem_re = 1'b1;
+//   end else if(mem_re_o == `InValid)begin
+//   // 已经读到了数据
+//     no_need_for_mem_re = 1'b0;
+//   end
+// end
+always @(posedge clk)
+  begin
+    if( rst == `RstEnable)
+      begin
+        no_need_for_mem_re = `InValid;
+      end
+    else if (mem_addr_read_ready == `Ready && mem_re_o == `Valid)
+      begin
+        no_need_for_mem_re = `Valid;
+      end
+    else if (mem_data_i_valid == `Valid)
+      begin
+        no_need_for_mem_re = `InValid;
+      end
+    else
+      begin
+
+      end
+
+  end
 
 // always ready because it's a logistic module and it never stall by other reason.
 assign mem_read_ready = `Ready;
@@ -201,6 +243,7 @@ always @(*)
     else if((wb_cp0_reg_we == `WriteEnable)&&
             (wb_cp0_reg_write_addr == `CP0_REG_CAUSE))
       begin
+        cp0_cause = `ZeroWord;
         // IP[1:0] 字段是可写的
         cp0_cause[9:8] = wb_cp0_reg_data[9:8];
         // WP 字段
@@ -315,6 +358,7 @@ always @(*)
         whilo_o = whilo_i;
         mem_addr_o = `ZeroWord;
         mem_we = `WriteDisable;
+        mem_data_o = `ZeroWord;
         mem_sel_o = 4'b1111;
         mem_ce_o = `ChipDisable;
         LLbit_we_o = `WriteDisable;
@@ -333,6 +377,7 @@ always @(*)
         whilo_o = whilo_i;
         mem_addr_o = `ZeroWord;
         mem_we = `WriteDisable;
+        mem_data_o = `ZeroWord;
         mem_sel_o = 4'b1111;
         mem_ce_o = `ChipDisable;
         LLbit_we_o = `WriteDisable;

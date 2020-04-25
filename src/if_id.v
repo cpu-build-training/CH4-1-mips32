@@ -3,8 +3,8 @@
 module if_id(
          input wire clk,
          wire rst,
-         wire[`InstAddrBus] if_pc,
-         wire[`InstBus] if_inst,
+         (*mark_debug = "true"*)wire[`InstAddrBus] if_pc,
+         (*mark_debug = "true"*)wire[`InstBus] if_inst,
 
          // CTRL
          input wire flush,
@@ -29,10 +29,6 @@ module if_id(
          // tell pc don't request because if cannot receive any more.if_inst
          output wire full,
 
-         // PC传来的异常类型
-         input wire[`RegBus] pc_excepttype,
-         // 传向ID的异常
-         output reg[`RegBus] id_excepttype,
 
          // 来自 id
          input wire id_next_in_delay_slot,
@@ -121,35 +117,34 @@ always @(posedge clk)
       begin
         // stall[1] == `Stop
 
-        if (last_inst_valid == `Valid)
-          begin
-            // mem 也暂停了流水线，这时候会形成死锁，需要在这里解开对 axi read 的占用
-            // 什么时候存 现在
-            // 怎么存 还需要有信号标识：已经收到了一个值
-            // 什么时候释放 当 stall 结束了
+        // if (last_inst_valid == `Valid)
+        //   begin
+        // mem 也暂停了流水线，这时候会形成死锁，需要在这里解开对 axi read 的占用
+        // 什么时候存 现在
+        // 怎么存 还需要有信号标识：已经收到了一个值
+        // 什么时候释放 当 stall 结束了
 
-            // inst_ready <= `Ready;
+        // inst_ready <= `Ready;
 
 
-          end
-        else if(stall[4:1] == 4'b1111)
-          begin
-            // 但恐怕目前这种不严格的判断，会导致，如果 id_inst 目前已经有合法的值，这样会被冲刷掉
-            // 但其实目前应该可以假设，mem 锁住流水线的时候，id 没有东西
-            // 这里是 mem 暂停流水线时的情况
-            // id_pc <=if_pc_filtered;
-            // id_inst <= if_inst_filtered;
+        // end
+        // else if(stall[4:1] == 4'b1111)
+        // begin
+        // 但恐怕目前这种不严格的判断，会导致，如果 id_inst 目前已经有合法的值，这样会被冲刷掉
+        // 但其实目前应该可以假设，mem 锁住流水线的时候，id 没有东西
+        // 这里是 mem 暂停流水线时的情况
+        // id_pc <=if_pc_filtered;
+        // id_inst <= if_inst_filtered;
 
-          end
-        else
-          begin
-            // 这里要利用好 ready 信号，控制 axi，不要使之转换到 Free 状态
-          end
+        // end
+        // else
+        // begin
+        // 这里要利用好 ready 信号，控制 axi，不要使之转换到 Free 状态
+        // end
       end
     // 其余情况下，保持输出不变
   end
 
-reg last_inst_valid;
 reg[`RegBus] saved_inst;
 reg saved;
 reg[`RegBus] saved_pc;
@@ -175,16 +170,10 @@ always @(posedge clk)
 
       end
     else
-      saved <= 1'b0;
+      begin
+        saved <= 1'b0;
+      end
 
-  end
-
-always @(posedge clk)
-  begin
-    if(rst == `RstEnable)
-      last_inst_valid <= `InValid;
-    else
-      last_inst_valid <= inst_valid;
   end
 
 assign full = saved;
@@ -194,11 +183,11 @@ assign full = saved;
 always @(*)
   begin
     if(rst == `RstEnable)
-      stallreq_for_if <= `NoStop;
+      stallreq_for_if = `NoStop;
     else if (inst_valid)
-      stallreq_for_if <= `NoStop;
+      stallreq_for_if = `NoStop;
     else
-      stallreq_for_if <= `Stop;
+      stallreq_for_if = `Stop;
 
 
   end
@@ -207,11 +196,11 @@ always @(*)
 always @(*)
   begin
     if(rst == `RstEnable)
-      stallreq_for_ex <= `NoStop;
+      stallreq_for_ex = `NoStop;
     else if(!branch_flag|| (branch_flag && pc_ready))
-      stallreq_for_ex <= `NoStop;
+      stallreq_for_ex = `NoStop;
     else
-      stallreq_for_ex <= `Stop;
+      stallreq_for_ex = `Stop;
   end
 
 always @(posedge clk)

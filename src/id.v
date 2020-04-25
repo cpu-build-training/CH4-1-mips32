@@ -169,6 +169,7 @@ always @(*)
         branch_target_address_o = `ZeroWord;
         branch_flag_o = `NotBranch;
         next_inst_in_delayslot_o = `NotInDelaySlot;
+        excepttype_cur_stage = `ZeroWord;
       end
     else if (pc_i[1:0] != 2'b00)
       begin
@@ -186,6 +187,7 @@ always @(*)
         branch_target_address_o = `ZeroWord;
         branch_flag_o = `NotBranch;
         next_inst_in_delayslot_o = `NotInDelaySlot;
+        excepttype_cur_stage = `ZeroWord;
         excepttype_cur_stage[`SYSCALL_IDX] = `False_v;
         excepttype_cur_stage[`ERET_IDX] = `False_v;
         excepttype_cur_stage[`BREAK_IDX] = `False_v;
@@ -208,6 +210,7 @@ always @(*)
         branch_target_address_o = `ZeroWord;
         branch_flag_o = `NotBranch;
         next_inst_in_delayslot_o = `NotInDelaySlot;
+        excepttype_cur_stage = `ZeroWord;
         excepttype_cur_stage[`SYSCALL_IDX] = `False_v;
         excepttype_cur_stage[`ERET_IDX] = `False_v;
         excepttype_cur_stage[`BREAK_IDX] = `False_v;
@@ -1096,6 +1099,7 @@ always @(*)
     else if (pre_inst_is_load == 1'b1 && ex_wd_i == reg1_addr_o && reg1_read_o == `ReadEnable)
       begin
         stallreq_for_reg1_loadrelate = `Stop;
+        reg1_o = `ZeroWord;
       end
     else if((reg1_read_o == 1'b1) && (ex_wreg_i == 1'b1)
             && (ex_wd_i == reg1_addr_o))
@@ -1140,6 +1144,7 @@ always @(*)
     else if(pre_inst_is_load == 1'b1 && ex_wd_i == reg2_addr_o && reg2_read_o == 1'b1)
       begin
         stallreq_for_reg2_loadrelate= `Stop;
+        reg2_o = `ZeroWord;
       end
     else if((reg2_read_o == 1'b1) && (ex_wreg_i == 1'b1)
             && (ex_wd_i == reg2_addr_o))

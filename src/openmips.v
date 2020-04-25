@@ -10,6 +10,7 @@ module openmips(
          output wire             rom_ce_o,
          wire                    inst_ready,
          wire                    mem_data_ready,
+         input wire                    mem_addr_read_ready,
          input wire                    pc_ready,
          input wire[`RegBus]     current_inst_address,
          input wire[`RegBus]     ram_data_i,
@@ -207,6 +208,7 @@ wire[`RegBus]       cp0_cause_o;
 wire[`RegBus]       cp0_epc_o;
 wire[`RegBus]       cp0_config_o;
 wire[`RegBus]       cp0_prid_o;
+wire[`RegBus]       cp0_badvaddr_o;
 
 
 wire full;
@@ -487,6 +489,7 @@ ex_mem ex_mem0(
 
 // MEM 实例化
 mem mem0(
+      .clk(clk),
       .rst(rst),
 
       // 来自 EX/MEM 模块的信息
@@ -527,7 +530,8 @@ mem mem0(
       .mem_sel_o(ram_sel_o),
       .mem_data_o(ram_data_o),
       .mem_ce_o(ram_ce_o),
-      .mem_re_o(ram_re_o),
+      .mem_re_o_filtered(ram_re_o),
+      .mem_addr_read_ready(mem_addr_read_ready),
 
       // cp0
       .cp0_reg_we_i(mem_cp0_reg_we_i),
@@ -669,6 +673,7 @@ cp0_reg cp0_reg0(
           .epc_o(cp0_epc_o),
           .config_o(cp0_config_o),
           .prid_o(cp0_prid_o),
+          .badvaddr_o(cp0_badvaddr_o),
 
           .excepttype_i(excepttype),
           .current_inst_addr_i(mem_current_inst_addr_o),
