@@ -309,9 +309,14 @@ always @(*)
         hilo_temp_o = {`ZeroWord, `ZeroWord};
         cnt_o = 2'b00;
         stallreq_for_madd_msub = `NoStop;
+        hilo_temp1 = {`ZeroWord, `ZeroWord};
       end
     else
       begin
+        cnt_o = 2'b00;
+        stallreq_for_madd_msub = `NoStop;
+        hilo_temp_o = {`ZeroWord, `ZeroWord};
+        hilo_temp1 = {`ZeroWord, `ZeroWord};
         case (aluop_i)
           `EXE_MADD_OP, `EXE_MADDU_OP:
             begin
@@ -339,6 +344,7 @@ always @(*)
                   // 执行阶段第一个时钟周期
                   hilo_temp_o = ~mulres + 1;
                   cnt_o = 2'b01;
+                  hilo_temp1 = {`ZeroWord, `ZeroWord};
                   stallreq_for_madd_msub = `Stop;
                 end
               else if(cnt_i == 2'b01)
@@ -352,7 +358,6 @@ always @(*)
             end
           default:
             begin
-
               hilo_temp_o = {`ZeroWord, `ZeroWord};
               cnt_o = 2'b00;
               stallreq_for_madd_msub = `NoStop;
@@ -478,10 +483,13 @@ always @(*)
     if(rst == `RstEnable)
       begin
         moveres = `ZeroWord;
+        cp0_reg_read_addr_o = 5'b00000;
       end
     else
       begin
         moveres = `ZeroWord;
+        // 要从 CP0 中读取的寄存器的地址
+        cp0_reg_read_addr_o = 5'b00000;
         case (aluop_i)
           `EXE_MFHI_OP:
             begin
@@ -731,6 +739,7 @@ always @(*)
 always @(*)
   begin
 
+    excepttype_cur_stage = `ZeroWord;
     excepttype_cur_stage[`TRAP_IDX] = `TrapNotAssert;
 
     case (aluop_i)

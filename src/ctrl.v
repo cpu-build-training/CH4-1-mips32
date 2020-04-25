@@ -1,11 +1,10 @@
 `include "defines.v"
 module ctrl(
          input wire rst,
-         wire stallreq_from_pc,
          wire stallreq_from_id,
          wire stallreq_from_ex,
-         wire stallreq_from_mem,
-         wire stallreq_from_if,
+         (*mark_debug = "true"*)wire stallreq_from_mem,
+         (*mark_debug = "true"*)wire stallreq_from_if,
          // 来自 MEM
          wire[31:0]   excepttype_i,
          wire[`RegBus]    cp0_epc_i,
@@ -13,7 +12,7 @@ module ctrl(
          output
          reg[`RegBus]     new_pc,
          reg               flush,
-         reg[5:0] stall
+         (*mark_debug="true"*)reg[5:0] stall
        );
 always @(*)
   begin
@@ -27,6 +26,7 @@ always @(*)
       begin
         // 发生异常
         flush = 1'b1;
+        new_pc = `ZeroWord;
         stall = 6'b000000;
         case (excepttype_i)
           32'h0000_0001:
@@ -79,21 +79,27 @@ always @(*)
       end
     else if(stallreq_from_mem == `Stop)
       begin
+        flush = 1'b0;
         stall = 6'b011110;
+        new_pc = `ZeroWord;
       end
     else if(stallreq_from_ex == `Stop)
       begin
         stall = 6'b001110;
         flush = 1'b0;
+        new_pc = `ZeroWord;
       end
     else if(stallreq_from_id == `Stop)
       begin
         stall = 6'b000110;
         flush = 1'b0;
+        new_pc = `ZeroWord;
       end
     else if (stallreq_from_if == `Stop)
       begin
         stall = 6'b000010;
+        flush = 1'b0;
+        new_pc = `ZeroWord;
       end
     else
       begin

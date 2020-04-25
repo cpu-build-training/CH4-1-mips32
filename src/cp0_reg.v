@@ -8,7 +8,7 @@ module cp0_reg(
          wire[4:0] waddr_i,
          wire[4:0] raddr_i,
          wire[`RegBus] data_i,
-         
+
          // 访存时用的地址,出现异常时要保存到BadVAddr
          wire[`RegBus] badvaddr_i,
 
@@ -337,6 +337,7 @@ always @(*)
             end
           default:
             begin
+              data_o = `ZeroWord;
             end
         endcase
       end

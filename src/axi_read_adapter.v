@@ -11,15 +11,15 @@ module axi_read_adapter(
          // read address channel signals
          output
          wire[3:0]   arid,
-         wire[31:0]   araddr,
+         (*mark_debug="true"*)wire[31:0]   araddr,
          wire[3:0]   arlen,
          wire[2:0]   arsize,
          wire[1:0]   arburst,
          wire[1:0]   arlock,
          wire[3:0]   arcache,
          wire[2:0]   arprot,
-         output reg  arvalid,
-         input
+         (*mark_debug="true"*)output reg  arvalid,
+         (*mark_debug="true"*)input
          wire        arready,
 
          // input
@@ -28,11 +28,11 @@ module axi_read_adapter(
          // read data channel signals
          input
          wire[3:0]      rid,
-         wire[31:0]     rdata,
+         (*mark_debug="true"*)wire[31:0]     rdata,
          wire[1:0]     rresp,
          input wire     rlast,
-         wire           rvalid,
-         output
+         (*mark_debug="true"*)wire           rvalid,
+         (*mark_debug="true"*)output
          reg            rready,
 
          // from/to if_pc
@@ -56,16 +56,16 @@ module axi_read_adapter(
          output wire[`RegBus]      current_inst_address,
 
          // from/to mem
-         input
+         (*mark_debug="true"*)input
          wire             mem_re,
-         wire             mem_data_read_ready,
-         wire[31:0]       mem_addr,
+         (*mark_debug="true"*)wire             mem_data_read_ready,
+         (*mark_debug="true"*)wire[31:0]       mem_addr,
          output
          reg              mem_data_valid,
          reg[31:0]       mem_data,
          // 消除锁存器以后，传出的信号延迟了一个周期，导致当读取完毕，状态为 free 时，上一次
          //  的 mem_re 还没有消除，所以增加这个信号用来告诉 mem 提前把 mem_re 变成 0；
-         output reg      mem_addr_read_ready
+         (*mark_debug="true"*)output reg      mem_addr_read_ready
        );
 /////////////////////////////////////////////////////////////
 //
@@ -133,7 +133,7 @@ reg[`RegBus] current_address;
 // end else if ((mem_re && !rvalid) || (mem_we && !wvalid)) begin
 // mem_data_ready <= 1'b0;
 
-reg[1:0] read_channel_state;
+(*mark_debug="true"*)reg[1:0] read_channel_state;
 
 // 决定 araddress 的值
 // araddress 由 pc 给出
@@ -209,6 +209,7 @@ always @(posedge clk)
         // 如果在某个上升沿，addr ready 了，就停掉 valid，关于 IF
         pc_ready <= `Ready;
         unmapped_address <= 32'b0;
+        mem_addr_read_ready <= `NotReady;
         arvalid <= `InValid;
       end
     else if
@@ -362,6 +363,10 @@ always @(*)
       begin
         rready = mem_data_read_ready;
       end
+    else
+    begin
+        rready = `NotReady;
+    end
   end
 
 
