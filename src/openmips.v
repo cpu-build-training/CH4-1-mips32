@@ -10,6 +10,7 @@ module openmips(
          output wire             rom_ce_o,
          wire                    inst_ready,
          wire                    mem_data_ready,
+         input wire                    mem_addr_read_ready,
          input wire                    pc_ready,
          input wire[`RegBus]     current_inst_address,
          input wire[`RegBus]     ram_data_i,
@@ -140,6 +141,7 @@ wire[`RegBus]       mem_cp0_reg_data_o;
 // To cp0
 wire                mem_is_in_delayslot_o;
 wire[`RegBus]       mem_current_inst_addr_o;
+wire[`RegBus]       mem_badvaddr_o;
 
 // 连接 MEM/WB 模块的输出与回写阶段的输入的变量
 wire                wb_wreg_i;
@@ -206,6 +208,7 @@ wire[`RegBus]       cp0_cause_o;
 wire[`RegBus]       cp0_epc_o;
 wire[`RegBus]       cp0_config_o;
 wire[`RegBus]       cp0_prid_o;
+wire[`RegBus]       cp0_badvaddr_o;
 
 
 wire full;
@@ -251,6 +254,9 @@ if_id if_id0(
         .id_inst(id_inst_i),
         .stall(stall),
 
+        .id_next_in_delay_slot(id_next_inst_in_delayslot_o),
+        .id_in_delay_slot(id_is_in_delayslot_i),
+
         .branch_flag(pc_branch_flag_i),
         .inst_valid(rom_data_valid),
         .inst_ready(inst_ready),
@@ -266,6 +272,7 @@ id id0(
 
      // 来自 Regfile 模块的输入
      .reg1_data_i(reg1_data), .reg2_data_i(reg2_data),
+     .excepttype_i(`ZeroWord),
 
      // 送到 regfile 模块的信息
      .reg1_read_o(reg1_read), .reg2_read_o(reg2_read),
@@ -328,10 +335,10 @@ id_ex id_ex0(
 
         .id_link_address(id_link_addr_o),
         .id_is_in_delayslot(id_is_in_delayslot_o),
-        .next_inst_in_delayslot_i(id_next_inst_in_delayslot_o),
+        // .next_inst_in_delayslot_i(id_next_inst_in_delayslot_o),
         .ex_is_in_delayslot(ex_is_in_delayslot_i),
         .ex_link_address(ex_link_address_i),
-        .is_in_delayslot_o(id_is_in_delayslot_i),
+        // .is_in_delayslot_o(id_is_in_delayslot_i),
 
         .flush(flush),
         .id_excepttype(id_excepttype_o),
@@ -482,6 +489,7 @@ ex_mem ex_mem0(
 
 // MEM 实例化
 mem mem0(
+      .clk(clk),
       .rst(rst),
 
       // 来自 EX/MEM 模块的信息
@@ -522,7 +530,8 @@ mem mem0(
       .mem_sel_o(ram_sel_o),
       .mem_data_o(ram_data_o),
       .mem_ce_o(ram_ce_o),
-      .mem_re_o(ram_re_o),
+      .mem_re_o_filtered(ram_re_o),
+      .mem_addr_read_ready(mem_addr_read_ready),
 
       // cp0
       .cp0_reg_we_i(mem_cp0_reg_we_i),
@@ -549,7 +558,8 @@ mem mem0(
       .cp0_epc_o(ctrl_cp0_epc),
       .excepttype_o(excepttype),
       .is_in_delayslot_o(mem_is_in_delayslot_o),
-      .current_inst_address_o(mem_current_inst_addr_o)
+      .current_inst_address_o(mem_current_inst_addr_o),
+      .badvaddr_o(mem_badvaddr_o)
     );
 
 // MEM/WB 实例化
@@ -651,8 +661,9 @@ cp0_reg cp0_reg0(
           .data_i(cp0_data_i),
           .waddr_i(cp0_waddr_i),
           .we_i(cp0_we_i),
-
           .raddr_i(cp0_raddr_i),
+
+          .badvaddr_i(mem_badvaddr_o),
 
           .data_o(cp0_data_o),
           .count_o(cp0_count_o),
@@ -662,6 +673,7 @@ cp0_reg cp0_reg0(
           .epc_o(cp0_epc_o),
           .config_o(cp0_config_o),
           .prid_o(cp0_prid_o),
+          .badvaddr_o(cp0_badvaddr_o),
 
           .excepttype_i(excepttype),
           .current_inst_addr_i(mem_current_inst_addr_o),

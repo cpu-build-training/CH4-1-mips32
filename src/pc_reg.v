@@ -15,7 +15,7 @@ module pc_reg(
     // 异常处理例程入口地址
     input wire[`RegBus] new_pc,
 
-    output reg[`InstAddrBus] pc,
+    (*mark_debug="true"*)output reg[`InstAddrBus] pc,
     output reg ce
 );
 
@@ -47,8 +47,8 @@ always @(posedge clk) begin
         if(branch_flag_i == `Branch) begin
             pc <= branch_target_address_i;
         end else begin
-        //  按照字节寻址
-        pc <= pc + `InstAddrIncrement;
+            //  按照字节寻址
+            pc <= pc + `InstAddrIncrement;
         end
     end
     // if stall, then pc remain the same

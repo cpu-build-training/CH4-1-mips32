@@ -9,6 +9,9 @@ module cp0_reg(
          wire[4:0] raddr_i,
          wire[`RegBus] data_i,
 
+         // 访存时用的地址,出现异常时要保存到BadVAddr
+         wire[`RegBus] badvaddr_i,
+
          wire[5:0]   int_i,
 
          // 异常
@@ -22,6 +25,7 @@ module cp0_reg(
          reg[`RegBus]    compare_o,
          reg[`RegBus]    status_o,
          reg[`RegBus]    cause_o,
+         reg[`RegBus]    badvaddr_o,
          reg[`RegBus]    epc_o,
          reg[`RegBus]    config_o,
          reg[`RegBus]    prid_o,
@@ -47,6 +51,9 @@ always @(posedge clk)
 
         // Cause Register
         cause_o <= `ZeroWord;
+
+        // BadVAddr
+        badvaddr_o <= `ZeroWord;
 
         // EPC Reg
         epc_o <= `ZeroWord;
@@ -139,7 +146,6 @@ always @(posedge clk)
                       epc_o <= current_inst_addr_i;
                       cause_o[31] <= 1'b0;
                     end
-
                 end                // Status.EXL
               status_o[1] <= 1'b1;
               // Cause.ExcCode
@@ -233,6 +239,46 @@ always @(posedge clk)
               // Cause.ExcCode
               cause_o[6:2] <= 5'b01100;
             end
+          `ADEL_FINAL:
+            begin
+              // AdEL  读取地址未对齐
+              if(is_in_delayslot_i == `InDelaySlot)
+                begin
+                  epc_o <= current_inst_addr_i - 4;
+                  // Cause 寄存器的 BD 字段
+                  cause_o[31] <= 1'b1;
+                end
+              else
+                begin
+                  epc_o <= current_inst_addr_i;
+                  cause_o[31] <= 1'b0;
+                end
+              // Status.EXL
+              status_o[1] <= 1'b1;
+              // Cause.ExcCode
+              cause_o[6:2] <= 5'b00100;
+              badvaddr_o <= badvaddr_i;
+            end
+          `ADES_FINAL:
+            begin
+              // 外部中断
+              if(is_in_delayslot_i == `InDelaySlot)
+                begin
+                  epc_o <= current_inst_addr_i - 4;
+                  // Cause 寄存器的 BD 字段
+                  cause_o[31] <= 1'b1;
+                end
+              else
+                begin
+                  epc_o <= current_inst_addr_i;
+                  cause_o[31] <= 1'b0;
+                end
+              // Status.EXL
+              status_o[1] <= 1'b1;
+              // Cause.ExcCode
+              cause_o[6:2] <= 5'b00101;
+              badvaddr_o <= badvaddr_i;
+            end
           32'h0000_000e:
             begin
               // 异常返回指令 eret
@@ -285,8 +331,13 @@ always @(*)
             begin
               data_o = config_o;
             end
+          `CP0_REG_BADVADDR:
+            begin
+              data_o = badvaddr_o;
+            end
           default:
             begin
+              data_o = `ZeroWord;
             end
         endcase
       end

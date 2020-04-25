@@ -247,6 +247,7 @@
 `define CP0_REG_EPC         5'b01110
 `define CP0_REG_PRID        5'b01111
 `define CP0_REG_CONFIG      5'b10000
+`define CP0_REG_BADVADDR    5'b01000
 
 `define InterruptAssert     1'b1
 `define InterruptNotAssert     1'b0
@@ -267,3 +268,25 @@
 `define BusyForMEM          2'b10
 `define WriteFree           1'b0
 `define WriteBusy           1'b1
+
+// Exception Related
+// 在mem及之前各类型异常对应的标志位在excepttype中的下标
+`define INTERRUPT_IDX       7:0
+`define SYSCALL_IDX         8
+`define INSTINVALID_IDX     9
+`define BREAK_IDX           10
+`define ERET_IDX            11
+`define TRAP_IDX            12
+`define OVERFLOW_IDX        13
+`define ADEL_IDX            14
+`define ADES_IDX            15
+
+`define INTERRUPT_FINAL     32'h0000_0001
+`define SYSCALL_FINAL       32'h0000_0008
+`define INSTINVALID_FINAL   32'h0000_000a
+`define BREAK_FINAL         32'h0000_0009
+`define ERET_FINAL          32'h0000_000e
+`define TRAP_FINAL          32'h0000_000d
+`define OVERFLOW_FINAL      32'h0000_000c
+`define ADEL_FINAL          32'h0000_000f
+`define ADES_FINAL          32'h0000_0010
