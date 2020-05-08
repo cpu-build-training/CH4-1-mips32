@@ -19,8 +19,8 @@ reg[5:0]        cnt;    // 记录试商法进行了几轮，当等于 32 时，�
 reg[64:0]       dividend;
 reg[1:0]        state;
 reg[31:0]       divisor;
-reg[31:0]       temp_op1;
-reg[31:0]       temp_op2;
+// reg[31:0]       temp_op1;
+// reg[31:0]       temp_op2;
 
 // dividend 的低 32 位保存的是被除数、中间结果，第 k 次迭代结束的时候 dividend[k:0]
 // 保存的就是当前得到的中间结果，dividend[31:k+1] 保存的就是被除数中还没有参与运算
@@ -36,6 +36,7 @@ always @(posedge clk)
         state <= `DivFree;
         ready_o <= `DivResultNotReady;
         result_o <= {`ZeroWord,`ZeroWord};
+        dividend <= {1'b1, `ZeroWord, `ZeroWord};
       end
     else
       begin
@@ -58,6 +59,7 @@ always @(posedge clk)
                       // 准备进行第一次迭代
                       state <= `DivOn;
                       cnt <= 6'b0;
+                      dividend <= {`ZeroWord, `ZeroWord, 1'b0};
                       if(signed_div_i == 1'b1 && opdata1_i[31] == 1'b1)
                         begin
                           dividend[32:1] <= ~opdata1_i + 1;
@@ -74,7 +76,7 @@ always @(posedge clk)
                         begin
                           divisor <= opdata2_i;
                         end
-                      dividend <= {`ZeroWord, `ZeroWord, 1'b0};
+
                     end
 
 

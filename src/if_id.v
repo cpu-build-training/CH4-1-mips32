@@ -11,7 +11,7 @@ module if_id(
          input wire[5:0] stall, // From CTRL module.
 
          // if inst is a valid signal
-         input wire inst_valid,
+         (*mark_debug = "true"*)input wire inst_valid,
 
          // if pc is
 
@@ -19,8 +19,8 @@ module if_id(
          input wire pc_ready,
          // if in branch
          input wire branch_flag,
-         output reg[`InstAddrBus] id_pc,
-         reg[`InstBus] id_inst,
+         (*mark_debug = "true"*)output reg[`InstAddrBus] id_pc,
+         (*mark_debug = "true"*)reg[`InstBus] id_inst,
          // if we need to stall due to axi wait
          output reg             stallreq_for_if,
          output reg             stallreq_for_ex,
@@ -65,6 +65,8 @@ always @(posedge clk)
       begin
         id_pc <= `ZeroWord;
         id_inst <= `ZeroWord;
+        saved_inst <= `ZeroWord;
+        saved_pc <= `ZeroWord;
       end
     else if(flush == 1'b1)
       begin
@@ -94,11 +96,11 @@ always @(posedge clk)
         id_pc <= if_pc_filtered;
         id_inst <= if_inst_filtered;
       end
-    else if(stall[1] == `Stop && stall[2] == `Stop && inst_valid == `Valid && id_inst == `ZeroWord)
+    else if(stall[1] == `Stop && stall[2] == `Stop && inst_valid == `Valid)
       begin
 
-        id_pc <= if_pc_filtered;
-        id_inst <= if_inst_filtered;
+        saved_pc <= if_pc_filtered;
+        saved_inst <= if_inst_filtered;
 
       end
     else if(stall[1] ==  `Stop && stall[2] == `NoStop && inst_valid == `Valid && inst_ready == `Ready)
@@ -146,23 +148,19 @@ always @(posedge clk)
   end
 
 reg[`RegBus] saved_inst;
-reg saved;
+(*mark_debug="True"*)reg saved;
 reg[`RegBus] saved_pc;
-assign inst_ready = !full;
+assign inst_ready = !full && stall[1] != 1'b1 && stall[2] != 1'b1;
 
 always @(posedge clk)
   begin
     if(rst == `RstEnable)
       begin
-        saved_inst <= `ZeroWord;
-        saved_pc <= `ZeroWord;
         saved <= 1'b0;
       end
-    else if (stall[1] == `Stop && stall[2] == `Stop && inst_valid == `Valid && id_inst != `ZeroWord)
+    else if (stall[1] == `Stop && stall[2] == `Stop && inst_valid == `Valid)
       begin
         // 此时应该保存
-        saved_inst <= if_inst;
-        saved_pc <= if_pc;
         saved <= 1'b1;
       end
     else if (stall[1] == `Stop && stall[2] == `Stop)
@@ -182,12 +180,12 @@ assign full = saved;
 // if_id 如果收到这个信号，应该保持指令为空
 always @(*)
   begin
-    if(rst == `RstEnable)
+    // if(rst == `RstEnable)
       stallreq_for_if = `NoStop;
-    else if (inst_valid)
-      stallreq_for_if = `NoStop;
-    else
-      stallreq_for_if = `Stop;
+//     else if (inst_valid)
+//       stallreq_for_if = `NoStop;
+//     else
+//       stallreq_for_if = `Stop;
 
 
   end
@@ -199,8 +197,10 @@ always @(*)
       stallreq_for_ex = `NoStop;
     else if(!branch_flag|| (branch_flag && pc_ready))
       stallreq_for_ex = `NoStop;
-    else
+    else if(branch_flag)
       stallreq_for_ex = `Stop;
+    else
+      stallreq_for_ex = `NoStop;
   end
 
 always @(posedge clk)
