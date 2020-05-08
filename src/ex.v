@@ -152,6 +152,8 @@ assign aluop_o = aluop_i;
 // mem_addr_o 会传递到访存阶段，是加载、存储指令对应的存储器地址，此处的 reg1_i
 // 就是加载、存储指令中地址为 base 的通用寄存器的值，inst_i[15:0] 就是指令中的
 // offset。通过 mem_addr_o 的计算，读者也可以明白为何要在译码阶段 ID 模块新增输出接口 inst_o
+
+// 计算完成后，还需要检查地址是否按照要求对齐，否则要抛出异常。
 assign mem_addr_o = reg1_i + {{16{inst_i[15]}},inst_i[15:0]};
 
 // reg2_i 是存储指令要存储的数据，或者 lwl\lwr 指令要加载到的目的寄存器的原始值，
