@@ -17,7 +17,7 @@ module mem(
 
          // 来自执行阶段的信息
          wire[`AluOpBus]  aluop_i,
-         wire[`RegBus]    mem_addr_i,
+        (*mark_debug = "true"*)wire[`RegBus]    mem_addr_i,
          wire[`RegBus]    reg2_i,
 
          // 来自外部数据存储器 RAM 的信息
@@ -25,7 +25,7 @@ module mem(
          input wire             mem_data_i_valid,
          wire[`RegBus]    mem_data_i,
          // 表示已经不需要再传输 mem_re
-         (*mark_debug="true"*)input wire        mem_addr_read_ready,
+         input wire        mem_addr_read_ready,
          // axi bvalid
          // 写入是否 ready
          input wire             mem_write_ready,
@@ -44,7 +44,7 @@ module mem(
          // 来自执行阶段
          wire[31:0]           excepttype_i,
          input wire                 is_in_delayslot_i,
-         wire[`RegBus]       current_inst_address_i,
+         (*mark_debug = "true"*)wire[`RegBus]       current_inst_address_i,
 
          // 来自 CP0 模块
          wire[`RegBus]        cp0_status_i,
@@ -69,11 +69,11 @@ module mem(
          // 送到外部数据存储器 RAM 的信息
          reg[`RegBus]         mem_addr_o,
          output wire          mem_read_ready,
-         wire                 mem_we_o,
+         (*mark_debug = "true"*)wire                 mem_we_o,
          reg[3:0]             mem_sel_o,
          reg[`RegBus]         mem_data_o,
-         output reg           mem_ce_o,
-         wire                 mem_re_o_filtered,
+         (*mark_debug = "true"*)output reg           mem_ce_o,
+         (*mark_debug = "true"*)wire                 mem_re_o_filtered,
 
          // 新增的输出接口
          reg                  LLbit_we_o,
@@ -89,7 +89,7 @@ module mem(
          wire[`RegBus]   cp0_epc_o,
          wire[`RegBus]   current_inst_address_o,
          output wire     is_in_delayslot_o,
-         output wire     stallreq_for_mem,
+         (*mark_debug = "true"*)output wire     stallreq_for_mem,
          wire[`RegBus]   badvaddr_o
        );
 wire[`RegBus]   zero32;
@@ -123,7 +123,7 @@ assign stallreq_for_mem = (mem_we_o && !mem_write_ready) || (mem_re_o && !mem_da
 // 转化出读使能
 assign mem_re_o = mem_ce_o && !mem_we_o;
 
-(*mark_debug="true"*)reg no_need_for_mem_re;
+(*mark_debug = "true"*)reg no_need_for_mem_re;
 
 assign mem_re_o_filtered = no_need_for_mem_re? `InValid: mem_re_o;
 

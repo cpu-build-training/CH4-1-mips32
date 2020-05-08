@@ -11,15 +11,15 @@ module axi_read_adapter(
          // read address channel signals
          output
          wire[3:0]   arid,
-         (*mark_debug="true"*)wire[31:0]   araddr,
+         wire[31:0]   araddr,
          wire[3:0]   arlen,
          wire[2:0]   arsize,
          wire[1:0]   arburst,
          wire[1:0]   arlock,
          wire[3:0]   arcache,
          wire[2:0]   arprot,
-         (*mark_debug="true"*)output reg  arvalid,
-         (*mark_debug="true"*)input
+         output reg  arvalid,
+         input
          wire        arready,
 
          // input
@@ -28,11 +28,11 @@ module axi_read_adapter(
          // read data channel signals
          input
          wire[3:0]      rid,
-         (*mark_debug="true"*)wire[31:0]     rdata,
+         wire[31:0]     rdata,
          wire[1:0]     rresp,
          input wire     rlast,
-         (*mark_debug="true"*)wire           rvalid,
-         (*mark_debug="true"*)output
+         wire           rvalid,
+         output
          reg            rready,
 
          // from/to if_pc
@@ -40,6 +40,8 @@ module axi_read_adapter(
          input
          wire[31:0]     pc,
          input wire     pc_re,
+         // 缓冲区是否满了
+         input wire     if_id_full,
          // 送往 pc, 表示是否该地址已经读取完毕，可以跳转到下一地址
          // 只存在一个周期。
          // 由它来控制 pc 的行为
@@ -54,18 +56,19 @@ module axi_read_adapter(
          // 去 IF ，表示数据是否 valid
          output reg       inst_valid,
          output wire[`RegBus]      current_inst_address,
+         output wire[1:0] axi_read_state,
 
          // from/to mem
-         (*mark_debug="true"*)input
+         input
          wire             mem_re,
-         (*mark_debug="true"*)wire             mem_data_read_ready,
-         (*mark_debug="true"*)wire[31:0]       mem_addr,
-         output
+         wire             mem_data_read_ready,
+         wire[31:0]       mem_addr,
+         (*mark_debug = "true"*)output
          reg              mem_data_valid,
-         reg[31:0]       mem_data,
+         (*mark_debug = "true"*)reg[31:0]       mem_data,
          // 消除锁存器以后，传出的信号延迟了一个周期，导致当读取完毕，状态为 free 时，上一次
          //  的 mem_re 还没有消除，所以增加这个信号用来告诉 mem 提前把 mem_re 变成 0；
-         (*mark_debug="true"*)output reg      mem_addr_read_ready
+         (*mark_debug = "true"*)output reg      mem_addr_read_ready
        );
 /////////////////////////////////////////////////////////////
 //
@@ -135,6 +138,8 @@ reg[`RegBus] current_address;
 
 (*mark_debug="true"*)reg[1:0] read_channel_state;
 
+assign axi_read_state = read_channel_state;
+
 // 决定 araddress 的值
 // araddress 由 pc 给出
 // 在收到对方的 rready 后，需要变为 invalid
@@ -155,7 +160,8 @@ always @(posedge clk)
     else if  (read_channel_state == `BusyForIF)
       // state: BusyForIF
       begin
-        if (rvalid == `Valid && inst_read_ready == `Ready )
+        // if (rvalid && rready)
+        if (rvalid == `Valid && inst_read_ready == `Ready  )
           begin
 
             // 在此时数据向 IF 进行了传输，状态归位
@@ -188,7 +194,7 @@ always @(posedge clk)
             arvalid <= `Valid;
             current_address <= mem_addr;
           end
-        else if (pc_re == `Valid)
+        else if (pc_re == `Valid && if_id_full == 1'b0)
           begin
             // for if, start to read
             read_channel_state <= `BusyForIF;
@@ -278,7 +284,7 @@ always @(posedge clk)
           end
         else
           begin
-            inst_valid = rvalid;
+            inst_valid = rvalid && rready;
             inst = rdata;
           end
         mem_data = `ZeroWord;

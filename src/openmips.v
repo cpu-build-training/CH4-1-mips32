@@ -4,6 +4,7 @@ module openmips(
          input
          wire  clk,  rst,
 
+         input wire[1:0]         axi_read_state,
          input wire[`RegBus]     rom_data_i_le,
          input wire              rom_data_valid,
          output  wire[`RegBus]   rom_addr_o,
@@ -21,6 +22,7 @@ module openmips(
          wire[`RegBus]     ram_data_o,
 
          output wire                ram_we_o,
+         output wire          full,
          wire[3:0]           ram_sel_o,
          output wire                ram_ce_o,
          wire                ram_re_o,
@@ -34,10 +36,10 @@ module openmips(
          output wire flush_o,
 
          // debug use
-         wire[31:0]      debug_wb_pc,
-         wire[3:0]       debug_wb_rf_wen,
-         wire[4:0]       debug_wb_rf_wnum,
-         wire[31:0]      debug_wb_rf_wdata
+         (*mark_debug = "true"*)wire[31:0]      debug_wb_pc,
+         (*mark_debug = "true"*)wire[3:0]       debug_wb_rf_wen,
+         (*mark_debug = "true"*)wire[4:0]       debug_wb_rf_wnum,
+         (*mark_debug = "true"*)wire[31:0]      debug_wb_rf_wdata
        );
 // id_pc_i 模块_功能_输入or输出
 
@@ -211,7 +213,7 @@ wire[`RegBus]       cp0_prid_o;
 wire[`RegBus]       cp0_badvaddr_o;
 
 
-wire full;
+
 reg stall_pc;
 always @(*)
   begin
@@ -246,6 +248,11 @@ assign debug_wb_rf_wen = {4{wb_wreg_i}};
 assign debug_wb_rf_wdata = wb_wdata_i;
 assign debug_wb_rf_wnum = wb_wd_i;
 
+wire if_id_inst_ready;
+
+assign inst_ready = if_id_inst_ready;
+wire inst_valid;
+assign inst_valid = rom_data_valid && if_id_inst_ready;
 
 // IF/ID 实例化
 if_id if_id0(
@@ -258,8 +265,8 @@ if_id if_id0(
         .id_in_delay_slot(id_is_in_delayslot_i),
 
         .branch_flag(pc_branch_flag_i),
-        .inst_valid(rom_data_valid),
-        .inst_ready(inst_ready),
+        .inst_valid(inst_valid),
+        .inst_ready(if_id_inst_ready),
         .pc_ready(!stall_pc),
         .stallreq_for_if(stallreq_from_if),
         .stallreq_for_ex(stallreq_from_if_for_ex),
@@ -622,6 +629,8 @@ ctrl ctrl0(
        .stallreq_from_id(stallreq_from_id),
        .stallreq_from_if(stallreq_from_if),
        .stallreq_from_mem(stallreq_from_mem),
+       .axi_read_state(axi_read_state),
+       .mem_we(ram_we_o),
 
        .cp0_epc_i(ctrl_cp0_epc),
        .excepttype_i(excepttype),

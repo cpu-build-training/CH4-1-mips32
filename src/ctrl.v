@@ -3,8 +3,10 @@ module ctrl(
          input wire rst,
          wire stallreq_from_id,
          wire stallreq_from_ex,
-         (*mark_debug = "true"*)wire stallreq_from_mem,
-         (*mark_debug = "true"*)wire stallreq_from_if,
+         wire stallreq_from_mem,
+         wire stallreq_from_if,
+         wire[1:0] axi_read_state,
+         input wire mem_we,
          // 来自 MEM
          wire[31:0]   excepttype_i,
          wire[`RegBus]    cp0_epc_i,
@@ -12,7 +14,7 @@ module ctrl(
          output
          reg[`RegBus]     new_pc,
          reg               flush,
-         (*mark_debug="true"*)reg[5:0] stall
+         reg[5:0] stall
        );
 always @(*)
   begin
@@ -80,7 +82,11 @@ always @(*)
     else if(stallreq_from_mem == `Stop)
       begin
         flush = 1'b0;
-        stall = 6'b011110;
+        if (axi_read_state == `BusyForMEM || mem_we) begin
+          stall = 6'b011110;
+        end else begin
+          stall = 6'b011000;
+        end
         new_pc = `ZeroWord;
       end
     else if(stallreq_from_ex == `Stop)
