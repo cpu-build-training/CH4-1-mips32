@@ -22,6 +22,8 @@
 *
 !*/
 !.gitignore
+
+!*.py
 ###########################################################################
 ##	VIVADO
 #Source files:
@@ -97,3 +99,4 @@ testAsm/*.out
 testAsm/*.bin
 testAsm/*.o
 testAsm/*.om
+output.txt
