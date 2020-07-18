@@ -15,8 +15,7 @@ module axi_write_adapter(
          wire[3:0]   awcache,
          wire[2:0]   awprot,
          output wire         awvalid,
-         input
-         wire    awready,
+         input wire    awready,
 
          // write data channel signals
          output
@@ -48,7 +47,7 @@ module axi_write_adapter(
          output wire        mem_write_done
        );
 
-reg write_channel_state;
+// reg write_channel_state;
 
 assign awid = 4'b0;
 assign wid = 4'b0;
@@ -78,44 +77,64 @@ assign awaddr =  (address[31:29] == 3'b100 ||
                  )? { 3'b0,address[28:0]} : address;
 // ignore the BRESP because we always accept it
 
+// save
+reg awvalid_done;
+reg wvalid_done;
+
 // only when AXI is Free, we can regard a write enable as a valid signal,
 // otherwise it maybe be rised only because we freeze the stream
 // (which we should not repeat send valid signal)
-assign awvalid = we && (write_channel_state == `WriteFree);
-assign wvalid = we && (write_channel_state == `WriteFree);
+assign awvalid = ((we == 1'b1) && (awvalid_done == 1'b0))? 1'b1: 1'b0;
+assign wvalid = ((we == 1'b1) && (wvalid_done == 1'b0))? 1'b1: 1'b0;
+
+// awvalid_done
+always @(posedge clk ) begin
+  if (reset == `RstEnable) begin
+    awvalid_done <= 1'b0;
+  end else if ( we && awvalid && awready) begin
+    awvalid_done <= 1'b1;
+  end else if ( we ) begin
+    // do nothing
+  end else begin
+    awvalid_done <= 1'b0;
+  end
+end
+
+// wvalid_done
+always @(posedge clk ) begin
+  if (reset == `RstEnable) begin
+    wvalid_done <= 1'b0;
+  end else if ( we && wvalid && wready) begin
+    wvalid_done <= 1'b1;
+  end else if ( we ) begin
+    // do nothing
+  end else begin
+    wvalid_done <= 1'b0;
+  end
+end
+
+
 
 // set it to high according to 3.1.2
 assign bready = 1'b1;
 assign mem_write_done = bvalid;
 
-always @(posedge clk)
-  begin
-    if(reset == `RstEnable)
-      begin
-        write_channel_state <= `WriteFree;
-        // awvalid <= `InValid;
-        // wvalid <= `InValid;
-      end
-    else if(we == `Valid && write_channel_state == `WriteFree)
-      begin
-        // free -> busy, means we start to write
-        // $display("write channel active, addr = %x, data = %x", awaddr,wdata );
-        // $stop();
-        write_channel_state <= `WriteBusy;
-        // awvalid <= `InValid;
-        // wvalid <= `InValid;
-      end
-    else if(bvalid == `Valid && write_channel_state == `WriteBusy)
-      begin
-        write_channel_state <= `WriteFree;
-      end
+// always @(posedge clk)
+//   begin
+//     if(reset == `RstEnable)
+//       begin
+//         write_channel_state <= `WriteFree;
+//       end
+//     else if(we == `Valid && write_channel_state == `WriteFree && awready == `Ready && wready == `Ready)
+//       begin
+//         write_channel_state <= `WriteBusy;
+//       end
+//     else if(bvalid == `Valid && write_channel_state == `WriteBusy)
+//       begin
+//         write_channel_state <= `WriteFree;
+//       end
 
-    // if (awready == `Ready && awvalid == `Valid)
-    //   awvalid <= `InValid;
-
-    // if (wready == `Ready && awvalid == `Valid)
-    //   wvalid <= `InValid;
-  end
+//   end
 
 
 endmodule // axi_write_adapter

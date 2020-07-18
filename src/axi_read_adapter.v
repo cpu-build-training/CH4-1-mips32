@@ -160,6 +160,7 @@ always @(posedge clk)
     else if  (read_channel_state == `BusyForIF)
       // state: BusyForIF
       begin
+        pc_ready <= `NotReady;
         // if (rvalid && rready)
         if (rvalid == `Valid && inst_read_ready == `Ready  )
           begin
@@ -201,6 +202,7 @@ always @(posedge clk)
             unmapped_address <= pc;
             arvalid <= `Valid;
             current_address <= pc;
+            pc_ready <= `Ready;
           end
         else
           begin
@@ -213,7 +215,6 @@ always @(posedge clk)
     if (arready == `Ready && read_channel_state == `BusyForIF && arvalid == `Valid)
       begin
         // 如果在某个上升沿，addr ready 了，就停掉 valid，关于 IF
-        pc_ready <= `Ready;
         unmapped_address <= 32'b0;
         mem_addr_read_ready <= `NotReady;
         arvalid <= `InValid;
@@ -229,7 +230,6 @@ always @(posedge clk)
     else
       begin
         mem_addr_read_ready <= `NotReady;
-        pc_ready <= `NotReady;
       end
   end
 

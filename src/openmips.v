@@ -4,28 +4,40 @@ module openmips(
          input
          wire  clk,  rst,
 
+        // inst
          input wire[1:0]         axi_read_state,
          input wire[`RegBus]     rom_data_i_le,
          input wire              rom_data_valid,
          output  wire[`RegBus]   rom_addr_o,
          output wire             rom_ce_o,
          wire                    inst_ready,
-         wire                    mem_data_ready,
-         input wire                    mem_addr_read_ready,
          input wire                    pc_ready,
          input wire[`RegBus]     current_inst_address,
-         input wire[`RegBus]     ram_data_i,
-         input wire              ram_write_ready,
-         input wire              ram_read_valid,
-         output
-         wire[`RegBus]     ram_addr_o,
-         wire[`RegBus]     ram_data_o,
 
-         output wire                ram_we_o,
-         output wire          full,
-         wire[3:0]           ram_sel_o,
-         output wire                ram_ce_o,
-         wire                ram_re_o,
+
+        // data
+          output wire data_req,
+          output wire data_wr,
+          output wire[3:0] data_select,
+          output wire[`RegBus] data_addr,
+          output wire[`RegBus] data_wdata,
+          input wire  data_addr_ok,
+          input wire data_data_ok,
+          input wire[`RegBus] data_rdata,
+
+        //  wire                    mem_data_ready,
+        //  input wire                    mem_addr_read_ready,
+        //  input wire[`RegBus]     ram_data_i,
+        //  input wire              ram_write_ready,
+        //  input wire              ram_read_valid,
+        //  output
+        //  wire[`RegBus]     ram_addr_o,
+        //  wire[`RegBus]     ram_data_o,
+        //  output wire                ram_we_o,
+        //  output wire          full,
+        //  wire[3:0]           ram_sel_o,
+        //  output wire                ram_ce_o,
+        //  wire                ram_re_o,
 
          // 6 个外部硬件中断输入
          input wire[5:0]          int_i,
@@ -36,10 +48,10 @@ module openmips(
          output wire flush_o,
 
          // debug use
-         (*mark_debug = "true"*)wire[31:0]      debug_wb_pc,
-         (*mark_debug = "true"*)wire[3:0]       debug_wb_rf_wen,
-         (*mark_debug = "true"*)wire[4:0]       debug_wb_rf_wnum,
-         (*mark_debug = "true"*)wire[31:0]      debug_wb_rf_wdata
+         wire[31:0]      debug_wb_pc,
+         wire[3:0]       debug_wb_rf_wen,
+         wire[4:0]       debug_wb_rf_wnum,
+         wire[31:0]      debug_wb_rf_wdata
        );
 // id_pc_i 模块_功能_输入or输出
 
@@ -227,13 +239,19 @@ always @(*)
 
 wire stallreq_from_if_for_ex;
 wire ce;
+
+// pc 能否更新
+wire next_pc_valid;
+
 // 我好像一直都在弄错 rom_ce_o 的含义
 // 目前这个是 pc_re 的意思，表示 valid
-assign rom_ce_o = ce;
+assign rom_ce_o = next_pc_valid;
+
 // pc_reg 实例化
 pc_reg  pc_reg0(
           .clk(clk), .rst(rst), .pc(pc), .ce(ce),
-          .stall(stall_pc),
+          .stall(!rom_data_valid),
+          .pc_read_ready(pc_ready),
 
           .branch_flag_i(pc_branch_flag_i),
           .branch_target_address_i(pc_branch_target_address_i),
@@ -255,24 +273,41 @@ wire inst_valid;
 assign inst_valid = rom_data_valid && if_id_inst_ready;
 
 // IF/ID 实例化
-if_id if_id0(
-        .clk(clk), .rst(rst), .if_pc(current_inst_address),
-        .if_inst(rom_data_i), .id_pc(id_pc_i),
-        .id_inst(id_inst_i),
-        .stall(stall),
+// if_id if_id0(
+//         .clk(clk), .rst(rst), .if_pc(current_inst_address),
+//         .if_inst(rom_data_i), .id_pc(id_pc_i),
+//         .id_inst(id_inst_i),
+//         .stall(stall),
 
-        .id_next_in_delay_slot(id_next_inst_in_delayslot_o),
-        .id_in_delay_slot(id_is_in_delayslot_i),
+//         .id_next_in_delay_slot(id_next_inst_in_delayslot_o),
+//         .id_in_delay_slot(id_is_in_delayslot_i),
 
-        .branch_flag(pc_branch_flag_i),
-        .inst_valid(inst_valid),
-        .inst_ready(if_id_inst_ready),
-        .pc_ready(!stall_pc),
-        .stallreq_for_if(stallreq_from_if),
-        .stallreq_for_ex(stallreq_from_if_for_ex),
-        .flush(flush),
-        .full(full)
-      );
+//         .branch_flag(pc_branch_flag_i),
+//         .inst_valid(inst_valid),
+//         .inst_ready(if_id_inst_ready),
+//         .pc_ready(!stall_pc),
+//         .stallreq_for_if(stallreq_from_if),
+//         .stallreq_for_ex(stallreq_from_if_for_ex),
+//         .flush(flush),
+//         .full(full)
+//       );
+
+assign inst_ready = 1'b1;
+// assign full = 1'b0;
+
+new_if_id new_if_id0(
+.clk(clk), .rst(rst), .flush(flush),
+.valid(rom_data_valid),
+.if_inst(rom_data_i), .if_pc(current_inst_address),
+.id_inst(id_inst_i), .id_pc(id_pc_i),
+.stall(stall),
+
+.next_pc_valid(next_pc_valid),
+
+.id_next_in_delay_slot(id_next_inst_in_delayslot_o),
+.id_in_delay_slot(id_is_in_delayslot_i)
+
+);
 
 id id0(
      .rst(rst), .pc_i(id_pc_i), .inst_i(id_inst_i),
@@ -440,6 +475,8 @@ ex ex0(
      .is_in_delayslot_o(ex_is_in_delayslot_o)
    );
 
+
+
 // EX/MEM 实例化
 ex_mem ex_mem0(
          .clk(clk),  .rst(rst), .flush(flush),
@@ -494,6 +531,20 @@ ex_mem ex_mem0(
 
        );
 
+// see `mem_signal_extend.v`
+// 以下信号为 `mem` <--> `mem_signal_extend`
+// 目的是扩展 mem 信号为 SRAM 接口
+wire mem_ce_enable;
+wire mem_write_enable;
+wire[`RegBus] mem_addr_i;
+wire[`RegBus] mem_data_i;
+wire[3:0] mem_sel_i;
+wire mem_write_finish;
+wire mem_read_finish;
+wire[`RegBus] mem_data_o;
+
+
+
 // MEM 实例化
 mem mem0(
       .clk(clk),
@@ -502,9 +553,7 @@ mem mem0(
       // 来自 EX/MEM 模块的信息
       .wd_i(mem_wd_i), .wreg_i(mem_wreg_i),
       .wdata_i(mem_wdata_i),
-      .mem_write_ready(ram_write_ready),
-      .mem_data_i_valid(ram_read_valid),
-      .mem_read_ready(mem_data_ready),
+      .mem_read_ready(),
       .stallreq_for_mem(stallreq_from_mem),
 
       .whilo_i(mem_whilo_i),
@@ -528,17 +577,19 @@ mem mem0(
       .LLbit_we_o(mem_LLbit_we_o),
       .LLbit_value_o(mem_LLbit_value_o),
 
-      // 来自数据存储器的信息
-      .mem_data_i(ram_data_i),
+      // 来自 mem_signal_extend 的信息
+      .mem_data_i(mem_data_o),
+      .mem_write_ready(mem_write_finish),
+      .mem_data_i_valid(mem_read_finish),
 
-      // 送到数据存储器的信息
-      .mem_addr_o(ram_addr_o),
-      .mem_we_o(ram_we_o),
-      .mem_sel_o(ram_sel_o),
-      .mem_data_o(ram_data_o),
-      .mem_ce_o(ram_ce_o),
-      .mem_re_o_filtered(ram_re_o),
-      .mem_addr_read_ready(mem_addr_read_ready),
+      // 送到 mem_signal_extend 的信息
+      .mem_addr_o(mem_addr_i),
+      .mem_we_o(mem_write_enable),
+      .mem_sel_o(mem_sel_i),
+      .mem_data_o(mem_data_i),
+      .mem_ce_o(mem_ce_enable),
+      .mem_re_o_filtered(),
+      .mem_addr_read_ready(),
 
       // cp0
       .cp0_reg_we_i(mem_cp0_reg_we_i),
@@ -568,6 +619,29 @@ mem mem0(
       .current_inst_address_o(mem_current_inst_addr_o),
       .badvaddr_o(mem_badvaddr_o)
     );
+
+mem_signal_extend mem_signal_extend0 (
+      .clk(clk), .rst(rst), .flush(flush),
+
+      .enable(mem_ce_enable),
+      .we(mem_write_enable),
+      .mem_addr_i(mem_addr_i),
+      .mem_data_i(mem_data_i),
+      .mem_sel_i(mem_sel_i),
+      .mem_write_finish(mem_write_finish),
+      .mem_read_finish(mem_read_finish),
+      .mem_data_o(mem_data_o),
+
+      .req(data_req),
+      .wr(data_wr),
+      .select(data_select),
+      .addr(data_addr),
+      .wdata(data_wdata),
+      .addr_ok(data_addr_ok),
+      .data_ok(data_data_ok),
+      .rdata(data_rdata)
+
+);
 
 // MEM/WB 实例化
 mem_wb mem_wb0(
@@ -630,7 +704,7 @@ ctrl ctrl0(
        .stallreq_from_if(stallreq_from_if),
        .stallreq_from_mem(stallreq_from_mem),
        .axi_read_state(axi_read_state),
-       .mem_we(ram_we_o),
+       .mem_we(mem_write_enable),
 
        .cp0_epc_i(ctrl_cp0_epc),
        .excepttype_i(excepttype),
