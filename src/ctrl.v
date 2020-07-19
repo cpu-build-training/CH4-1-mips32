@@ -82,11 +82,11 @@ always @(*)
     else if(stallreq_from_mem == `Stop)
       begin
         flush = 1'b0;
-        if (axi_read_state == `BusyForMEM || mem_we) begin
+        // if (axi_read_state == `BusyForMEM || mem_we) begin
           stall = 6'b011110;
-        end else begin
-          stall = 6'b011000;
-        end
+        // end else begin
+        //   stall = 6'b011000;
+        // end
         new_pc = `ZeroWord;
       end
     else if(stallreq_from_ex == `Stop)
