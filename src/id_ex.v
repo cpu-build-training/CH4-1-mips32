@@ -41,10 +41,10 @@ module id_ex(
          output reg                  ex_is_in_delayslot,
         //  reg                  is_in_delayslot_o,
          // 当前处于执行阶段的指令
-         (*mark_debug = "true"*)reg[`RegBus]         ex_inst,
+         reg[`RegBus]         ex_inst,
 
          // 异常
-         (*mark_debug = "true"*)reg[`RegBus]         ex_current_inst_address,
+         reg[`RegBus]         ex_current_inst_address,
          reg[31:0]            ex_excepttype,
 
          // From CTRL module.

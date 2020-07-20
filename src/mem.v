@@ -17,15 +17,13 @@ module mem(
 
          // 来自执行阶段的信息
          wire[`AluOpBus]  aluop_i,
-        (*mark_debug = "true"*)wire[`RegBus]    mem_addr_i,
+         wire[`RegBus]    mem_addr_i,
          wire[`RegBus]    reg2_i,
 
          // 来自外部数据存储器 RAM 的信息
          // 读取的 data 是否 valid
          input wire             mem_data_i_valid,
          wire[`RegBus]    mem_data_i,
-         // 表示已经不需要再传输 mem_re
-         input wire        mem_addr_read_ready,
          // axi bvalid
          // 写入是否 ready
          input wire             mem_write_ready,
@@ -44,7 +42,7 @@ module mem(
          // 来自执行阶段
          wire[31:0]           excepttype_i,
          input wire                 is_in_delayslot_i,
-         (*mark_debug = "true"*)wire[`RegBus]       current_inst_address_i,
+         wire[`RegBus]       current_inst_address_i,
 
          // 来自 CP0 模块
          wire[`RegBus]        cp0_status_i,
@@ -69,11 +67,10 @@ module mem(
          // 送到外部数据存储器 RAM 的信息
          reg[`RegBus]         mem_addr_o,
          output wire          mem_read_ready,
-         (*mark_debug = "true"*)wire                 mem_we_o,
+         wire                 mem_we_o,
          reg[3:0]             mem_sel_o,
          reg[`RegBus]         mem_data_o,
-         (*mark_debug = "true"*)output reg           mem_ce_o,
-         (*mark_debug = "true"*)wire                 mem_re_o_filtered,
+         output reg           mem_ce_o,
 
          // 新增的输出接口
          reg                  LLbit_we_o,
@@ -89,7 +86,7 @@ module mem(
          wire[`RegBus]   cp0_epc_o,
          wire[`RegBus]   current_inst_address_o,
          output wire     is_in_delayslot_o,
-         (*mark_debug = "true"*)output wire     stallreq_for_mem,
+         output wire     stallreq_for_mem,
          wire[`RegBus]   badvaddr_o
        );
 wire[`RegBus]   zero32;
@@ -104,7 +101,7 @@ reg[`RegBus]        cp0_cause;
 // CP0 中 EPC 寄存器的最新值
 reg[`RegBus]        cp0_epc;
 
-(*mark_debug="true"*)wire mem_re_o;
+wire mem_re_o;
 
 // 外部数据存储器 RAM 的读写信号
 // 不小心 multi-driver 了
@@ -123,41 +120,6 @@ assign stallreq_for_mem = (mem_we_o && !mem_write_ready) || (mem_re_o && !mem_da
 // 转化出读使能
 assign mem_re_o = mem_ce_o && !mem_we_o;
 
-(*mark_debug = "true"*)reg no_need_for_mem_re;
-
-assign mem_re_o_filtered = no_need_for_mem_re? `InValid: mem_re_o;
-
-// always @(posedge mem_addr_read_ready or negedge mem_re_o or negedge rst or posedge rst) begin
-//   if (rst == `RstEnable) begin
-//     no_need_for_mem_re = 1'b0;
-//   end else if(mem_re_o == `Valid && mem_addr_read_ready == `Ready) begin
-//   // 刚开始发出信号的时候
-//     no_need_for_mem_re = 1'b1;
-//   end else if(mem_re_o == `InValid)begin
-//   // 已经读到了数据
-//     no_need_for_mem_re = 1'b0;
-//   end
-// end
-always @(posedge clk)
-  begin
-    if( rst == `RstEnable)
-      begin
-        no_need_for_mem_re = `InValid;
-      end
-    else if (mem_addr_read_ready == `Ready && mem_re_o == `Valid)
-      begin
-        no_need_for_mem_re = `Valid;
-      end
-    else if (mem_data_i_valid == `Valid)
-      begin
-        no_need_for_mem_re = `InValid;
-      end
-    else
-      begin
-
-      end
-
-  end
 
 // always ready because it's a logistic module and it never stall by other reason.
 assign mem_read_ready = `Ready;

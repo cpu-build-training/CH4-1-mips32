@@ -18,7 +18,7 @@ module pc_reg(
          // 异常处理例程入口地址
          input wire[`RegBus] new_pc,
 
-         (*mark_debug="true"*)output reg[`InstAddrBus] pc,
+         output reg[`InstAddrBus] pc,
          output reg ce
        );
 // reg valid_pc;
@@ -74,6 +74,24 @@ always @(posedge clk )
 //       end
 //   end
 
+reg flushed;
+
+
+// flush 以后，丢弃了最新收到的 pc_read_ready(也就是这一次不会直接增加)
+always @(posedge clk)
+  begin
+    if (rst == `RstEnable)
+      flushed <= 1'b0;
+    else if (flush  == 1'b1)
+      flushed <= 1'b1;
+    else if (pc_read_ready == `Ready)
+      flushed <= 1'b0;
+    else
+      begin
+
+      end
+  end
+
 always @(posedge clk)
   begin
     // about pc
@@ -93,7 +111,7 @@ always @(posedge clk)
         pc <= new_pc;
         // valid_pc <= `Valid;
       end
-    else if(pc_read_ready == `Ready)
+    else if(pc_read_ready == `Ready && flushed == 1'b0)
       begin
         if(branch_flag == `Branch)
           begin

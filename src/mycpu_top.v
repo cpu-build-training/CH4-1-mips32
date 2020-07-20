@@ -486,7 +486,6 @@ openmips openmips0(
            .clk(aclk),.rst(aresetn),
            .flush_o(flush),
 
-           .axi_read_state(axi_read_state),
            .rom_data_i_le(rom_data),
            .rom_data_valid(inst_valid),
            .rom_addr_o(rom_addr),

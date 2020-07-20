@@ -4,8 +4,8 @@ module ctrl(
          wire stallreq_from_id,
          wire stallreq_from_ex,
          wire stallreq_from_mem,
-         wire stallreq_from_if,
-         wire[1:0] axi_read_state,
+        //  wire stallreq_from_if,
+        //  wire[1:0] axi_read_state,
          input wire mem_we,
          // 来自 MEM
          wire[31:0]   excepttype_i,
@@ -101,12 +101,12 @@ always @(*)
         flush = 1'b0;
         new_pc = `ZeroWord;
       end
-    else if (stallreq_from_if == `Stop)
-      begin
-        stall = 6'b000010;
-        flush = 1'b0;
-        new_pc = `ZeroWord;
-      end
+    // else if (stallreq_from_if == `Stop)
+    //   begin
+    //     stall = 6'b000010;
+    //     flush = 1'b0;
+    //     new_pc = `ZeroWord;
+    //   end
     else
       begin
         stall = 6'b000000;

@@ -4,8 +4,7 @@ module openmips(
          input
          wire  clk,  rst,
 
-        // inst
-         input wire[1:0]         axi_read_state,
+         // inst
          input wire[`RegBus]     rom_data_i_le,
          input wire              rom_data_valid,
          output  wire[`RegBus]   rom_addr_o,
@@ -15,29 +14,29 @@ module openmips(
          input wire[`RegBus]     current_inst_address,
 
 
-        // data
-          output wire data_req,
-          output wire data_wr,
-          output wire[3:0] data_select,
-          output wire[`RegBus] data_addr,
-          output wire[`RegBus] data_wdata,
-          input wire  data_addr_ok,
-          input wire data_data_ok,
-          input wire[`RegBus] data_rdata,
+         // data
+         output wire data_req,
+         output wire data_wr,
+         output wire[3:0] data_select,
+         output wire[`RegBus] data_addr,
+         output wire[`RegBus] data_wdata,
+         input wire  data_addr_ok,
+         input wire data_data_ok,
+         input wire[`RegBus] data_rdata,
 
-        //  wire                    mem_data_ready,
-        //  input wire                    mem_addr_read_ready,
-        //  input wire[`RegBus]     ram_data_i,
-        //  input wire              ram_write_ready,
-        //  input wire              ram_read_valid,
-        //  output
-        //  wire[`RegBus]     ram_addr_o,
-        //  wire[`RegBus]     ram_data_o,
-        //  output wire                ram_we_o,
-        //  output wire          full,
-        //  wire[3:0]           ram_sel_o,
-        //  output wire                ram_ce_o,
-        //  wire                ram_re_o,
+         //  wire                    mem_data_ready,
+         //  input wire                    mem_addr_read_ready,
+         //  input wire[`RegBus]     ram_data_i,
+         //  input wire              ram_write_ready,
+         //  input wire              ram_read_valid,
+         //  output
+         //  wire[`RegBus]     ram_addr_o,
+         //  wire[`RegBus]     ram_data_o,
+         //  output wire                ram_we_o,
+         //  output wire          full,
+         //  wire[3:0]           ram_sel_o,
+         //  output wire                ram_ce_o,
+         //  wire                ram_re_o,
 
          // 6 个外部硬件中断输入
          input wire[5:0]          int_i,
@@ -182,7 +181,6 @@ wire[`RegAddrBus]   reg1_addr;
 wire[`RegAddrBus]   reg2_addr;
 
 // 连接 CTRL 和其他模块的通路
-wire                stallreq_from_if;
 wire                stallreq_from_id;
 wire                stallreq_from_ex;
 wire                stallreq_from_mem;
@@ -237,7 +235,6 @@ always @(*)
       stall_pc = `Stop;
   end
 
-wire stallreq_from_if_for_ex;
 wire ce;
 
 // pc 能否更新
@@ -266,11 +263,9 @@ assign debug_wb_rf_wen = {4{wb_wreg_i}};
 assign debug_wb_rf_wdata = wb_wdata_i;
 assign debug_wb_rf_wnum = wb_wd_i;
 
-wire if_id_inst_ready;
 
-assign inst_ready = if_id_inst_ready;
 wire inst_valid;
-assign inst_valid = rom_data_valid && if_id_inst_ready;
+assign inst_valid = rom_data_valid;
 
 // IF/ID 实例化
 // if_id if_id0(
@@ -296,18 +291,18 @@ assign inst_ready = 1'b1;
 // assign full = 1'b0;
 
 new_if_id new_if_id0(
-.clk(clk), .rst(rst), .flush(flush),
-.valid(rom_data_valid),
-.if_inst(rom_data_i), .if_pc(current_inst_address),
-.id_inst(id_inst_i), .id_pc(id_pc_i),
-.stall(stall),
+            .clk(clk), .rst(rst), .flush(flush),
+            .valid(rom_data_valid),
+            .if_inst(rom_data_i), .if_pc(current_inst_address),
+            .id_inst(id_inst_i), .id_pc(id_pc_i),
+            .stall(stall),
 
-.next_pc_valid(next_pc_valid),
+            .next_pc_valid(next_pc_valid),
 
-.id_next_in_delay_slot(id_next_inst_in_delayslot_o),
-.id_in_delay_slot(id_is_in_delayslot_i)
+            .id_next_in_delay_slot(id_next_inst_in_delayslot_o),
+            .id_in_delay_slot(id_is_in_delayslot_i)
 
-);
+          );
 
 id id0(
      .rst(rst), .pc_i(id_pc_i), .inst_i(id_inst_i),
@@ -588,8 +583,6 @@ mem mem0(
       .mem_sel_o(mem_sel_i),
       .mem_data_o(mem_data_i),
       .mem_ce_o(mem_ce_enable),
-      .mem_re_o_filtered(),
-      .mem_addr_read_ready(),
 
       // cp0
       .cp0_reg_we_i(mem_cp0_reg_we_i),
@@ -621,27 +614,27 @@ mem mem0(
     );
 
 mem_signal_extend mem_signal_extend0 (
-      .clk(clk), .rst(rst), .flush(flush),
+                    .clk(clk), .rst(rst), .flush(flush),
 
-      .enable(mem_ce_enable),
-      .we(mem_write_enable),
-      .mem_addr_i(mem_addr_i),
-      .mem_data_i(mem_data_i),
-      .mem_sel_i(mem_sel_i),
-      .mem_write_finish(mem_write_finish),
-      .mem_read_finish(mem_read_finish),
-      .mem_data_o(mem_data_o),
+                    .enable(mem_ce_enable),
+                    .we(mem_write_enable),
+                    .mem_addr_i(mem_addr_i),
+                    .mem_data_i(mem_data_i),
+                    .mem_sel_i(mem_sel_i),
+                    .mem_write_finish(mem_write_finish),
+                    .mem_read_finish(mem_read_finish),
+                    .mem_data_o(mem_data_o),
 
-      .req(data_req),
-      .wr(data_wr),
-      .select(data_select),
-      .addr(data_addr),
-      .wdata(data_wdata),
-      .addr_ok(data_addr_ok),
-      .data_ok(data_data_ok),
-      .rdata(data_rdata)
+                    .req(data_req),
+                    .wr(data_wr),
+                    .select(data_select),
+                    .addr(data_addr),
+                    .wdata(data_wdata),
+                    .addr_ok(data_addr_ok),
+                    .data_ok(data_data_ok),
+                    .rdata(data_rdata)
 
-);
+                  );
 
 // MEM/WB 实例化
 mem_wb mem_wb0(
@@ -694,16 +687,16 @@ hilo_reg hilo_reg0(
            .lo_o(hilo_lo_o)
          );
 
-wire stallreq_from_ex_sum = stallreq_from_ex || stallreq_from_if_for_ex;
+wire stallreq_from_ex_sum = stallreq_from_ex;
 
 ctrl ctrl0(
        .rst(rst),
        .stall(stall),
        .stallreq_from_ex(stallreq_from_ex_sum),
        .stallreq_from_id(stallreq_from_id),
-       .stallreq_from_if(stallreq_from_if),
+      //  .stallreq_from_if(stallreq_from_if),
        .stallreq_from_mem(stallreq_from_mem),
-       .axi_read_state(axi_read_state),
+      //  .axi_read_state(axi_read_state),
        .mem_we(mem_write_enable),
 
        .cp0_epc_i(ctrl_cp0_epc),

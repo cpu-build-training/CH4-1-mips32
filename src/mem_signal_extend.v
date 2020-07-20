@@ -34,7 +34,6 @@ module mem_signal_extend (
          input wire[`RegBus] rdata
        );
 
-reg busy;
 
 // 在一次数据交换内，一旦 addr 上升， addr_ok_last_long 将一直保持高电位。
 // 一次数据交换是指 enable 使能的这段范围
@@ -61,8 +60,8 @@ always @(posedge clk)
   end
 
 // TODO
-wire testb;
-assign testb = (addr_ok == 1'b1 || addr_ok_last_long == 1'b1)? 1'b0: enable;
+// wire testb;
+// assign testb = (addr_ok == 1'b1 || addr_ok_last_long == 1'b1)? 1'b0: enable;
 assign req = (addr_ok == 1'b1 || addr_ok_last_long == 1'b1)? 1'b0: enable;
 assign wr = we;
 assign select = mem_sel_i;
@@ -72,12 +71,12 @@ assign mem_write_finish = (enable == 1'b1 && we == 1'b1)? data_ok:1'b0;
 assign mem_read_finish = (enable == 1'b1 && we == 1'b0)? data_ok:1'b0;
 assign mem_data_o = rdata;
 
-always @(posedge clk)
-  begin
-    if (rst == `RstEnable)
-      begin
-        busy <= 1'b0;
-      end
-  end
+// always @(posedge clk)
+//   begin
+//     if (rst == `RstEnable)
+//       begin
+//         busy <= 1'b0;
+//       end
+//   end
 
 endmodule

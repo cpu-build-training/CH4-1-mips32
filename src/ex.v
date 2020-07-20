@@ -626,12 +626,10 @@ always @(*)
         (aluop_i == `EXE_SUB_OP)) && (ov_sum == 1'b1))
       begin
         wreg_o = `WriteDisable;
-        excepttype_cur_stage[`OVERFLOW_IDX] = 1'b1;
       end
     else
       begin
         wreg_o = wreg_i;
-        excepttype_cur_stage[`OVERFLOW_IDX] = 1'b0;
       end
     case (alusel_i)
       `EXE_RES_LOGIC:
@@ -742,7 +740,7 @@ always @(*)
   begin
 
     excepttype_cur_stage = `ZeroWord;
-    excepttype_cur_stage[`TRAP_IDX] = `TrapNotAssert;
+    // excepttype_cur_stage[`TRAP_IDX] = `TrapNotAssert;
 
     case (aluop_i)
       // teg, teqi
@@ -808,6 +806,16 @@ always @(*)
       begin
         excepttype_cur_stage[`ADES_IDX] = 1'b0;
         excepttype_cur_stage[`ADEL_IDX] = 1'b0;
+      end
+
+    if(((aluop_i == `EXE_ADD_OP) || (aluop_i == `EXE_ADDI_OP) ||
+        (aluop_i == `EXE_SUB_OP)) && (ov_sum == 1'b1))
+      begin
+        excepttype_cur_stage[`OVERFLOW_IDX] = 1'b1;
+      end
+    else
+      begin
+        excepttype_cur_stage[`OVERFLOW_IDX] = 1'b0;
       end
   end
 

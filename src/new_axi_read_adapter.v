@@ -62,6 +62,9 @@ module new_axi_read_adapter(
 // 可以在此阶段映射，但在后续的阶段映射更好（合并以后）
 reg[`RegBus] unmapped_address;
 
+reg flushed;
+
+
 assign arid = 4'b0;
 assign arlen = 4'b0;
 assign arsize = 3'b010;
@@ -72,13 +75,29 @@ assign arprot = 3'b001;
 
 assign rready = 1'b1;
 
-assign data = (reset == `RstEnable)? `ZeroWord: rdata;
-assign data_address = (reset == `RstEnable)? `ZeroWord: unmapped_address;
+assign data = (reset == `RstEnable || flushed == 1'b1)? `ZeroWord: rdata;
+assign data_address = (reset == `RstEnable || flushed == 1'b1)? `ZeroWord: unmapped_address;
 assign data_valid = (reset == `RstEnable)? 1'b0: rvalid;
 
 // 1'b0 当前没有任务
 // 1'b1 正在与 slave 握手
 reg busy;
+
+always @(posedge clk)
+  begin
+    if (reset == `RstEnable)
+      begin
+        flushed <= 1'b0;
+      end
+    else if (flush && busy)
+      begin
+        flushed <= 1'b1;
+      end
+    else if (busy == 1'b0)
+      begin
+        flushed <= 1'b0;
+      end
+  end
 
 assign araddr =  (address[31:29] == 3'b100 ||
                   address[31:29] == 3'b101
@@ -103,37 +122,37 @@ always @(posedge clk)
             // 可以改变状态
             busy <= 1'b1;
             unmapped_address <= address;
-            arvalid <= `Valid;
             // address_read_ready <= `Ready;
           end
       end
     else
       begin
         // busy
-
+        // 控制 data 通道的行为
+        if (rvalid == `Valid)
+          begin
+            busy <= 1'b0;
+          end
       end
   end
 
 //  控制 address 通道的行为
 always @(posedge clk)
   begin
-    if(reset == `RstEnable) begin
+    if(reset == `RstEnable)
+      begin
         arvalid <= `InValid;
-    end
+      end
+    else if (busy == 1'b0 && address_valid == `Valid)
+      begin
+        arvalid <= `Valid;
+      end
     else if(arready == `Ready && busy == 1'b1)
       begin
         arvalid <= `InValid;
       end
   end
 
-// 控制 data 通道的行为
-always @(posedge clk)
-  begin
-    if (rvalid == `Valid)
-      begin
-        busy <= 1'b0;
-      end
-  end
 
 // 只让 address_read_ready 停留一个周期
 // always @(posedge clk )

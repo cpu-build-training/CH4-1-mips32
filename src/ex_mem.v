@@ -46,8 +46,8 @@ module ex_mem(
          reg[1:0]             cnt_o,
 
          // STORE / LOAD
-         (*mark_debug = "true"*)reg[`AluOpBus]      mem_aluop,
-         (*mark_debug = "true"*)reg[`RegBus]        mem_mem_addr,
+         reg[`AluOpBus]      mem_aluop,
+         reg[`RegBus]        mem_mem_addr,
          reg[`RegBus]        mem_reg2,
 
          // cp0
@@ -60,7 +60,7 @@ module ex_mem(
          reg[`RegBus]    mem_current_inst_address,
 
          // From CTRL module.
-         (*mark_debug = "true"*)input wire[5:0]     stall
+         input wire[5:0]     stall
        );
 
 always @(posedge clk)
