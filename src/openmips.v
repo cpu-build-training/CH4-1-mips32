@@ -238,11 +238,11 @@ always @(*)
 wire ce;
 
 // pc 能否更新
-wire next_pc_valid;
+// wire next_pc_valid;
 
 // 我好像一直都在弄错 rom_ce_o 的含义
 // 目前这个是 pc_re 的意思，表示 valid
-assign rom_ce_o = next_pc_valid;
+// assign rom_ce_o = next_pc_valid;
 
 // pc_reg 实例化
 pc_reg  pc_reg0(
@@ -297,7 +297,7 @@ new_if_id new_if_id0(
             .id_inst(id_inst_i), .id_pc(id_pc_i),
             .stall(stall),
 
-            .next_pc_valid(next_pc_valid),
+            .next_pc_valid(rom_ce_o),
 
             .id_next_in_delay_slot(id_next_inst_in_delayslot_o),
             .id_in_delay_slot(id_is_in_delayslot_i)
@@ -411,8 +411,8 @@ ex ex0(
      .whilo_o(ex_whilo_o),
      .hi_o(ex_hi_o),.lo_o(ex_lo_o),
 
-     .cnt_o(cnt_o),
-     .hilo_temp_o(hilo_temp_o),
+    //  .cnt_o(cnt_o),
+    //  .hilo_temp_o(hilo_temp_o),
 
      .aluop_o(ex_aluop_o),
      .mem_addr_o(ex_mem_addr_o),
@@ -483,8 +483,8 @@ ex_mem ex_mem0(
          .ex_whilo(ex_whilo_o), .ex_hi(ex_hi_o),
          .ex_lo(ex_lo_o),
 
-         .cnt_i(cnt_o),
-         .hilo_i(hilo_temp_o),
+        //  .cnt_i(cnt_o),
+        //  .hilo_i(hilo_temp_o),
 
          .ex_aluop(ex_aluop_o),
          .ex_mem_addr(ex_mem_addr_o),
@@ -505,8 +505,8 @@ ex_mem ex_mem0(
          .stall(stall),
 
          // TO EX
-         .cnt_o(cnt_i),
-         .hilo_o(hilo_temp_i),
+        //  .cnt_o(cnt_i),
+        //  .hilo_o(hilo_temp_i),
 
          // cp0
          .ex_cp0_reg_we(ex_cp0_reg_we_o),

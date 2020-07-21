@@ -45,7 +45,7 @@ reg[`RegBus] branch_target_address;
 // 存储每次收到的 branch
 always @(posedge clk )
   begin
-    if (rst == `RstEnable)
+    if (rst == `RstEnable || flush)
       begin
         branch_flag <= 1'b0;
         branch_target_address <= `ZeroWord;
@@ -74,23 +74,23 @@ always @(posedge clk )
 //       end
 //   end
 
-reg flushed;
+// reg flushed;
 
 
-// flush 以后，丢弃了最新收到的 pc_read_ready(也就是这一次不会直接增加)
-always @(posedge clk)
-  begin
-    if (rst == `RstEnable)
-      flushed <= 1'b0;
-    else if (flush  == 1'b1)
-      flushed <= 1'b1;
-    else if (pc_read_ready == `Ready)
-      flushed <= 1'b0;
-    else
-      begin
+// // flush 以后，丢弃了最新收到的 pc_read_ready(也就是这一次不会直接增加)
+// always @(posedge clk)
+//   begin
+//     if (rst == `RstEnable)
+//       flushed <= 1'b0;
+//     else if (flush  == 1'b1)
+//       flushed <= 1'b1;
+//     else if (pc_read_ready == `Ready)
+//       flushed <= 1'b0;
+//     else
+//       begin
 
-      end
-  end
+//       end
+//   end
 
 always @(posedge clk)
   begin
@@ -111,7 +111,7 @@ always @(posedge clk)
         pc <= new_pc;
         // valid_pc <= `Valid;
       end
-    else if(pc_read_ready == `Ready && flushed == 1'b0)
+    else if(pc_read_ready == `Ready)
       begin
         if(branch_flag == `Branch)
           begin
