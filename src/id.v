@@ -893,41 +893,41 @@ always @(*)
                     reg2_read_o = `ReadEnable;
                     instvalid = `InstValid;
                   end
-                `EXE_MADD:
-                  begin
-                    aluop_o = `EXE_MADD_OP;
-                    alusel_o = `EXE_RES_MUL;
-                    reg1_read_o = `ReadEnable;
-                    reg2_read_o = `ReadEnable;
-                    instvalid = `InstValid;
-                  end
-                `EXE_MADDU:
-                  begin
-                    wreg_o = `WriteDisable;
-                    aluop_o = `EXE_MADDU_OP;
-                    alusel_o = `EXE_RES_MUL;
-                    reg1_read_o = `ReadEnable;
-                    reg2_read_o = `ReadEnable;
-                    instvalid = `InstValid;
-                  end
-                `EXE_MSUB:
-                  begin
-                    wreg_o = `WriteDisable;
-                    aluop_o = `EXE_MSUB_OP;
-                    alusel_o = `EXE_RES_MUL;
-                    reg1_read_o = `ReadEnable;
-                    reg2_read_o = `ReadEnable;
-                    instvalid = `InstValid;
-                  end
-                `EXE_MSUBU:
-                  begin
-                    wreg_o = `WriteDisable;
-                    aluop_o = `EXE_MSUBU_OP;
-                    alusel_o = `EXE_RES_MUL;
-                    reg1_read_o = `ReadEnable;
-                    reg2_read_o = `ReadEnable;
-                    instvalid = `InstValid;
-                  end
+                // `EXE_MADD:
+                //   begin
+                //     aluop_o = `EXE_MADD_OP;
+                //     alusel_o = `EXE_RES_MUL;
+                //     reg1_read_o = `ReadEnable;
+                //     reg2_read_o = `ReadEnable;
+                //     instvalid = `InstValid;
+                //   end
+                // `EXE_MADDU:
+                //   begin
+                //     wreg_o = `WriteDisable;
+                //     aluop_o = `EXE_MADDU_OP;
+                //     alusel_o = `EXE_RES_MUL;
+                //     reg1_read_o = `ReadEnable;
+                //     reg2_read_o = `ReadEnable;
+                //     instvalid = `InstValid;
+                //   end
+                // `EXE_MSUB:
+                //   begin
+                //     wreg_o = `WriteDisable;
+                //     aluop_o = `EXE_MSUB_OP;
+                //     alusel_o = `EXE_RES_MUL;
+                //     reg1_read_o = `ReadEnable;
+                //     reg2_read_o = `ReadEnable;
+                //     instvalid = `InstValid;
+                //   end
+                // `EXE_MSUBU:
+                //   begin
+                //     wreg_o = `WriteDisable;
+                //     aluop_o = `EXE_MSUBU_OP;
+                //     alusel_o = `EXE_RES_MUL;
+                //     reg1_read_o = `ReadEnable;
+                //     reg2_read_o = `ReadEnable;
+                //     instvalid = `InstValid;
+                //   end
                 default:
                   begin
 

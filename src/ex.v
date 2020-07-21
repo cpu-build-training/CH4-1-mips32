@@ -78,9 +78,9 @@ module ex(
          //    reg[`RegBus]        logicout
 
          // 第一个执行周期得到的乘法结果
-         reg[`DoubleRegBus] hilo_temp_o,
+        //  reg[`DoubleRegBus] hilo_temp_o,
          // 当前处于执行阶段的第几个时钟周期
-         reg[1:0]             cnt_o,
+        //  reg[1:0]             cnt_o,
 
          //    TO CTRL
          output reg stallreq,
@@ -123,8 +123,8 @@ wire[`RegBus]   result_sum;     // 保存加法结果
 wire[`RegBus]   opdata1_mult;   // 乘法操作中的被乘数
 wire[`RegBus]   opdata2_mult;   // 乘法操作中的乘数
 wire[`DoubleRegBus] hilo_temp;  // 临时保存成发结果，宽度为 64 位
-reg[`DoubleRegBus] hilo_temp1;
-reg             stallreq_for_madd_msub;
+// reg[`DoubleRegBus] hilo_temp1;
+// reg             stallreq_for_madd_msub;
 reg[`DoubleRegBus] mulres;     // 保存乘法结果
 
 // // 是否有自陷异常
@@ -266,10 +266,10 @@ always @(*)
 
 // 乘法运算
 // 取得乘法运算的被乘数，如果是有符号乘法且被乘数是负数，那么取补码
-assign opdata1_mult = (((aluop_i == `EXE_MUL_OP) || (aluop_i == `EXE_MULT_OP) || (aluop_i == `EXE_MADD_OP) || (aluop_i == `EXE_MSUB_OP)) && (reg1_i[31] == 1'b1)) ? (~reg1_i + 1) : reg1_i;
+assign opdata1_mult = (((aluop_i == `EXE_MUL_OP) || (aluop_i == `EXE_MULT_OP) ) && (reg1_i[31] == 1'b1)) ? (~reg1_i + 1) : reg1_i;
 
 // 取得乘法运算的乘数，如果是有符号乘法且乘数是负数，那么取补码
-assign opdata2_mult = (((aluop_i == `EXE_MUL_OP) || (aluop_i == `EXE_MULT_OP) || (aluop_i == `EXE_MADD_OP) || (aluop_i == `EXE_MSUB_OP)) && (reg2_i[31] == 1'b1)) ? (~reg2_i + 1) : reg2_i;
+assign opdata2_mult = (((aluop_i == `EXE_MUL_OP) || (aluop_i == `EXE_MULT_OP) ) && (reg2_i[31] == 1'b1)) ? (~reg2_i + 1) : reg2_i;
 
 // 得到临时乘法结果，保存在变量 hilo_temp 中
 assign hilo_temp = opdata1_mult * opdata2_mult;
@@ -286,7 +286,7 @@ always @(*)
       begin
         mulres = {`ZeroWord, `ZeroWord};
       end
-    else if ((aluop_i == `EXE_MULT_OP) || (aluop_i == `EXE_MUL_OP)||(aluop_i == `EXE_MADD_OP) || (aluop_i == `EXE_MSUB_OP))
+    else if ((aluop_i == `EXE_MULT_OP) || (aluop_i == `EXE_MUL_OP))
       begin
         if(reg1_i[31] ^ reg2_i[31] == 1'b1)
           begin
@@ -304,69 +304,69 @@ always @(*)
   end
 
 // MADD, MADDU, MSUB, MSUBU
-always @(*)
-  begin
-    if(rst == `RstEnable)
-      begin
-        hilo_temp_o = {`ZeroWord, `ZeroWord};
-        cnt_o = 2'b00;
-        stallreq_for_madd_msub = `NoStop;
-        hilo_temp1 = {`ZeroWord, `ZeroWord};
-      end
-    else
-      begin
-        cnt_o = 2'b00;
-        stallreq_for_madd_msub = `NoStop;
-        hilo_temp_o = {`ZeroWord, `ZeroWord};
-        hilo_temp1 = {`ZeroWord, `ZeroWord};
-        case (aluop_i)
-          `EXE_MADD_OP, `EXE_MADDU_OP:
-            begin
-              if(cnt_i == 2'b00)
-                begin
-                  // 执行阶段第一个时钟周期
-                  hilo_temp_o = mulres;
-                  cnt_o = 2'b01;
-                  hilo_temp1 = {`ZeroWord, `ZeroWord};
-                  stallreq_for_madd_msub = `Stop;
-                end
-              else if(cnt_i == 2'b01)
-                begin
-                  // 执行阶段第二个时钟周期
-                  hilo_temp_o = {`ZeroWord, `ZeroWord};
-                  cnt_o = 2'b10;
-                  hilo_temp1 = hilo_temp_i + {HI, LO};
-                  stallreq_for_madd_msub = `NoStop;
-                end
-            end
-          `EXE_MSUB_OP, `EXE_MSUBU_OP:
-            begin
-              if(cnt_i == 2'b00)
-                begin
-                  // 执行阶段第一个时钟周期
-                  hilo_temp_o = ~mulres + 1;
-                  cnt_o = 2'b01;
-                  hilo_temp1 = {`ZeroWord, `ZeroWord};
-                  stallreq_for_madd_msub = `Stop;
-                end
-              else if(cnt_i == 2'b01)
-                begin
-                  // 执行阶段第二个时钟周期
-                  hilo_temp_o = {`ZeroWord, `ZeroWord};
-                  cnt_o = 2'b10;
-                  hilo_temp1 = hilo_temp_i + {HI, LO};
-                  stallreq_for_madd_msub = `NoStop;
-                end
-            end
-          default:
-            begin
-              hilo_temp_o = {`ZeroWord, `ZeroWord};
-              cnt_o = 2'b00;
-              stallreq_for_madd_msub = `NoStop;
-            end
-        endcase
-      end
-  end
+// always @(*)
+//   begin
+//     if(rst == `RstEnable)
+//       begin
+//         hilo_temp_o = {`ZeroWord, `ZeroWord};
+//         cnt_o = 2'b00;
+//         stallreq_for_madd_msub = `NoStop;
+//         hilo_temp1 = {`ZeroWord, `ZeroWord};
+//       end
+//     else
+//       begin
+//         cnt_o = 2'b00;
+//         stallreq_for_madd_msub = `NoStop;
+//         hilo_temp_o = {`ZeroWord, `ZeroWord};
+//         hilo_temp1 = {`ZeroWord, `ZeroWord};
+//         case (aluop_i)
+//           `EXE_MADD_OP, `EXE_MADDU_OP:
+//             begin
+//               if(cnt_i == 2'b00)
+//                 begin
+//                   // 执行阶段第一个时钟周期
+//                   hilo_temp_o = mulres;
+//                   cnt_o = 2'b01;
+//                   hilo_temp1 = {`ZeroWord, `ZeroWord};
+//                   stallreq_for_madd_msub = `Stop;
+//                 end
+//               else if(cnt_i == 2'b01)
+//                 begin
+//                   // 执行阶段第二个时钟周期
+//                   hilo_temp_o = {`ZeroWord, `ZeroWord};
+//                   cnt_o = 2'b10;
+//                   hilo_temp1 = hilo_temp_i + {HI, LO};
+//                   stallreq_for_madd_msub = `NoStop;
+//                 end
+//             end
+//           `EXE_MSUB_OP, `EXE_MSUBU_OP:
+//             begin
+//               if(cnt_i == 2'b00)
+//                 begin
+//                   // 执行阶段第一个时钟周期
+//                   hilo_temp_o = ~mulres + 1;
+//                   cnt_o = 2'b01;
+//                   hilo_temp1 = {`ZeroWord, `ZeroWord};
+//                   stallreq_for_madd_msub = `Stop;
+//                 end
+//               else if(cnt_i == 2'b01)
+//                 begin
+//                   // 执行阶段第二个时钟周期
+//                   hilo_temp_o = {`ZeroWord, `ZeroWord};
+//                   cnt_o = 2'b10;
+//                   hilo_temp1 = hilo_temp_i + {HI, LO};
+//                   stallreq_for_madd_msub = `NoStop;
+//                 end
+//             end
+//           default:
+//             begin
+//               hilo_temp_o = {`ZeroWord, `ZeroWord};
+//               cnt_o = 2'b00;
+//               stallreq_for_madd_msub = `NoStop;
+//             end
+//         endcase
+//       end
+//   end
 
 // 输出 DIV 模块的控制信息，获取 DIV 模块给出的结果
 always @(*)
@@ -453,7 +453,7 @@ always @(*)
 // 目前只有四条会导致暂停，所以就 stallreq 直接等于 stallreq_for_madd_msub 的值
 always @(*)
   begin
-    stallreq = stallreq_for_madd_msub || stallreq_for_div;
+    stallreq = stallreq_for_div;
   end
 
 // 得到最新的 HI/LO
@@ -685,12 +685,12 @@ always @(*)
         hi_o = mulres[63:32];
         lo_o = mulres[31:0];
       end
-    else if((aluop_i == `EXE_MSUB_OP) || (aluop_i == `EXE_MSUBU_OP) || (aluop_i == `EXE_MADD_OP) ||(aluop_i == `EXE_MADDU_OP) )
-      begin
-        whilo_o = `WriteEnable;
-        hi_o = hilo_temp1[63:32];
-        lo_o = hilo_temp1[31:0];
-      end
+    // else if((aluop_i == `EXE_MSUB_OP) || (aluop_i == `EXE_MSUBU_OP) || (aluop_i == `EXE_MADD_OP) ||(aluop_i == `EXE_MADDU_OP) )
+    //   begin
+    //     whilo_o = `WriteEnable;
+    //     hi_o = hilo_temp1[63:32];
+    //     lo_o = hilo_temp1[31:0];
+    //   end
     else if (aluop_i == `EXE_MTHI_OP)
       begin
         whilo_o  = `WriteEnable;

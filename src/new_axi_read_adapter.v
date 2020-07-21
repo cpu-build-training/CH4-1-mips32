@@ -19,7 +19,7 @@ module new_axi_read_adapter(
          wire[1:0]   arlock,
          wire[3:0]   arcache,
          wire[2:0]   arprot,
-         output reg  arvalid,
+         output wire  arvalid,
          input
          wire        arready,
 
@@ -81,7 +81,7 @@ assign data_valid = (reset == `RstEnable)? 1'b0: rvalid;
 
 // 1'b0 当前没有任务
 // 1'b1 正在与 slave 握手
-reg busy;
+// reg busy;
 
 always @(posedge clk)
   begin
@@ -89,11 +89,11 @@ always @(posedge clk)
       begin
         flushed <= 1'b0;
       end
-    else if (flush && busy)
+    else if (flush)
       begin
         flushed <= 1'b1;
       end
-    else if (busy == 1'b0)
+    else if (data_valid || address_valid)
       begin
         flushed <= 1'b0;
       end
@@ -106,52 +106,82 @@ assign araddr =  (address[31:29] == 3'b100 ||
 
 assign address_read_ready = (arready && arvalid)? `Ready : `NotReady;
 
-// 控制该模块的状态: busy
+// save address
 always @(posedge clk)
   begin
     if(reset == `RstEnable)
-      begin
-        busy <= 1'b0;
-        unmapped_address <= `ZeroWord;
-      end
-    else if (busy == 1'b0)
-      begin
-        // not busy
-        if (address_valid == `Valid)
-          begin
-            // 可以改变状态
-            busy <= 1'b1;
-            unmapped_address <= address;
-            // address_read_ready <= `Ready;
-          end
-      end
+      unmapped_address <= `ZeroWord;
+    else if(address_valid == `Valid)
+      unmapped_address <= address;
     else
       begin
-        // busy
-        // 控制 data 通道的行为
-        if (rvalid == `Valid)
-          begin
-            busy <= 1'b0;
-          end
+
       end
   end
 
-//  控制 address 通道的行为
+
+// 控制该模块的状态: busy
+// always @(posedge clk)
+//   begin
+//     if(reset == `RstEnable)
+//       begin
+//         busy <= 1'b0;
+//       end
+//     else if (busy == 1'b0)
+//       begin
+//         // not busy
+//         if (address_valid == `Valid)
+//           begin
+//             // 可以改变状态
+//             busy <= 1'b1;
+//             // address_read_ready <= `Ready;
+//           end
+//       end
+//     else
+//       begin
+//         // busy
+//         // 控制 data 通道的行为
+//         if (rvalid == `Valid)
+//           begin
+//             busy <= 1'b0;
+//           end
+//       end
+//   end
+
+// 如果当 address_valid 来临时， arready 没有就绪，那么需要存储
+reg stored_address_valid;
+
+assign arvalid = address_valid || stored_address_valid;
+
+
 always @(posedge clk)
   begin
     if(reset == `RstEnable)
-      begin
-        arvalid <= `InValid;
-      end
-    else if (busy == 1'b0 && address_valid == `Valid)
-      begin
-        arvalid <= `Valid;
-      end
-    else if(arready == `Ready && busy == 1'b1)
-      begin
-        arvalid <= `InValid;
-      end
+      stored_address_valid <= `InValid;
+    else if (address_valid && (arready == `NotReady))
+      stored_address_valid <= `Valid;
+    else if (stored_address_valid && arready)
+      stored_address_valid <= `InValid;
+    else begin
+
+    end
   end
+//  控制 address 通道的行为
+// always @(posedge clk)
+//   begin
+//     if(reset == `RstEnable)
+//       begin
+//         arvalid <= `InValid;
+//       end
+//     else if (busy == 1'b0 && address_valid == `Valid)
+//       begin
+//         arvalid <= `Valid;
+//       end
+//     else if(arready == `Ready && busy == 1'b1)
+//       begin
+//         arvalid <= `InValid;
+//       end
+//   end
 
 
 // 只让 address_read_ready 停留一个周期

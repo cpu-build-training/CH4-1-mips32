@@ -58,8 +58,8 @@
 `define EXE_MUL         6'b000010
 `define EXE_MULT        6'b011000
 `define EXE_MULTU       6'b011001
-`define EXE_MADD        6'b000000
-`define EXE_MADDU       6'b000001
+// `define EXE_MADD        6'b000000
+// `define EXE_MADDU       6'b000001
 `define EXE_MSUB        6'b000100
 `define EXE_MSUBU       6'b000101
 `define EXE_DIV         6'b011010
@@ -136,10 +136,10 @@
 `define EXE_CLZ_OP      8'b01100000
 `define EXE_CLO_OP      8'b01100001
 `define EXE_MUL_OP      8'b00000010
-`define EXE_MADD_OP        8'b01000000
-`define EXE_MADDU_OP       8'b01000001
-`define EXE_MSUB_OP        8'b01000100
-`define EXE_MSUBU_OP       8'b01000101
+// `define EXE_MADD_OP        8'b01000000
+// `define EXE_MADDU_OP       8'b01000001
+// `define EXE_MSUB_OP        8'b01000100
+// `define EXE_MSUBU_OP       8'b01000101
 `define EXE_DIV_OP         8'b00011010
 `define EXE_DIVU_OP        8'b00011011
 `define EXE_J_OP           8'b01000010
