@@ -31,9 +31,9 @@ module inst_cache(
     output        inst_addr_ready,
     output [31:0] inst_addr_out,
     output        inst_data_ok,
-    output [31:0] inst_rdata,
+    output [31:0] inst_rdata
     
-    input         inst_cache
+    // input         inst_cache
     );
     
     wire rst;
@@ -68,6 +68,9 @@ module inst_cache(
             inst_cache_r <= inst_cache;
         end
     end
+
+    wire inst_cache = inst_addr[31:29] == 3'b101 ? 1'b0 : 1'b1;
+    // assign inst_cache = inst_addr_r[31:29] == 3'b101 ? 1'b0 : 1'b1;
 
     wire flushed;
     assign flushed = flush ? 1'b1 :
@@ -179,18 +182,18 @@ module inst_cache(
             work_state <= state_reset;
             wait_data <= 32'b0;
             write_counter <= 3'b000;
-        end else if (work_state == state_reset && inst_req == 1'b1) begin
+        end else if (work_state == state_reset && inst_req == 1'b1) begin                   // state: 0
             if ((work0 & work1 & work2 & work3) == 1'b1 && inst_cache == 1'b1) begin
                 work_state <= state_lookup;
             end else begin
                 work_state <= state_access_ram_0;
             end
-        end else if (work_state == state_access_ram_0 && arready == 1'b1) begin
+        end else if (work_state == state_access_ram_0 && arready == 1'b1) begin             // state: 2
             work_state <= state_access_ram_1;
-        end else if (work_state == state_access_ram_1 && rvalid) begin
+        end else if (work_state == state_access_ram_1 && rvalid) begin                      // state: 3
             work_state <= state_data_ready;
             wait_data <= rdata;
-        end else if (work_state == state_data_ready) begin
+        end else if (work_state == state_data_ready) begin                                  // state: 4
             if (inst_req) begin
                 if ((work0 & work1 & work2 & work3) == 1'b1 && inst_cache == 1'b1) begin
                     work_state <= state_lookup;
@@ -198,7 +201,7 @@ module inst_cache(
                     work_state <= state_access_ram_0;
                 end
             end else work_state <= state_reset;
-        end else if (work_state == state_lookup) begin
+        end else if (work_state == state_lookup) begin                                      // state: 1
             if (hit) begin
                 if (inst_req) begin
                     if ((work0 & work1 & work2 & work3) == 1'b1 && inst_cache == 1'b1) begin
@@ -206,12 +209,13 @@ module inst_cache(
                     end else begin
                         work_state <= state_access_ram_0;
                     end
-                end else work_state <= state_reset;
-            end
-            else work_state <= state_miss_access_ram_0;
-        end else if (work_state == state_miss_access_ram_0 && arready == 1'b1) begin
+                end else 
+                    work_state <= state_reset;
+            end else 
+                work_state <= state_miss_access_ram_0;
+        end else if (work_state == state_miss_access_ram_0 && arready == 1'b1) begin        // state: 5
             work_state <= state_miss_access_ram_1;
-        end else if (work_state == state_miss_access_ram_1) begin
+        end else if (work_state == state_miss_access_ram_1) begin                           // state: 6
             if (rvalid) begin
                 write_counter <= write_counter + 1'b1;
                 if (write_counter == inst_addr_r[4:2]) wait_data = rdata;
@@ -220,7 +224,7 @@ module inst_cache(
                 write_counter <= 3'b000;
                 work_state <= state_miss_update;
             end
-        end else if (work_state == state_miss_update) begin
+        end else if (work_state == state_miss_update) begin                                 // state: 7
             work_state <= state_data_ready;
         end
     end
@@ -366,8 +370,21 @@ module inst_cache(
 
     assign rready  = 1'b1;
     
-    // assign inst_addr_ready = (work_state == state_reset || work_state == state_data_ready) ? 1'b1 : 1'b0;
-    assign inst_addr_ready = (arready && arvalid)? `Ready : `NotReady;
+    // reg inst_addr_is_ready;  // 计数器,让inst_addr_ready的高只保持一个周期
+    // always @ (posedge clk) begin
+    //     if (rst) begin
+    //         inst_addr_is_ready = 1'b0;
+    //     end else if (inst_addr_is_ready == 1'b1) begin
+    //         inst_addr_is_ready <= 1'b0;
+    //         inst_addr_ready <= `NotReady;
+    //     end else if (work_state == state_reset || work_state == state_lookup || work_state == state_data_ready) begin
+    //         inst_addr_is_ready <= 1'b1;
+    //         inst_addr_ready <= `Ready;
+    //     end
+    // end
+    // assign inst_addr_ready = (work_state == state_lookup || work_state == state_access_ram_0) ? `Ready : `NotReady;
+    // assign inst_addr_ready = (arready && arvalid)? `Ready : `NotReady;
+    assign inst_addr_ready = inst_req;
     assign inst_data_ok = (work_state == state_data_ready) ? 1'b1 : 
                           (work_state == state_lookup) ? hit :1'b0;
     assign inst_rdata = (work_state == state_data_ready && ~flushed) ? wait_data :

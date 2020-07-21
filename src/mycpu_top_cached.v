@@ -430,9 +430,9 @@ inst_cache inst_cache_0(
     .inst_addr(rom_addr),
     .inst_addr_out(current_inst_address),
     .inst_rdata(rom_data),
-    .inst_data_ok(inst_valid),
+    .inst_data_ok(inst_valid)
     
-    .inst_cache(1'b0)
+    // .inst_cache(1'b0)
 );
 
 
