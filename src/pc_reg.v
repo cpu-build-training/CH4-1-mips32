@@ -55,7 +55,7 @@ always @(posedge clk )
         branch_flag <= 1'b0;
         branch_target_address <= `ZeroWord;
       end
-    else if (branch_flag_i == 1'b1)
+    else if (branch_flag_i == 1'b1 && pc_read_ready != `Ready)
       begin
         branch_flag <= 1'b1;
         branch_target_address <= branch_target_address_i;
@@ -65,32 +65,6 @@ always @(posedge clk )
 
       end
   end
-
-// always @(posedge clk)
-//   begin
-//     if (valid_pc == `Valid && ce== `ChipEnable && pc_read_ready == `Ready )
-//       begin
-//         valid_pc <= `InValid;
-//       end
-//   end
-
-// reg flushed;
-
-
-// // flush 以后，丢弃了最新收到的 pc_read_ready(也就是这一次不会直接增加)
-// always @(posedge clk)
-//   begin
-//     if (rst == `RstEnable)
-//       flushed <= 1'b0;
-//     else if (flush  == 1'b1)
-//       flushed <= 1'b1;
-//     else if (pc_read_ready == `Ready)
-//       flushed <= 1'b0;
-//     else
-//       begin
-
-//       end
-//   end
 
 always @(posedge clk)
   begin
@@ -113,7 +87,7 @@ always @(posedge clk)
       end
     else if(pc_read_ready == `Ready)
       begin
-        if(branch_flag == `Branch)
+        if(branch_flag == `Branch || branch_flag_i == `Branch)
           begin
             pc <= branch_target_address;
           end
