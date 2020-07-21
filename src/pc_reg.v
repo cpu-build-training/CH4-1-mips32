@@ -113,7 +113,7 @@ always @(posedge clk)
       end
     else if(pc_read_ready == `Ready)
       begin
-        if(branch_flag == `Branch)
+        if(branch_flag == `Branch || branch_flag_i == `Branch)
           begin
             pc <= branch_target_address;
           end
