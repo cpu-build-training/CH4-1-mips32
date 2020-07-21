@@ -12,7 +12,7 @@ module new_axi_read_adapter(
          // read address channel signals
          output
          wire[3:0]   arid,
-         wire[31:0]   araddr,
+         wire[31:0]  araddr,
          wire[3:0]   arlen,
          wire[2:0]   arsize,
          wire[1:0]   arburst,
@@ -125,8 +125,7 @@ always @(posedge clk)
             // address_read_ready <= `Ready;
           end
       end
-    else
-      begin
+    else begin
         // busy
         // 控制 data 通道的行为
         if (rvalid == `Valid)

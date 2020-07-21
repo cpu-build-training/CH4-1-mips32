@@ -10,7 +10,7 @@ module openmips(
          output  wire[`RegBus]   rom_addr_o,
          output wire             rom_ce_o,
          wire                    inst_ready,
-         input wire                    pc_ready,
+         input wire              pc_ready,
          input wire[`RegBus]     current_inst_address,
 
 

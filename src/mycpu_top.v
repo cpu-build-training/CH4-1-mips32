@@ -426,54 +426,16 @@ new_axi_read_adapter new_axi_read_adapter_inst(
                        .rready(ir_rready),
                        .rlast(ir_rlast),
 
+
                        .address(rom_addr),
                        .address_valid(rom_re),
                        .address_read_ready(pc_ready),
 
                        .data_valid(inst_valid),
                        .data(rom_data),
+
                        .data_address(current_inst_address)
-
                      );
-
-// axi_read_adapter axi_read_adapter0(
-//                    .clk(aclk),
-//                    .reset(aresetn),
-//                    .flush(flush),
-//                    .arid(arid),
-//                    .araddr(araddr),
-//                    .arlen(arlen),
-//                    .arsize(arsize),
-//                    .arburst(arburst),
-//                    .arlock(arlock),
-//                    .arcache(arcache),
-//                    .arprot(arprot),
-//                    .arvalid(arvalid),
-//                    .arready(arready),
-//                    .rid(rid),
-//                    .rdata(rdata),
-//                    .rresp(rresp),
-//                    .rlast(rlast),
-//                    .rvalid(rvalid),
-//                    .rready(rready),
-
-//                    .pc(rom_addr),
-//                    .pc_re(rom_re),
-//                    .pc_ready(pc_ready),
-//                    .inst_read_ready(inst_ready),
-//                    .inst(rom_data),
-//                    .inst_valid(inst_valid),
-//                    .current_inst_address(current_inst_address),
-//                    .if_id_full(if_id_full),
-//                    .axi_read_state(axi_read_state),
-
-//                    .mem_re(ram_re),
-//                    .mem_addr(ram_addr),
-//                    .mem_data_read_ready(mem_data_ready),
-//                    .mem_data_valid(ram_read_ready),
-//                    .mem_data(ram_data_i),
-//                    .mem_addr_read_ready(mem_addr_read_ready)
-//                  );
 
 
 // data write
