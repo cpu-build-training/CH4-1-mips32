@@ -16,8 +16,8 @@ module new_if_id (
          input wire id_next_in_delay_slot,
 
 
-         output reg[`InstAddrBus] id_pc,
-         reg[`InstBus] id_inst,
+         output wire[`InstAddrBus] id_pc,
+         output wire[`InstBus] id_inst,
 
          // 是否 axi 可以读取下个 pc
          output wire next_pc_valid,
@@ -38,6 +38,9 @@ always @(posedge clk)
   end
 
 assign next_pc_valid = (valid && stall[1] == `NoStop) || delayed_next_pc_valid;
+
+assign id_pc = (rst == `RstEnable) ? `ZeroWord: (stall[1] == `NoStop && valid) ? if_pc : ((stall[1] == `NoStop) ? stored_pc :`ZeroWord );
+assign id_inst = (rst == `RstEnable) ? `ZeroWord: (stall[1] == `NoStop && valid) ? if_inst : ((stall[1] == `NoStop) ? stored_inst: `ZeroWord) ;
 
 // 在 stall 时存储，随后输出
 always @(posedge clk)
@@ -72,22 +75,16 @@ always @(posedge clk)
       if (rst == `RstEnable || flush == `Valid)
         begin
           // on reset or flush
-          id_pc <= `ZeroWord;
-          id_inst <= `ZeroWord;
           delayed_next_pc_valid <= `InValid;
         end
       else
         begin
           if (valid == `Valid && stall[1] == `NoStop)
             begin
-              id_pc <= if_pc;
-              id_inst <= if_inst;
               delayed_next_pc_valid <= `InValid;
             end
           else if (stall[1] == `NoStop && stored_inst != `ZeroWord)
             begin
-              id_pc <= stored_pc;
-              id_inst <= stored_inst;
               delayed_next_pc_valid <= `Valid;
             end
           else if (rst ==  `RstDisable && last_rst == `RstEnable)
@@ -96,8 +93,6 @@ always @(posedge clk)
             end
           else
             begin
-              id_pc <= `ZeroWord;
-              id_inst <= `ZeroWord;
               delayed_next_pc_valid <= `InValid;
             end
         end

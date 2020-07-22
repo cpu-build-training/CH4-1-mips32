@@ -99,9 +99,9 @@ always @(posedge clk)
       end
   end
 
-assign araddr =  (address[31:29] == 3'b100 ||
-                  address[31:29] == 3'b101
-                 )? { 3'b0,address[28:0]} : unmapped_address;
+assign araddr =  (unmapped_address[31:29] == 3'b100 ||
+                  unmapped_address[31:29] == 3'b101
+                 )? { 3'b0,unmapped_address[28:0]} : unmapped_address;
 
 
 assign address_read_ready = (arready && arvalid)? `Ready : `NotReady;
@@ -118,35 +118,6 @@ always @(posedge clk)
 
       end
   end
-
-
-// 控制该模块的状态: busy
-// always @(posedge clk)
-//   begin
-//     if(reset == `RstEnable)
-//       begin
-//         busy <= 1'b0;
-//       end
-//     else if (busy == 1'b0)
-//       begin
-//         // not busy
-//         if (address_valid == `Valid)
-//           begin
-//             // 可以改变状态
-//             busy <= 1'b1;
-//             // address_read_ready <= `Ready;
-//           end
-//       end
-//     else
-//       begin
-//         // busy
-//         // 控制 data 通道的行为
-//         if (rvalid == `Valid)
-//           begin
-//             busy <= 1'b0;
-//           end
-//       end
-//   end
 
 // 如果当 address_valid 来临时， arready 没有就绪，那么需要存储
 reg stored_address_valid;
@@ -166,31 +137,4 @@ always @(posedge clk)
 
     end
   end
-//  控制 address 通道的行为
-// always @(posedge clk)
-//   begin
-//     if(reset == `RstEnable)
-//       begin
-//         arvalid <= `InValid;
-//       end
-//     else if (busy == 1'b0 && address_valid == `Valid)
-//       begin
-//         arvalid <= `Valid;
-//       end
-//     else if(arready == `Ready && busy == 1'b1)
-//       begin
-//         arvalid <= `InValid;
-//       end
-//   end
-
-
-// 只让 address_read_ready 停留一个周期
-// always @(posedge clk )
-//   begin
-//     if(reset == `RstEnable)
-//       address_read_ready <= `NotReady;
-//     if (address_read_ready == `Ready)
-//       address_read_ready <= `NotReady;
-//   end
-
 endmodule
