@@ -1,5 +1,5 @@
 `include "defines.v"
-module mycpu_top_cached(
+module mycpu_top_icached(
 
          input
          wire aclk,
