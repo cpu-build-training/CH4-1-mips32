@@ -39,8 +39,8 @@ module id(
          // 来自 ex, mem 的输出
          // 处于执行阶段的指令的运算结果
          input
-         wire             ex_wreg_i,
-         wire[`RegBus]    ex_wdata_i,
+         wire                 ex_wreg_i,
+         wire[`RegBus]        ex_wdata_i,
          wire[`RegAddrBus]    ex_wd_i,
 
          // 处于访存阶段的指令的运算结果
@@ -56,7 +56,7 @@ module id(
          reg                  branch_flag_o,
          reg[`RegBus]         branch_target_address_o,
          reg[`RegBus]         link_addr_o,
-         output reg                  is_in_delayslot_o,
+         output reg           is_in_delayslot_o,
 
          // 当前处于译码阶段的指令
          output wire[`RegBus]   inst_o,
