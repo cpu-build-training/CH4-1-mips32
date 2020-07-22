@@ -223,22 +223,7 @@ wire[`RegBus]       cp0_prid_o;
 wire[`RegBus]       cp0_badvaddr_o;
 
 
-
-reg stall_pc;
-always @(*)
-  begin
-    if (rst == `RstEnable)
-      stall_pc = `Stop;
-    else if ((pc_ready == `Ready))
-      stall_pc = `NoStop;
-    else
-      stall_pc = `Stop;
-  end
-
 wire ce;
-
-// pc 能否更新
-// wire next_pc_valid;
 
 // 我好像一直都在弄错 rom_ce_o 的含义
 // 目前这个是 pc_re 的意思，表示 valid
@@ -248,7 +233,7 @@ wire ce;
 pc_reg  pc_reg0(
           .clk(clk), .rst(rst), .pc(pc), .ce(ce),
           .stall(!rom_data_valid),
-          .pc_read_ready(pc_ready),
+          .pc_read_ready(rom_ce_o),
 
           .branch_flag_i(pc_branch_flag_i),
           .branch_target_address_i(pc_branch_target_address_i),
@@ -267,28 +252,7 @@ assign debug_wb_rf_wnum = wb_wd_i;
 wire inst_valid;
 assign inst_valid = rom_data_valid;
 
-// IF/ID 实例化
-// if_id if_id0(
-//         .clk(clk), .rst(rst), .if_pc(current_inst_address),
-//         .if_inst(rom_data_i), .id_pc(id_pc_i),
-//         .id_inst(id_inst_i),
-//         .stall(stall),
-
-//         .id_next_in_delay_slot(id_next_inst_in_delayslot_o),
-//         .id_in_delay_slot(id_is_in_delayslot_i),
-
-//         .branch_flag(pc_branch_flag_i),
-//         .inst_valid(inst_valid),
-//         .inst_ready(if_id_inst_ready),
-//         .pc_ready(!stall_pc),
-//         .stallreq_for_if(stallreq_from_if),
-//         .stallreq_for_ex(stallreq_from_if_for_ex),
-//         .flush(flush),
-//         .full(full)
-//       );
-
 assign inst_ready = 1'b1;
-// assign full = 1'b0;
 
 new_if_id new_if_id0(
             .clk(clk), .rst(rst), .flush(flush),

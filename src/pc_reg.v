@@ -50,7 +50,7 @@ always @(posedge clk )
         branch_flag <= 1'b0;
         branch_target_address <= `ZeroWord;
       end
-    else if (pc_read_ready == `Ready)
+    else if (branch_flag && pc_read_ready == `Ready)
       begin
         branch_flag <= 1'b0;
         branch_target_address <= `ZeroWord;
@@ -85,18 +85,20 @@ always @(posedge clk)
         pc <= new_pc;
         // valid_pc <= `Valid;
       end
+    else if (branch_flag_i == `Branch && pc_read_ready == `Ready)
+      begin
+        pc <= branch_target_address_i;
+      end
+    else if (branch_flag == `Branch && pc_read_ready == `Ready)
+      begin
+        pc <= branch_target_address;
+      end
     else if(pc_read_ready == `Ready)
       begin
-        if(branch_flag == `Branch || branch_flag_i == `Branch)
-          begin
-            pc <= branch_target_address;
-          end
-        else
-          begin
-            //  按照字节寻址
-            pc <= pc + `InstAddrIncrement;
-          end
-        // valid_pc <= `Valid;
+        begin
+          //  按照字节寻址
+          pc <= pc + `InstAddrIncrement;
+        end
       end
     // if stall, then pc remain the same
   end
