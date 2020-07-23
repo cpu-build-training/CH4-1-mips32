@@ -62,7 +62,9 @@ always @(posedge clk)
 // TODO
 // wire testb;
 // assign testb = (addr_ok == 1'b1 || addr_ok_last_long == 1'b1)? 1'b0: enable;
-assign req = (addr_ok == 1'b1 || addr_ok_last_long == 1'b1)? 1'b0: enable;
+// assign req = (addr_ok == 1'b1 || addr_ok_last_long == 1'b1) ? 1'b0 : enable;
+assign req = (addr_ok_last_long == 1'b1) ? 1'b0 : enable;
+// assign req = enable;
 assign wr = we;
 assign select = mem_sel_i;
 assign addr = mem_addr_i;

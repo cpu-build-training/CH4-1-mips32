@@ -62,6 +62,8 @@ module inst_cache(
                                 inst_addr_r[31:29] == 3'b101) ? 
                                 { 3'b0, inst_addr_r[28:0]} : inst_addr_r;
 
+    wire inst_cache = inst_addr[31:29] == 3'b101 ? 1'b0 : 1'b1;
+    // assign inst_cache = inst_addr_r[31:29] == 3'b101 ? 1'b0 : 1'b1;
     reg inst_cache_r;
     always @ (posedge clk) begin
         if (inst_req == 1'b1) begin
@@ -69,18 +71,17 @@ module inst_cache(
         end
     end
 
-    wire inst_cache = inst_addr[31:29] == 3'b101 ? 1'b0 : 1'b1;
-    // assign inst_cache = inst_addr_r[31:29] == 3'b101 ? 1'b0 : 1'b1;
-
     wire flushed;
-    assign flushed = flush ? 1'b1 :
-                     (rst || work_state == state_reset || work_state == state_lookup) ? 1'b0 : flushed;
-    // always @ (posedge clk) begin
-    //     if (rst || work_state == state_reset || work_state == state_lookup) begin
-    //         flushed <= 1'b0;
-    //     end else if (flush)
-    //         flushed <= 1'b1;
-    // end
+    // assign flushed = flush ? 1'b1 :
+    //                  (rst || work_state == state_reset || work_state == state_lookup) ? 1'b0 : flushed;
+    reg flushed_r;
+    always @ (posedge clk) begin
+        if (rst || work_state == state_reset || work_state == state_lookup) begin
+            flushed_r <= 1'b0;
+        end else if (flush)
+            flushed_r <= 1'b1;
+    end
+    assign flushed = flush || flushed_r;
     
     icache_tag icache_tag_0(rst, clk, tag0_wen, tag_wdata, access_cache_addr, hit0, valid0, work0, op0);
     icache_tag icache_tag_1(rst, clk, tag1_wen, tag_wdata, access_cache_addr, hit1, valid1, work1, op1);

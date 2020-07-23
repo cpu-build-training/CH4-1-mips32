@@ -34,7 +34,7 @@ module mycpu_top_dcached(
          input
          wire[3:0]   bid,
          wire[1:0]   bresp,
-         input wire        bvalid,
+         input wire  bvalid,
          output
          wire        bready,
 
@@ -43,25 +43,25 @@ module mycpu_top_dcached(
          output
          wire[3:0]   arid,
          wire[31:0]  araddr,
-         wire[3:0]  arlen,
+         wire[3:0]   arlen,
          wire[2:0]   arsize,
          wire[1:0]   arburst,
          wire[1:0]   arlock,
          wire[3:0]   arcache,
          wire[2:0]   arprot,
-         output wire        arvalid,
+         output wire arvalid,
          input
          wire        arready,
 
          // read data channel signals
          input
-         wire[3:0]    rid,
-         wire[31:0]   rdata,
-         wire[1:0]    rresp,
-         input wire         rlast,
-         wire         rvalid,
+         wire[3:0]   rid,
+         wire[31:0]  rdata,
+         wire[1:0]   rresp,
+         input wire  rlast,
+         wire        rvalid,
          output
-         wire         rready,
+         wire        rready,
 
 
          // port for debug
@@ -91,7 +91,7 @@ wire[`RegBus] current_inst_address;
 wire flush;
 wire          mem_addr_read_ready;
 wire          if_id_full;
-wire[1:0]          axi_read_state;
+wire[1:0]     axi_read_state;
 
 
 
@@ -226,14 +226,14 @@ axi_crossbar_0 axi_crossbar_0_merge (
 
 
 // memory write
-wire[3:0] mw_awid;
-wire[31:0] mw_awaddr;
-wire[3:0]  mw_awlen;
-wire[2:0]  mw_awsize;
-wire[1:0]  mw_awburst;
-wire[1:0]  mw_awlock;
-wire[3:0]  mw_awcache;
-wire[2:0]  mw_awprot;
+wire[3:0]   mw_awid;
+wire[31:0]  mw_awaddr;
+wire[3:0]   mw_awlen;
+wire[2:0]   mw_awsize;
+wire[1:0]   mw_awburst;
+wire[1:0]   mw_awlock;
+wire[3:0]   mw_awcache;
+wire[2:0]   mw_awprot;
 wire        mw_awvalid;
 wire        mw_awready;
 wire[3:0]   mw_wid;
@@ -248,40 +248,40 @@ wire        mw_bvalid;
 wire        mw_bready;
 
 wire[3:0]   mr_arid;
-wire[31:0]   mr_araddr;
+wire[31:0]  mr_araddr;
 wire[3:0]   mr_arlen;
 wire[2:0]   mr_arsize;
 wire[1:0]   mr_arburst;
 wire[1:0]   mr_arlock;
 wire[3:0]   mr_arcache;
 wire[2:0]   mr_arprot;
-wire  mr_arvalid;
-wire   mr_arready;
-wire  mr_flush;
-wire[3:0]    mr_rid;
-wire[31:0]   mr_rdata;
-wire[1:0]    mr_rresp;
-wire         mr_rlast;
-wire         mr_rvalid;
-wire         mr_rready;
+wire        mr_arvalid;
+wire        mr_arready;
+wire        mr_flush;
+wire[3:0]   mr_rid;
+wire[31:0]  mr_rdata;
+wire[1:0]   mr_rresp;
+wire        mr_rlast;
+wire        mr_rvalid;
+wire        mr_rready;
 
 wire[3:0]   ir_arid;
-wire[31:0]   ir_araddr;
+wire[31:0]  ir_araddr;
 wire[3:0]   ir_arlen;
 wire[2:0]   ir_arsize;
 wire[1:0]   ir_arburst;
 wire[1:0]   ir_arlock;
 wire[3:0]   ir_arcache;
 wire[2:0]   ir_arprot;
-wire  ir_arvalid;
-wire   ir_arready;
-wire  ir_flush;
-wire[3:0]    ir_rid;
-wire[31:0]   ir_rdata;
-wire[1:0]    ir_rresp;
-wire         ir_rlast;
-wire         ir_rvalid;
-wire         ir_rready;
+wire        ir_arvalid;
+wire        ir_arready;
+wire        ir_flush;
+wire[3:0]   ir_rid;
+wire[31:0]  ir_rdata;
+wire[1:0]   ir_rresp;
+wire        ir_rlast;
+wire        ir_rvalid;
+wire        ir_rready;
 
 assign s_axi_awid = {4'b0, mw_awid};
 assign s_axi_awaddr = {32'b0, mw_awaddr};
@@ -336,7 +336,7 @@ wire[`RegBus] data_rdata;
 // data r/w
 dcache dcache_0(
     .clk(aclk),
-    .rst(aresetn),
+    .rstn(aresetn),
 
 
     // AXI
@@ -393,7 +393,9 @@ dcache dcache_0(
     .data_rdata(data_rdata),
 
     .data_sel(data_select),
-    .data_wdata(data_wdata)
+    .data_wdata(data_wdata),
+
+    .data_cache(1'b0)
 );
 
 
