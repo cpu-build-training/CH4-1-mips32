@@ -237,7 +237,7 @@ module dcache(
                     work_state <= state_access_ram_write_2;
             end 
             state_access_ram_write_2: begin
-                // if (bvalid)
+                if (bvalid)
                     work_state <= state_data_ready;
             end 
             state_lookup_read: begin // cache read
@@ -525,7 +525,8 @@ module dcache(
     
     
     // data sram like
-    assign data_addr_ok = 1'b1;
+    // assign data_addr_ok = 1'b1;
+    assign data_addr_ok = ((work_state == state_reset || work_state == state_data_ready || work_state == state_lookup_read) && data_req) ? 1'b1 : 1'b0;
     assign data_data_ok = (work_state == state_data_ready) ? 1'b1 : 
                           (work_state == state_lookup_read && hit) ? 1'b1 :
                           1'b0;
