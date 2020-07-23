@@ -22,7 +22,7 @@ module new_if_id (
          // 是否 axi 可以读取下个 pc
          output wire next_pc_valid,
 
-         output reg id_in_delay_slot
+         output wire id_in_delay_slot
        );
 
 reg[`RegBus] stored_inst;
@@ -56,7 +56,7 @@ always @(posedge clk)
           stored_inst <= if_inst;
           stored_pc <= if_pc;
         end
-      else if (stall[1] == `NoStop && stored_inst != `ZeroWord)
+      else if (stall[1] == `NoStop && stored_pc != `ZeroWord)
         begin
           // 此时旧值正好传给 id_*，所以清零
           stored_inst <= `ZeroWord;
@@ -83,7 +83,7 @@ always @(posedge clk)
             begin
               delayed_next_pc_valid <= `InValid;
             end
-          else if (stall[1] == `NoStop && stored_inst != `ZeroWord)
+          else if (stall[1] == `NoStop && stored_pc != `ZeroWord)
             begin
               delayed_next_pc_valid <= `Valid;
             end
@@ -117,17 +117,18 @@ always @(posedge clk)
     else if (valid == `Valid)
       begin
         in_delay_slot<=id_next_in_delay_slot;
-
       end
     else
       begin
 
       end
 
-    // 为了产生一个周期的延迟，和其他数据同步。
-    if(rst == `RstEnable)
-      id_in_delay_slot <= `False_v;
-    else
-      id_in_delay_slot <= (valid == `Valid)? in_delay_slot:`False_v;
+    // // 为了产生一个周期的延迟，和其他数据同步。
+    // if(rst == `RstEnable)
+    //   id_in_delay_slot <= `False_v;
+    // else
+    //   id_in_delay_slot <= (valid == `Valid)? in_delay_slot:`False_v;
   end
+
+assign id_in_delay_slot = (rst == `RstEnable || id_pc == `ZeroWord)? 1'b0: in_delay_slot;
 endmodule
