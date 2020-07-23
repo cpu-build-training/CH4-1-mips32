@@ -55,14 +55,15 @@ module dcache(
     input  [31:0] data_wdata,
     output        data_addr_ok,
     output        data_data_ok,
-    output [31:0] data_rdata,
+    output [31:0] data_rdata
 
-    input         data_cache
+    // input         data_cache
     );
     
     wire rst;
     assign rst = ~rstn;
     
+    wire data_cache = data_addr[31:29] == 3'b101 ? 1'b0 : 1'b1;
 
     wire[31:0] data_addr_mapped;
     assign data_addr_mapped = (data_addr[31:29] == 3'b100 ||

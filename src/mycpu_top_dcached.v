@@ -17,7 +17,7 @@ module mycpu_top_dcached(
          wire[1:0]   awlock,
          wire[3:0]   awcache,
          wire[2:0]   awprot,
-         output wire         awvalid,
+         output wire awvalid,
          input
          wire    awready,
 
@@ -393,9 +393,9 @@ dcache dcache_0(
     .data_rdata(data_rdata),
 
     .data_sel(data_select),
-    .data_wdata(data_wdata),
+    .data_wdata(data_wdata)
 
-    .data_cache(1'b0)
+    // .data_cache(1'b0)
 );
 
 
