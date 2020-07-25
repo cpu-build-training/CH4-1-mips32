@@ -39,8 +39,12 @@ always @(posedge clk)
 
 assign next_pc_valid = (valid && stall[1] == `NoStop) || delayed_next_pc_valid;
 
-assign id_pc = (rst == `RstEnable) ? `ZeroWord: (stall[1] == `NoStop && valid) ? if_pc : ((stall[1] == `NoStop) ? stored_pc :`ZeroWord );
-assign id_inst = (rst == `RstEnable) ? `ZeroWord: (stall[1] == `NoStop && valid) ? if_inst : ((stall[1] == `NoStop) ? stored_inst: `ZeroWord) ;
+assign id_pc = (rst == `RstEnable) ? `ZeroWord: 
+               (stall[1] == `NoStop && valid) ? if_pc :
+               ((stall[1] == `NoStop) ? stored_pc :`ZeroWord );
+assign id_inst = (rst == `RstEnable) ? `ZeroWord: 
+                 (stall[1] == `NoStop && valid) ? if_inst : 
+                 ((stall[1] == `NoStop) ? stored_inst: `ZeroWord);
 
 // 在 stall 时存储，随后输出
 always @(posedge clk)

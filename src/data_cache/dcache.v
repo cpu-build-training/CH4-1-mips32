@@ -195,11 +195,15 @@ module dcache(
             state_reset: begin 
                 if (data_req == 1'b1) begin
                     if (data_wr == 1'b0) begin
-                        if (work0 && work1 && data_cache) work_state <= state_lookup_read;
-                        else work_state <= state_access_ram_read_0;
+                        if (work0 && work1 && data_cache)
+                            work_state <= state_lookup_read;
+                        else
+                            work_state <= state_access_ram_read_0;
                     end else if (data_wr == 1'b1) begin
-                        if (work0 && work1 && data_cache) work_state <= state_lookup_write;
-                        else work_state <= state_access_ram_write_0;
+                        if (work0 && work1 && data_cache)
+                            work_state <= state_lookup_write;
+                        else
+                            work_state <= state_access_ram_write_0;
                     end
                 end
             end
