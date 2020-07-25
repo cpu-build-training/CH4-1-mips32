@@ -44,7 +44,7 @@ reg[`RegBus] next_pc;
 reg branch_flag;
 reg[`RegBus] branch_target_address;
 
-assign pc = (branch_flag_i ? branch_target_address_i : next_pc);
+assign pc = flush ? new_pc : (branch_flag_i ? branch_target_address_i : next_pc);
 
 // 存储每次收到的 branch
 always @(posedge clk )
