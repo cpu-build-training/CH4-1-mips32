@@ -1,5 +1,5 @@
 `include "defines.v"
-module mycpu_top_dcached_wbuffered(
+module mycpu_top_idcached(
 
          input
          wire aclk,
@@ -217,8 +217,8 @@ axi_crossbar_0 axi_crossbar_0_merge (
                  .m_axi_rresp(rresp),      // input wire [1 : 0] m_axi_rresp
                  .m_axi_rlast(rlast),      // input wire [0 : 0] m_axi_rlast
                  .m_axi_rvalid(rvalid),    // input wire [0 : 0] m_axi_rvalid
-                 .m_axi_rready(rready)     // output wire [0 : 0] m_axi_rready
-);
+                 .m_axi_rready(rready)    // output wire [0 : 0] m_axi_rready
+               );
 
 
 
@@ -332,41 +332,12 @@ wire data_addr_ok;
 wire data_data_ok;
 wire[`RegBus] data_rdata;
 
-wire dch_wbf_wreq;
-wire dch_wbf_wreq_recvd;
-wire dch_wbf_wdone;
-
-wire [31:0] dch_wbf_wdata_paddr;
-wire [31:0] dch_wbf_wdata_bank0;
-wire [31:0] dch_wbf_wdata_bank1;
-wire [31:0] dch_wbf_wdata_bank2;
-wire [31:0] dch_wbf_wdata_bank3;
-wire [31:0] dch_wbf_wdata_bank4;
-wire [31:0] dch_wbf_wdata_bank5;
-wire [31:0] dch_wbf_wdata_bank6;
-wire [31:0] dch_wbf_wdata_bank7;
-
-wire dch_wbf_empty;
-wire dch_wbf_clear_req;
-wire dch_wbf_clear_done;
-
-wire dch_wbf_lookup_req;
-wire [31:0] dch_wbf_lookup_paddr;
-
-wire dch_wbf_lookup_res_hit;
-wire [31:0] dch_wbf_lookup_res_data_bank0;
-wire [31:0] dch_wbf_lookup_res_data_bank1;
-wire [31:0] dch_wbf_lookup_res_data_bank2;
-wire [31:0] dch_wbf_lookup_res_data_bank3;
-wire [31:0] dch_wbf_lookup_res_data_bank4;
-wire [31:0] dch_wbf_lookup_res_data_bank5;
-wire [31:0] dch_wbf_lookup_res_data_bank6;
-wire [31:0] dch_wbf_lookup_res_data_bank7;
 
 // data r/w
-dcache_wbuffered_new dcache_0(
+dcache dcache_0(
     .clk(aclk),
     .rstn(aresetn),
+
 
     // AXI
     .arid(mr_arid),
@@ -409,40 +380,7 @@ dcache_wbuffered_new dcache_0(
     .bresp(mw_bresp),
     .bvalid(mw_bvalid),
     .bready(mw_bready),
-
-
-    // wbuffer
-    .wbuffer_wreq(dch_wbf_wreq),
-    .wbuffer_wreq_recvd(dch_wbf_wreq_recvd),
-    .wbuffer_wdone(dch_wbf_wdone),
-
-    .wbuffer_wdata_paddr(dch_wbf_wdata_paddr),
-    .wbuffer_wdata_bank0(dch_wbf_wdata_bank0),
-    .wbuffer_wdata_bank1(dch_wbf_wdata_bank1),
-    .wbuffer_wdata_bank2(dch_wbf_wdata_bank2),
-    .wbuffer_wdata_bank3(dch_wbf_wdata_bank3),
-    .wbuffer_wdata_bank4(dch_wbf_wdata_bank4),
-    .wbuffer_wdata_bank5(dch_wbf_wdata_bank5),
-    .wbuffer_wdata_bank6(dch_wbf_wdata_bank6),
-    .wbuffer_wdata_bank7(dch_wbf_wdata_bank7),
-
-    .wbuffer_empty(dch_wbf_empty),
-    .wbuffer_clear_req(dch_wbf_clear_req),
-    .wbuffer_clear_done(dch_wbf_clear_done),
-
-    .wbuffer_lookup_req(dch_wbf_lookup_req),
-    .wbuffer_lookup_res_hit(dch_wbf_lookup_res_hit),
     
-    .wbuffer_lookup_paddr(dch_wbf_lookup_paddr),
-    .wbuffer_rdata_bank0(dch_wbf_lookup_res_data_bank0),
-    .wbuffer_rdata_bank1(dch_wbf_lookup_res_data_bank1),
-    .wbuffer_rdata_bank2(dch_wbf_lookup_res_data_bank2),
-    .wbuffer_rdata_bank3(dch_wbf_lookup_res_data_bank3),
-    .wbuffer_rdata_bank4(dch_wbf_lookup_res_data_bank4),
-    .wbuffer_rdata_bank5(dch_wbf_lookup_res_data_bank5),
-    .wbuffer_rdata_bank6(dch_wbf_lookup_res_data_bank6),
-    .wbuffer_rdata_bank7(dch_wbf_lookup_res_data_bank7),
-
 
     // CPU SRAM like
     .data_req(data_req),
@@ -460,107 +398,39 @@ dcache_wbuffered_new dcache_0(
     // .data_cache(1'b0)
 );
 
-wbuffer wbuffer_0(
-    .clk(aclk),
-    .rstn(aresetn),
-
-    // 与dcache
-    .wreq(dch_wbf_wreq),
-    .wreq_recvd(dch_wbf_wreq_recvd),
-    .wdone(dch_wbf_wdone),
-
-    .wdata_paddr(dch_wbf_wdata_paddr),
-    .wdata_bank0(dch_wbf_wdata_bank0),
-    .wdata_bank1(dch_wbf_wdata_bank1),
-    .wdata_bank2(dch_wbf_wdata_bank2),
-    .wdata_bank3(dch_wbf_wdata_bank3),
-    .wdata_bank4(dch_wbf_wdata_bank4),
-    .wdata_bank5(dch_wbf_wdata_bank5),
-    .wdata_bank6(dch_wbf_wdata_bank6),
-    .wdata_bank7(dch_wbf_wdata_bank7),
-
-    .empty(dch_wbf_empty),
-    .clear(dch_wbf_clear_req),
-    .clear_done(dch_wbf_clear_done),
-
-    .lookup_req(dch_wbf_lookup_req),
-    .lookup_paddr(dch_wbf_lookup_paddr),
-
-    .lookup_res_hit(dch_wbf_lookup_res_hit),
-    .lookup_res_data_bank0(dch_wbf_lookup_res_data_bank0),
-    .lookup_res_data_bank1(dch_wbf_lookup_res_data_bank1),
-    .lookup_res_data_bank2(dch_wbf_lookup_res_data_bank2),
-    .lookup_res_data_bank3(dch_wbf_lookup_res_data_bank3),
-    .lookup_res_data_bank4(dch_wbf_lookup_res_data_bank4),
-    .lookup_res_data_bank5(dch_wbf_lookup_res_data_bank5),
-    .lookup_res_data_bank6(dch_wbf_lookup_res_data_bank6),
-    .lookup_res_data_bank7(dch_wbf_lookup_res_data_bank7),
-
-    // 与axi
-    .awid(mw_awid),
-    .awaddr(mw_awaddr),
-    .awlen(mw_awlen),
-    .awsize(mw_awsize),
-    .awburst(mw_awburst),
-    .awlock(mw_awlock),
-    .awcache(mw_awcache),
-    .awprot(mw_awprot),
-    .awvalid(mw_awvalid),
-    .awready(mw_awready),
-
-    .wid(mw_wid),
-    .wdata(mw_wdata),
-    .wstrb(mw_wstrb),
-    .wlast(mw_wlast),
-    .wvalid(mw_wvalid),
-    .wready(mw_wready),
-
-    .bid(mw_bid),
-    .bresp(mw_bresp),
-    .bvalid(mw_bvalid),
-    .bready(mw_bready)
-);
-
 
 // inst read
-new_axi_read_adapter new_axi_read_adapter_inst(
-                       .clk(aclk),
-                       .reset(aresetn),
-                       .flush(flush),
+inst_cache inst_cache_0(
+    .clk(aclk),
+    .rstn(aresetn),
+    .flush(flush),
 
-                       .arid(ir_arid),
-                       .araddr(ir_araddr),
-                       .arlen(ir_arlen),
-                       .arsize(ir_arsize),
-                       .arburst(ir_arburst),
-                       .arlock(ir_arlock),
-                       .arcache(ir_arcache),
-                       .arprot(ir_arprot),
-                       .arvalid(ir_arvalid),
-                       .arready(ir_arready),
-                       .rid(ir_rid),
-                       .rdata(ir_rdata),
-                       .rresp(ir_rresp),
-                       .rvalid(ir_rvalid),
-                       .rready(ir_rready),
-                       .rlast(ir_rlast),
+    .arid(ir_arid),
+    .araddr(ir_araddr),
+    .arlen(ir_arlen),
+    .arsize(ir_arsize),
+    .arburst(ir_arburst),
+    .arlock(ir_arlock),
+    .arcache(ir_arcache),
+    .arprot(ir_arprot),
+    .arvalid(ir_arvalid),
+    .arready(ir_arready),
+    .rid(ir_rid),
+    .rdata(ir_rdata),
+    .rresp(ir_rresp),
+    .rvalid(ir_rvalid),
+    .rready(ir_rready),
+    .rlast(ir_rlast),
 
-
-                       .address(rom_addr),
-                       .address_valid(rom_re),
-                       .address_read_ready(pc_ready),
-
-                       .data_valid(inst_valid),
-                       .data(rom_data),
-
-                       .data_address(current_inst_address)
-                     );
-
-
-// data write
-
-
-// data read
+    .inst_req(rom_re),                      // cpu::rom_ce_o == read_adapter::address_valid
+    .inst_addr_ready(pc_ready),             // cpu::pc_ready == read_adapter::address_read_ready
+    .inst_addr(rom_addr),
+    .inst_addr_out(current_inst_address),
+    .inst_rdata(rom_data),
+    .inst_data_ok(inst_valid)
+    
+    // .inst_cache(1'b0)
+);
 
 
 openmips openmips0(

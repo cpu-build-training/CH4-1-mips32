@@ -7,6 +7,8 @@ module wbuffer(
     // with dcache
     // 写请求,与有效的wdata一起保持至收到wreq_recvd(包括wreq_recvd为高的这一个周期)
     input  wreq,
+    // 当前的写请求是否是uncached的,如果是则直接将dcache与axi的信号直接传递过去
+    input  is_uncached,
     // 成功接收wreq与wdata,维持一个周期
     output wreq_recvd,
     // 写完成, 仅在实际写入ram的那一个周期为高
@@ -42,6 +44,30 @@ module wbuffer(
     output [31:0] lookup_res_data_bank6,
     output [31:0] lookup_res_data_bank7,
     
+    // dcache axi write (for uncached write)
+    // aw
+    input  [3 :0] dch_awid   ,
+    input  [31:0] dch_awaddr ,
+    input  [3 :0] dch_awlen  ,
+    input  [2 :0] dch_awsize ,
+    input  [1 :0] dch_awburst,
+    input  [1 :0] dch_awlock ,
+    input  [3 :0] dch_awcache,
+    input  [2 :0] dch_awprot ,
+    input         dch_awvalid,
+    output        dch_awready,
+    //w
+    input  [3 :0] dch_wid    ,
+    input  [31:0] dch_wdata  ,
+    input  [3 :0] dch_wstrb  ,
+    input         dch_wlast  ,
+    input         dch_wvalid ,
+    output        dch_wready ,
+    //b
+    output [3 :0] dch_bid    ,
+    output [1 :0] dch_bresp  ,
+    output        dch_bvalid ,
+    input         dch_bready ,
 
     // with axi
     //aw

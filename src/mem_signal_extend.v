@@ -49,7 +49,7 @@ always @(posedge clk)
       begin
         addr_ok_last_long <= 1'b1;
       end
-    else if (addr_ok_last_long == 1'b1 && enable == 1'b0)
+    else if (addr_ok_last_long == 1'b1 && data_ok)
       begin
         addr_ok_last_long <= 1'b0;
       end
@@ -63,7 +63,7 @@ always @(posedge clk)
 // wire testb;
 // assign testb = (addr_ok == 1'b1 || addr_ok_last_long == 1'b1)? 1'b0: enable;
 // assign req = (addr_ok == 1'b1 || addr_ok_last_long == 1'b1) ? 1'b0 : enable;
-assign req = (addr_ok_last_long == 1'b1) ? 1'b0 : enable;
+assign req = (addr_ok_last_long) ? 1'b0 : enable;
 // assign req = enable;
 assign wr = we;
 assign select = mem_sel_i;

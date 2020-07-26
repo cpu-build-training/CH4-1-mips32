@@ -6,88 +6,88 @@ module mem(
          input wire rst,
          // 来自执行阶段的信息
          input
-         wire[`RegAddrBus]       wd_i,
-         input wire              wreg_i,
-         wire[`RegBus]           wdata_i,
+         wire[`RegAddrBus]        wd_i,
+         input wire               wreg_i,
+         wire[`RegBus]            wdata_i,
 
 
-         input wire whilo_i,
-         wire[`RegBus]    hi_i,
-         wire[`RegBus]    lo_i,
+         input wire               whilo_i,
+         wire[`RegBus]            hi_i,
+         wire[`RegBus]            lo_i,
 
          // 来自执行阶段的信息
-         wire[`AluOpBus]  aluop_i,
-         wire[`RegBus]    mem_addr_i,
-         wire[`RegBus]    reg2_i,
+         wire[`AluOpBus]          aluop_i,
+         wire[`RegBus]            mem_addr_i,
+         wire[`RegBus]            reg2_i,
 
          // 来自外部数据存储器 RAM 的信息
          // 读取的 data 是否 valid
-         input wire             mem_data_i_valid,
-         wire[`RegBus]    mem_data_i,
+         input wire               mem_data_i_valid,
+         wire[`RegBus]            mem_data_i,
          // axi bvalid
          // 写入是否 ready
-         input wire             mem_write_ready,
+         input wire               mem_write_ready,
 
          // 新增的输入接口
-         wire             LLbit_i,
-         wire             wb_LLbit_we_i,
-         wire             wb_LLbit_value_i,
+         wire                     LLbit_i,
+         wire                     wb_LLbit_we_i,
+         wire                     wb_LLbit_value_i,
 
          // cp0
-         wire             cp0_reg_we_i,
-         wire[4:0]        cp0_reg_write_addr_i,
-         wire[`RegBus]    cp0_reg_data_i,
+         wire                     cp0_reg_we_i,
+         wire[4:0]                cp0_reg_write_addr_i,
+         wire[`RegBus]            cp0_reg_data_i,
 
          // 异常
          // 来自执行阶段
-         wire[31:0]           excepttype_i,
-         input wire                 is_in_delayslot_i,
-         wire[`RegBus]       current_inst_address_i,
+         wire[31:0]               excepttype_i,
+         input wire               is_in_delayslot_i,
+         wire[`RegBus]            current_inst_address_i,
 
          // 来自 CP0 模块
-         wire[`RegBus]        cp0_status_i,
-         wire[`RegBus]        cp0_cause_i,
-         wire[`RegBus]        cp0_epc_i,
+         wire[`RegBus]            cp0_status_i,
+         wire[`RegBus]            cp0_cause_i,
+         wire[`RegBus]            cp0_epc_i,
 
          // 回写阶段的指令对 CP0 中寄存器的写信息
          // 用来检测数据相关
-         input wire                wb_cp0_reg_we,
-         wire[4:0]           wb_cp0_reg_write_addr,
-         wire[`RegBus]       wb_cp0_reg_data,
+         input wire               wb_cp0_reg_we,
+         wire[4:0]                wb_cp0_reg_write_addr,
+         wire[`RegBus]            wb_cp0_reg_data,
 
          // 访存阶段的结果
          output
-         reg[`RegAddrBus]        wd_o,
-         output reg                     wreg_o,
-         reg[`RegBus]            wdata_o,
+         reg[`RegAddrBus]         wd_o,
+         output reg               wreg_o,
+         reg[`RegBus]             wdata_o,
 
-         reg[`RegBus]         hi_o,
-         reg[`RegBus]         lo_o,
+         reg[`RegBus]             hi_o,
+         reg[`RegBus]             lo_o,
          output reg whilo_o,
          // 送到外部数据存储器 RAM 的信息
-         reg[`RegBus]         mem_addr_o,
-         output wire          mem_read_ready,
-         wire                 mem_we_o,
-         reg[3:0]             mem_sel_o,
-         reg[`RegBus]         mem_data_o,
-         output reg           mem_ce_o,
+         reg[`RegBus]             mem_addr_o,
+         output wire              mem_read_ready,
+         wire                     mem_we_o,
+         reg[3:0]                 mem_sel_o,
+         reg[`RegBus]             mem_data_o,
+         output reg               mem_ce_o,
 
          // 新增的输出接口
-         reg                  LLbit_we_o,
-         reg                  LLbit_value_o,
+         reg                      LLbit_we_o,
+         reg                      LLbit_value_o,
 
          // cp0
-         reg           cp0_reg_we_o,
-         reg[4:0]      cp0_reg_write_addr_o,
-         reg[`RegBus]  cp0_reg_data_o,
+         reg                      cp0_reg_we_o,
+         reg[4:0]                 cp0_reg_write_addr_o,
+         reg[`RegBus]             cp0_reg_data_o,
 
          // 异常
-         reg[31:0]       excepttype_o,
-         wire[`RegBus]   cp0_epc_o,
-         wire[`RegBus]   current_inst_address_o,
-         output wire     is_in_delayslot_o,
-         output wire     stallreq_for_mem,
-         wire[`RegBus]   badvaddr_o
+         reg[31:0]                excepttype_o,
+         wire[`RegBus]            cp0_epc_o,
+         wire[`RegBus]            current_inst_address_o,
+         output wire              is_in_delayslot_o,
+         output wire              stallreq_for_mem,
+         wire[`RegBus]            badvaddr_o
        );
 wire[`RegBus]   zero32;
 reg             mem_we;

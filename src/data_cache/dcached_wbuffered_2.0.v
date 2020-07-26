@@ -500,6 +500,7 @@ module dcache_wbuffered_new(
     // 与wbuffer
     // 向wbuffer写回的被换出的victim
     assign wbuffer_wreq        = (work_state == s_miss_victim_wb_wreq) ? 1'b1 : 1'b0;
+    assign wbuffer_is_uncached = (work_state == s_uncached_write_addr_hshake
     assign wbuffer_wdata_paddr = data_paddr_r;
     assign wbuffer_wdata_bank0 = way0_is_victim ? dcache_rdata_way_bank[0][0] :
                                  way1_is_victim ? dcache_rdata_way_bank[1][0] : 32'b0;

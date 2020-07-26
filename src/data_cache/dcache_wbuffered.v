@@ -241,7 +241,7 @@ module dcache_wbuffered(
             read_counter <= 3'b0;
         end else begin
             case(work_state)
-            state_idle: begin 
+            state_idle: begin                                                       // state: 0
                 if (data_req == 1'b1) begin
                     if (data_wr == 1'b0) begin
                         if (work0 && work1 && data_cache)
@@ -257,11 +257,11 @@ module dcache_wbuffered(
                 end
             end
             // uncached read
-            state_uncached_read_addr_hshake: begin
+            state_uncached_read_addr_hshake: begin                                  // state: 1
                 if (arready)
                     work_state <= state_uncached_read_data_transf;
             end
-            state_uncached_read_data_transf: begin
+            state_uncached_read_data_transf: begin                                  // state: 2
                 if (rvalid) begin
                     work_state <= state_rw_done;
                     wait_data <= rdata;

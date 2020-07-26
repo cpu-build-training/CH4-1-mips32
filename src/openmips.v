@@ -595,7 +595,6 @@ mem_signal_extend mem_signal_extend0 (
                     .addr_ok(data_addr_ok),
                     .data_ok(data_data_ok),
                     .rdata(data_rdata)
-
                   );
 
 // MEM/WB 实例化
