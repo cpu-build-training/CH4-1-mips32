@@ -195,7 +195,7 @@ module inst_cache(
             work_state <= state_data_ready;
             wait_data <= rdata;
         end else if (work_state == state_data_ready) begin                                  // state: 4
-            if (inst_req) begin
+            if (inst_req || flush) begin
                 if ((work0 & work1 & work2 & work3) == 1'b1 && inst_cache == 1'b1) begin
                     work_state <= state_lookup;
                 end else begin
@@ -204,7 +204,7 @@ module inst_cache(
             end else work_state <= state_reset;
         end else if (work_state == state_lookup) begin                                      // state: 1
             if (hit) begin
-                if (inst_req) begin
+                if (inst_req||flush) begin
                     if ((work0 & work1 & work2 & work3) == 1'b1 && inst_cache == 1'b1) begin
                         work_state <= state_lookup;
                     end else begin
@@ -385,7 +385,7 @@ module inst_cache(
     // end
     // assign inst_addr_ready = (work_state == state_lookup || work_state == state_access_ram_0) ? `Ready : `NotReady;
     // assign inst_addr_ready = (((arready && arvalid) || (work_state == state_lookup || work_state == state_data_ready)) && (inst_req)) ? `Ready : `NotReady;
-    assign inst_addr_ready = inst_req;
+    assign inst_addr_ready = inst_req || flushed;
     assign inst_data_ok = (work_state == state_data_ready) ? 1'b1 :
                           (work_state == state_lookup) ? hit :1'b0;
     assign inst_rdata = (work_state == state_data_ready && ~flushed) ? wait_data :

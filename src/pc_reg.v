@@ -8,6 +8,9 @@ module pc_reg(
          // 已经成功收到 pc，可以更新 pc 了
          input wire pc_read_ready,
 
+         // 来自外部，表示 addr_ok
+         input wire addr_ok,
+
          // 来自译码阶段的 ID 模块的信息,
          input wire branch_flag_i,
          input wire[`RegBus] branch_target_address_i,
@@ -86,7 +89,14 @@ always @(posedge clk)
       begin
         // 输入信号 flush 为 1 表示发生异常，将从 CTRL 模块给出的异常处理
         // 例程入口地址 new_pc 处取指执行
-        next_pc <= new_pc;
+        if (addr_ok)
+          begin
+            next_pc <= new_pc + `InstAddrIncrement;
+          end
+        else
+          begin
+            next_pc <= new_pc;
+          end
         // valid_pc <= `Valid;
       end
     else if (branch_flag_i == `Branch && pc_read_ready == `Ready)
