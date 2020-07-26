@@ -235,6 +235,8 @@ pc_reg  pc_reg0(
           .stall(!rom_data_valid),
           .pc_read_ready(rom_ce_o),
 
+          .addr_ok(pc_ready),
+
           .branch_flag_i(pc_branch_flag_i),
           .branch_target_address_i(pc_branch_target_address_i),
 
@@ -345,11 +347,7 @@ id_ex id_ex0(
         .id_excepttype(id_excepttype_o),
         .id_current_inst_address(id_current_inst_addr_o),
         .ex_excepttype(ex_excepttype_i),
-        .ex_current_inst_address(ex_current_inst_addr_i),
-
-        // fix
-        .branch_flag(pc_branch_flag_i),
-        .pc_ready(pc_ready)
+        .ex_current_inst_address(ex_current_inst_addr_i)
       );
 
 // EX 实例化
@@ -375,8 +373,8 @@ ex ex0(
      .whilo_o(ex_whilo_o),
      .hi_o(ex_hi_o),.lo_o(ex_lo_o),
 
-    //  .cnt_o(cnt_o),
-    //  .hilo_temp_o(hilo_temp_o),
+     //  .cnt_o(cnt_o),
+     //  .hilo_temp_o(hilo_temp_o),
 
      .aluop_o(ex_aluop_o),
      .mem_addr_o(ex_mem_addr_o),
@@ -447,8 +445,8 @@ ex_mem ex_mem0(
          .ex_whilo(ex_whilo_o), .ex_hi(ex_hi_o),
          .ex_lo(ex_lo_o),
 
-        //  .cnt_i(cnt_o),
-        //  .hilo_i(hilo_temp_o),
+         //  .cnt_i(cnt_o),
+         //  .hilo_i(hilo_temp_o),
 
          .ex_aluop(ex_aluop_o),
          .ex_mem_addr(ex_mem_addr_o),
@@ -469,8 +467,8 @@ ex_mem ex_mem0(
          .stall(stall),
 
          // TO EX
-        //  .cnt_o(cnt_i),
-        //  .hilo_o(hilo_temp_i),
+         //  .cnt_o(cnt_i),
+         //  .hilo_o(hilo_temp_i),
 
          // cp0
          .ex_cp0_reg_we(ex_cp0_reg_we_o),
@@ -658,9 +656,9 @@ ctrl ctrl0(
        .stall(stall),
        .stallreq_from_ex(stallreq_from_ex_sum),
        .stallreq_from_id(stallreq_from_id),
-      //  .stallreq_from_if(stallreq_from_if),
+       //  .stallreq_from_if(stallreq_from_if),
        .stallreq_from_mem(stallreq_from_mem),
-      //  .axi_read_state(axi_read_state),
+       //  .axi_read_state(axi_read_state),
        .mem_we(mem_write_enable),
 
        .cp0_epc_i(ctrl_cp0_epc),

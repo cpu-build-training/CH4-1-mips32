@@ -8,6 +8,9 @@ module pc_reg(
          // 已经成功收到 pc，可以更新 pc 了
          input wire pc_read_ready,
 
+         // 来自外部，表示 addr_ok
+         input wire addr_ok,
+
          // 来自译码阶段的 ID 模块的信息,
          input wire branch_flag_i,
          input wire[`RegBus] branch_target_address_i,
@@ -18,7 +21,7 @@ module pc_reg(
          // 异常处理例程入口地址
          input wire[`RegBus] new_pc,
 
-         output reg[`InstAddrBus] pc,
+         output wire[`InstAddrBus] pc,
          output reg ce
        );
 // reg valid_pc;
@@ -39,8 +42,12 @@ always @ (posedge clk)
       end
   end
 
+reg[`RegBus] next_pc;
+
 reg branch_flag;
 reg[`RegBus] branch_target_address;
+
+assign pc = flush ? new_pc : (branch_flag_i ? branch_target_address_i : next_pc);
 
 // 存储每次收到的 branch
 always @(posedge clk )
@@ -50,16 +57,16 @@ always @(posedge clk )
         branch_flag <= 1'b0;
         branch_target_address <= `ZeroWord;
       end
-    else if (branch_flag && pc_read_ready == `Ready)
-      begin
-        branch_flag <= 1'b0;
-        branch_target_address <= `ZeroWord;
-      end
-    else if (branch_flag_i == 1'b1 && pc_read_ready != `Ready)
-      begin
-        branch_flag <= 1'b1;
-        branch_target_address <= branch_target_address_i;
-      end
+    // else if (branch_flag && pc_read_ready == `Ready)
+    //   begin
+    //     branch_flag <= 1'b0;
+    //     branch_target_address <= `ZeroWord;
+    //   end
+    // else if (branch_flag_i == 1'b1 && pc_read_ready != `Ready)
+    //   begin
+    //     branch_flag <= 1'b1;
+    //     branch_target_address <= branch_target_address_i;
+    //   end
     else
       begin
 
@@ -76,28 +83,39 @@ always @(posedge clk)
     if (ce == `ChipDisable)
       begin
         // 如同手册里所写
-        pc <= 32'hbfc00000;
+        next_pc <= 32'hbfc00000;
       end
     else if(flush == 1'b1)
       begin
         // 输入信号 flush 为 1 表示发生异常，将从 CTRL 模块给出的异常处理
         // 例程入口地址 new_pc 处取指执行
-        pc <= new_pc;
+        if (addr_ok)
+          begin
+            next_pc <= new_pc + `InstAddrIncrement;
+          end
+        else
+          begin
+            next_pc <= new_pc;
+          end
         // valid_pc <= `Valid;
       end
     else if (branch_flag_i == `Branch && pc_read_ready == `Ready)
       begin
-        pc <= branch_target_address_i;
+        next_pc <= branch_target_address_i + `InstAddrIncrement;
+      end
+    else if (branch_flag_i == `Branch && pc_read_ready != `Ready)
+      begin
+        next_pc <= branch_target_address_i;
       end
     else if (branch_flag == `Branch && pc_read_ready == `Ready)
       begin
-        pc <= branch_target_address;
+        next_pc <= branch_target_address;
       end
     else if(pc_read_ready == `Ready)
       begin
         begin
           //  按照字节寻址
-          pc <= pc + `InstAddrIncrement;
+          next_pc <= next_pc + `InstAddrIncrement;
         end
       end
     // if stall, then pc remain the same
