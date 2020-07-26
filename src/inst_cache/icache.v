@@ -52,7 +52,7 @@ module inst_cache(
 
     reg[31:0] inst_addr_r;
     always @ (posedge clk) begin
-        if (inst_req == 1'b1 || flushed) begin
+        if (inst_req == 1'b1 || flush) begin
             inst_addr_r <= inst_addr;
         end
     end
@@ -385,7 +385,7 @@ module inst_cache(
     // end
     // assign inst_addr_ready = (work_state == state_lookup || work_state == state_access_ram_0) ? `Ready : `NotReady;
     // assign inst_addr_ready = (((arready && arvalid) || (work_state == state_lookup || work_state == state_data_ready)) && (inst_req)) ? `Ready : `NotReady;
-    assign inst_addr_ready = inst_req || flushed;
+    assign inst_addr_ready = (work_state == state_lookup || work_state == state_data_ready) && (inst_req || flushed);
     assign inst_data_ok = (work_state == state_data_ready) ? 1'b1 :
                           (work_state == state_lookup) ? hit :1'b0;
     assign inst_rdata = (work_state == state_data_ready && ~flushed) ? wait_data :
