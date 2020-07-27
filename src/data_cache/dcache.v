@@ -272,7 +272,7 @@ module dcache(
             state_miss_access_ram_read_0: begin
                 if (arready)
                     work_state <= state_miss_access_ram_read_1;
-            end 
+            end
             state_miss_access_ram_read_1: begin
                 if (rvalid) begin
                     read_counter <= read_counter + 1'b1;
@@ -283,7 +283,7 @@ module dcache(
                     read_counter <= 3'b000;
                     work_state <= state_miss_read_update;
                 end
-            end 
+            end
             state_miss_read_update: begin
                 work_state <= state_data_ready;
             end 

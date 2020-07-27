@@ -6,9 +6,11 @@ module pc_reg(
          input wire stall, // From CTRL mudule
 
          // 已经成功收到 pc，可以更新 pc 了
+         // == if_id::next_pc_valid == openmips::rom_ce_o =(rom_re)= icache::inst_req
          input wire pc_read_ready,
 
          // 来自外部，表示 addr_ok
+         // == openmips::pc_ready == icache::inst_addr_ready
          input wire addr_ok,
 
          // 来自译码阶段的 ID 模块的信息,
@@ -22,7 +24,7 @@ module pc_reg(
          input wire[`RegBus] new_pc,
 
          output wire[`InstAddrBus] pc,
-         output reg ce
+         output reg ce  // output useless
        );
 // reg valid_pc;
 

@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module dcache_wbuffered_new(
+module dcache_wbuffered(
     input         clk ,
     input         rstn,     // 低有效
     
@@ -25,33 +25,33 @@ module dcache_wbuffered_new(
     output        rready ,
     // uncached写由dcache直接完成,因此仍然需要这些写相关的axi信号
     //aw
-    output [3 :0] awid   ,
+    // output [3 :0] awid   ,
     output [31:0] awaddr ,
     output [3 :0] awlen  ,
-    output [2 :0] awsize ,
+    // output [2 :0] awsize ,
     output [1 :0] awburst,
-    output [1 :0] awlock ,
-    output [3 :0] awcache,
-    output [2 :0] awprot ,
+    // output [1 :0] awlock ,
+    // output [3 :0] awcache,
+    // output [2 :0] awprot ,
     output        awvalid,
     input         awready,
     //w
-    output [3 :0] wid    ,
+    // output [3 :0] wid    ,
     output [31:0] wdata  ,
     output [3 :0] wstrb  ,
     output        wlast  ,
     output        wvalid ,
     input         wready ,
     //b
-    input  [3 :0] bid    ,
-    input  [1 :0] bresp  ,
+    // input  [3 :0] bid    ,
+    // input  [1 :0] bresp  ,
     input         bvalid ,
-    output        bready ,
+    // output        bready ,
 
     // wbuffer
     // wb related
     output        wbuffer_wreq       ,
-    output        wbuffer_is_uncached,
+    output        wbuffer_uchd_wreq  ,
     input         wbuffer_wreq_recvd ,
     input         wbuffer_wdone      ,
 
@@ -74,7 +74,7 @@ module dcache_wbuffered_new(
     output        wbuffer_lookup_req    ,
     input         wbuffer_lookup_res_hit,
 
-    output        wbuffer_lookup_paddr,
+    output [31:0] wbuffer_lookup_paddr,
     input  [31:0] wbuffer_rdata_bank0,
     input  [31:0] wbuffer_rdata_bank1,
     input  [31:0] wbuffer_rdata_bank2,
@@ -98,14 +98,14 @@ module dcache_wbuffered_new(
     );
 
     wire rst;
-    assign rst = ~ rstn;
+    assign rst = ~rstn;
 
     wire data_cache = data_addr[31:29] == 3'b101 ? 1'b0 : 1'b1;
 
     wire[31:0] data_paddr;
     assign data_paddr = (data_addr[31:29] == 3'b100 ||
-                    data_addr[31:29] == 3'b101) ? 
-                    {3'b0, data_addr[28:0]} : data_addr;
+                         data_addr[31:29] == 3'b101) ? 
+                        {3'b0, data_addr[28:0]} : data_addr;
     reg[31:0] data_paddr_r;
     reg[31:0] data_wdata_r;
     reg[3:0]  data_sel_r;
@@ -118,8 +118,8 @@ module dcache_wbuffered_new(
             data_cache_r    <= data_cache;
         end
     end
-    wire tag_r      = data_paddr_r[31:12];
-    wire line_idx_r = data_paddr_r[11:5];
+    wire [19:0] tag_r      = data_paddr_r[31:12];
+    wire [6:0]  line_idx_r = data_paddr_r[11:5];
 
 
     reg[127:0] lru;
@@ -338,7 +338,7 @@ module dcache_wbuffered_new(
                     if(wbuffer_wreq_recvd)
                         work_state  <= s_miss_victim_wb_waitfor_wdone;
                 end
-                // state: 10
+                // state: 10   a
                 s_miss_victim_wb_waitfor_wdone: begin
                     // 如果向wbuffer写回完成,这时认为victim已经不dirty了
                     // 则本周期会发出查询wbuffer的请求
@@ -346,7 +346,7 @@ module dcache_wbuffered_new(
                     if(wbuffer_wdone)
                         work_state  <= s_check_wbuffer_lookup_res;
                 end
-                // state: 11
+                // state: 11   b
                 s_check_wbuffer_lookup_res: begin
                     if(wbuffer_lookup_res_hit)
                         // 如果在wbuffer中找到了所需的行,则将这行读取到cache
@@ -359,22 +359,23 @@ module dcache_wbuffered_new(
                         // 访存请求在这个周期发出(即arvalid)
                         work_state  <= s_miss_fetch_addr_hshake;
                 end
-                // state: 12
+                // state: 12   c
                 s_miss_fetch_addr_hshake: begin
                     if(arready)
                         work_state  <= s_miss_fetch_data_transf;
                 end
-                // state: 13
+                // state: 13   d
                 s_miss_fetch_data_transf: begin
                     if(rvalid) begin
                         if(rlast) begin
                             work_state   <= s_miss_update;
                             read_counter <= 3'b0;
-                        end else
+                        end else begin
                             read_counter <= read_counter + 3'b1;
+                        end
                     end
                 end
-                // state: 14
+                // state: 14   e
                 s_miss_update: begin
                     work_state  <= s_rw_done;
                 end
@@ -454,8 +455,7 @@ module dcache_wbuffered_new(
     generate
         for(i = 0; i < 8; i = i + 1) begin
             assign wen_way_bank[0][i] = (((work_state == s_cached_lookup && !is_read && hit0 && valid0) ||
-                                          (work_state == s_miss_update && !is_read && way0_is_victim)) &&
-                                          data_paddr_r[4:2] == i) ? data_sel :
+                                          (work_state == s_miss_update && !is_read && way0_is_victim)) && data_paddr_r[4:2] == i) ? data_sel :
                                         (work_state == s_check_wbuffer_lookup_res && wbuffer_lookup_res_hit) ? 4'b1111 : 
                                         {4{burst_wen_way_bank[0][i]}};
         end
@@ -470,8 +470,8 @@ module dcache_wbuffered_new(
     // 向cache_data写的数据
     // 可能来自wbuffer,也可能来自内存,也可能来自CPU要写的数据
     // 来自内存或CPU的数据
-    wire cache_wdata_not_from_wbuffer = (work_state == s_miss_fetch_data_transf) ? rdata :
-                                        (((work_state == s_cached_lookup && hit) || (work_state == s_miss_update)) && !is_read) ? data_wdata_r : 32'b0;
+    wire [31:0] cache_wdata_not_from_wbuffer = (work_state == s_miss_fetch_data_transf) ? rdata :
+                                               (((work_state == s_cached_lookup && hit) || (work_state == s_miss_update)) && !is_read) ? data_wdata_r : 32'b0;
     // 来自wbuffer时,8个bank同时得到数据; 来自内存时,8个bank依次得到数据
     assign dcache_wdata_way_bank[0][0] = (work_state == s_check_wbuffer_lookup_res) ? wbuffer_rdata_bank0 : cache_wdata_not_from_wbuffer;
     assign dcache_wdata_way_bank[0][1] = (work_state == s_check_wbuffer_lookup_res) ? wbuffer_rdata_bank1 : cache_wdata_not_from_wbuffer;
@@ -493,14 +493,16 @@ module dcache_wbuffered_new(
     // 命中后读出的字
     wire[31:0] word_selection0 = dcache_rdata_way_bank[0][data_paddr_r[4:2]];
     wire[31:0] word_selection1 = dcache_rdata_way_bank[1][data_paddr_r[4:2]];
-    wire hit_word = (hit0 && valid0) ? word_selection0 :
-                    (hit1 && valid1) ? word_selection1 : 32'b0;
+    wire[31:0] hit_word = (hit0 && valid0) ? word_selection0 :
+                          (hit1 && valid1) ? word_selection1 : 32'b0;
 
 
     // 与wbuffer
     // 向wbuffer写回的被换出的victim
     assign wbuffer_wreq        = (work_state == s_miss_victim_wb_wreq) ? 1'b1 : 1'b0;
-    assign wbuffer_is_uncached = (work_state == s_uncached_write_addr_hshake
+    assign wbuffer_uchd_wreq   = (work_state == s_uncached_write_addr_hshake ||
+                                  work_state == s_uncached_write_data_transf ||
+                                  work_state == s_uncached_write_waitfor_bv) ? 1'b1 :1'b0;
     assign wbuffer_wdata_paddr = data_paddr_r;
     assign wbuffer_wdata_bank0 = way0_is_victim ? dcache_rdata_way_bank[0][0] :
                                  way1_is_victim ? dcache_rdata_way_bank[1][0] : 32'b0;
@@ -522,7 +524,7 @@ module dcache_wbuffered_new(
     // 向wbuffer查询是否有需要的行
     assign wbuffer_lookup_req  = (work_state == s_cached_lookup && !hit && !victim_is_dirty) ||
                                  (work_state == s_miss_victim_wb_waitfor_wdone && wbuffer_wreq_recvd) ? 1'b1 : 1'b0;
-    assign wbuffer_lookup_paddr= data_paddr_r;
+    assign wbuffer_lookup_paddr= data_req ? data_paddr : data_paddr_r;
 
 
     // 与AXI
@@ -538,29 +540,29 @@ module dcache_wbuffered_new(
     assign arcache = 4'b0000;
     assign arprot  = 3'b000;
     assign arvalid = ((work_state == s_uncached_read_addr_hshake) || 
-                     (work_state == s_check_wbuffer_lookup_res && !wbuffer_lookup_res_hit)) ? 1'b1 : 1'b0;
+                     (work_state == s_miss_fetch_addr_hshake)) ? 1'b1 : 1'b0;
     // r
     assign rready  = 1'b1;
 
     // 只剩下uncached w需要直接通过axi写
     // aw
-    assign awid   = 4'b0000;
+    // assign awid   = 4'b0000;
     assign awaddr = (work_state == s_uncached_write_addr_hshake) ? {data_paddr_r[31:2], 2'b00} : 32'b0;
     assign awlen  = data_cache_r ? 4'b0111 : 4'b0000;
-    assign awsize = 3'b010;
+    // assign awsize = 3'b010;
     assign awburst= data_cache_r ? 2'b01 : 2'b00;
-    assign awlock = 2'b00;
-    assign awcache= 4'b0000;
-    assign awprot = 3'b000;
+    // assign awlock = 2'b00;
+    // assign awcache= 4'b0000;
+    // assign awprot = 3'b000;
     assign awvalid= (work_state == s_uncached_write_addr_hshake) ? 1'b1 : 1'b0;
     // w
-    assign wid    = 4'b0000;
+    // assign wid    = 4'b0000;
     assign wdata  = (work_state == s_uncached_write_data_transf) ? data_wdata_r : 32'b0;
     assign wstrb  = (work_state == s_uncached_write_data_transf) ? data_sel : 4'b0000;
     assign wlast  = (work_state == s_uncached_write_data_transf) ? 1'b1 : 1'b0;
     assign wvalid = (work_state == s_uncached_write_data_transf) ? 1'b1 : 1'b0;
     // b
-    assign bready = 1'b1;
+    // assign bready = 1'b1;
 
 
     // 与CPU
@@ -568,8 +570,9 @@ module dcache_wbuffered_new(
                            work_state == s_rw_done ||
                            work_state == s_cached_lookup) && data_req ? 1'b1 : 1'b0;
     assign data_data_ok = (work_state == s_rw_done ||
-                          (work_state == s_cached_lookup && hit)) ? 1'b1 : 1'b0;
-    assign data_rdata   = (work_state == s_rw_done ||
-                          (work_state == s_cached_lookup && is_read && hit)) ? hit_word : 32'b0;
+                          (work_state == s_cached_lookup && hit) ||
+                          (work_state == s_uncached_read_data_transf && rvalid)) ? 1'b1 : 1'b0;
+    assign data_rdata   = (work_state == s_rw_done || (work_state == s_cached_lookup && is_read && hit)) ? hit_word :
+                          (work_state == s_uncached_read_data_transf && rvalid) ? rdata : 32'b0;
 
 endmodule
