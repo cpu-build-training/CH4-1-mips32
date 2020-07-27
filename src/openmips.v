@@ -232,7 +232,7 @@ wire ce;
 // pc_reg 实例化
 pc_reg  pc_reg0(
           .clk(clk), .rst(rst), .pc(pc), .ce(ce),
-          .stall(!rom_data_valid),
+          .stall(stall[0]),
           .pc_read_ready(rom_ce_o),
 
           .addr_ok(pc_ready),

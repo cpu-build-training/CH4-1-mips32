@@ -83,7 +83,7 @@ always @(*)
       begin
         flush = 1'b0;
         // if (axi_read_state == `BusyForMEM || mem_we) begin
-          stall = 6'b011110;
+          stall = 6'b011111;
         // end else begin
         //   stall = 6'b011000;
         // end
@@ -91,13 +91,13 @@ always @(*)
       end
     else if(stallreq_from_ex == `Stop)
       begin
-        stall = 6'b001110;
+        stall = 6'b001111;
         flush = 1'b0;
         new_pc = `ZeroWord;
       end
     else if(stallreq_from_id == `Stop)
       begin
-        stall = 6'b000110;
+        stall = 6'b000111;
         flush = 1'b0;
         new_pc = `ZeroWord;
       end

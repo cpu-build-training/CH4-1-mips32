@@ -99,6 +99,9 @@ always @(posedge clk)
           end
         // valid_pc <= `Valid;
       end
+    else if (stall) begin
+        // if stall, do nothing
+    end
     else if (branch_flag_i == `Branch && pc_read_ready == `Ready)
       begin
         next_pc <= branch_target_address_i + `InstAddrIncrement;
