@@ -68,7 +68,7 @@ module dcache_wbuffered(
 
     // clear related
     input         wbuffer_empty     ,
-    output        wbuffer_clear_req ,
+    output reg    wbuffer_clear_req ,
     input         wbuffer_clear_done,
 
     // lookup related
@@ -217,6 +217,9 @@ module dcache_wbuffered(
     // cached rw 完成后更新LRU与dirty    cached w 向cache写数据
     parameter[4:0] s_miss_update                    = 5'b01110;
 
+    // ucached read/write 需要先清空wbuffer,该状态用于等待缓冲区清空完毕
+    parameter[4:0] s_clear_buffer_waitfor_done      = 5'b01111;
+
 
     always @ (posedge clk) begin
         if(rst) begin
@@ -224,6 +227,7 @@ module dcache_wbuffered(
             is_read         <= 1'b0;
             read_data       <= 32'b0;
             read_counter    <= 3'b0;
+            wbuffer_clear_req <= 1'b0;
         end else begin
             case(work_state)
                 // state: 0
@@ -234,16 +238,35 @@ module dcache_wbuffered(
                                 work_state  <= s_cached_lookup;
                                 is_read     <= 1'b1;
                             end else begin
-                                work_state  <= s_uncached_read_addr_hshake;
+                                if(wbuffer_empty)
+                                    work_state  <= s_uncached_read_addr_hshake;
+                                else begin
+                                    wbuffer_clear_req <= 1'b1;
+                                    work_state  <= s_clear_buffer_waitfor_done;
+                                end
                             end
                         end else begin  // data_wr == 1'b1;
                             if(work0 && work1 && data_cache) begin
-                                work_state <= s_cached_lookup;
+                                work_state  <= s_cached_lookup;
                                 is_read     <= 1'b0;
                             end else begin
-                                work_state  <= s_uncached_write_addr_hshake;
+                                if(wbuffer_empty)
+                                    work_state  <= s_uncached_write_addr_hshake;
+                                else begin
+                                    wbuffer_clear_req <= 1'b1;
+                                    work_state  <= s_clear_buffer_waitfor_done;
+                                end
                             end
                         end
+                    end
+                end
+                s_clear_buffer_waitfor_done: begin
+                    wbuffer_clear_req <= 1'b0;
+                    if(wbuffer_clear_done) begin
+                        if(is_read)
+                            work_state  <= s_uncached_read_addr_hshake;
+                        else
+                            work_state  <= s_uncached_write_addr_hshake;
                     end
                 end
                 // uncached read
@@ -278,20 +301,30 @@ module dcache_wbuffered(
                 // uncached rw / cached miss rw done
                 // state: 6
                 s_rw_done: begin
-                    if(data_req == 1'b1) begin
-                        if(data_wr == 1'b0) begin
+                    if(data_req && !flush) begin
+                        if(!data_wr) begin
                             if(work0 && work1 && data_cache) begin
                                 work_state  <= s_cached_lookup;
                                 is_read     <= 1'b1;
                             end else begin
-                                work_state  <= s_uncached_read_addr_hshake;
+                                if(wbuffer_empty)
+                                    work_state  <= s_uncached_read_addr_hshake;
+                                else begin
+                                    wbuffer_clear_req <= 1'b1;
+                                    work_state  <= s_clear_buffer_waitfor_done;
+                                end
                             end
                         end else begin  // data_wr == 1'b1;
                             if(work0 && work1 && data_cache) begin
                                 work_state <= s_cached_lookup;
                                 is_read     <= 1'b0;
                             end else begin
-                                work_state  <= s_uncached_write_addr_hshake;
+                                if(wbuffer_empty)
+                                    work_state  <= s_uncached_write_addr_hshake;
+                                else begin
+                                    wbuffer_clear_req <= 1'b1;
+                                    work_state  <= s_clear_buffer_waitfor_done;
+                                end
                             end
                         end
                     end else
@@ -302,20 +335,30 @@ module dcache_wbuffered(
                 s_cached_lookup: begin
                     if(hit) begin
                         // 如果命中可以在本周期接受下个请求
-                        if(data_req == 1'b1) begin
-                            if(data_wr == 1'b0) begin
+                        if(data_req && !flush) begin
+                            if(!data_wr) begin
                                 if(work0 && work1 && data_cache) begin
                                     work_state  <= s_cached_lookup;
                                     is_read     <= 1'b1;
                                 end else begin
-                                    work_state  <= s_uncached_read_addr_hshake;
+                                    if(wbuffer_empty)
+                                        work_state  <= s_uncached_read_addr_hshake;
+                                    else begin
+                                        wbuffer_clear_req <= 1'b1;
+                                        work_state  <= s_clear_buffer_waitfor_done;
+                                    end
                                 end
                             end else begin  // data_wr == 1'b1;
                                 if(work0 && work1 && data_cache) begin
                                     work_state <= s_cached_lookup;
                                     is_read     <= 1'b0;
                                 end else begin
-                                    work_state  <= s_uncached_write_addr_hshake;
+                                    if(wbuffer_empty)
+                                        work_state  <= s_uncached_write_addr_hshake;
+                                    else begin
+                                        wbuffer_clear_req <= 1'b1;
+                                        work_state  <= s_clear_buffer_waitfor_done;
+                                    end
                                 end
                             end
                         end else
@@ -521,7 +564,9 @@ module dcache_wbuffered(
                                  way1_is_victim ? dcache_rdata_way_bank[1][6] : 32'b0;
     assign wbuffer_wdata_bank7 = way0_is_victim ? dcache_rdata_way_bank[0][7] :
                                  way1_is_victim ? dcache_rdata_way_bank[1][7] : 32'b0;
-
+    // 主动清空缓冲区的请求    在进入s_clear_buffer_waitfor_done之前发出请求
+    // assign wbuffer_clear_req   = (work_state == s_idle || work_state == s_rw_done || (work_state == s_cached_lookup && hit) &&
+    //                               (!(work0 && work1 && data_cache) && !wbuffer_empty)) ? 1'b1 : 1'b0;
     // 向wbuffer查询是否有需要的行
     assign wbuffer_lookup_req  = (work_state == s_cached_lookup && !hit && !victim_is_dirty) ||
                                  (work_state == s_miss_victim_wb_waitfor_wdone && wbuffer_wreq_recvd) ? 1'b1 : 1'b0;
@@ -575,5 +620,4 @@ module dcache_wbuffered(
                           (work_state == s_uncached_read_data_transf && rvalid)) ? 1'b1 : 1'b0;
     assign data_rdata   = (work_state == s_rw_done || (work_state == s_cached_lookup && is_read && hit)) ? hit_word :
                           (work_state == s_uncached_read_data_transf && rvalid) ? rdata : 32'b0;
-
 endmodule

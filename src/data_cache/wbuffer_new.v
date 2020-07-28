@@ -27,7 +27,7 @@ module wbuffer_new(
     // buffer status
     output        empty,
     // clear the buffer
-    input         clear,
+    input         clear_req,
     output        clear_done,
 
     // 请求查询某一行是否在wbuffer中
@@ -233,6 +233,8 @@ module wbuffer_new(
                     end else if(lookup_req) begin
                         // dcache发出req的同时会给出lookup_paddr,所以该状态下已经可以得到lookup_res
                         work_state <= state_lookup_res;
+                    end else if(clear_req) begin
+                        work_state <= state_clear_buffer_init;
                     end else begin
                         work_state <= state_idle;
                     end
@@ -362,7 +364,7 @@ module wbuffer_new(
     assign wreq_recvd = ((work_state == state_idle) && wreq) ? 1'b1 : 1'b0;
     // 写完后仍然不full / 写完后full了但清空完毕了 的情况下可以发出wdone
     assign wdone  = (work_state == state_write_to_buffer_done && !full) ? 1'b1 : 1'b0;
-    assign empty  = (cur_buffer_size == 0)  ? 1'b0 : 1'b1;
+    assign empty  = (cur_buffer_size == 0)  ? 1'b1 : 1'b0;
     // 在回到state_write_to_buffer_done且之前没有收到wreq则可以认为有dcache主动要求的clear操作完成
     assign clear_done = ((work_state == state_write_to_buffer_done) && !has_wreq) ? 1'b1 : 1'b0;
 

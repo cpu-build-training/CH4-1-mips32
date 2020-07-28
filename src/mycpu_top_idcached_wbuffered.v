@@ -491,7 +491,7 @@ wbuffer_new wbuffer_0(
     .wdata_bank7(dch_wbf_wdata_bank7),
 
     .empty(dch_wbf_empty),
-    .clear(dch_wbf_clear_req),
+    .clear_req(dch_wbf_clear_req),
     .clear_done(dch_wbf_clear_done),
 
     .lookup_req(dch_wbf_lookup_req),
