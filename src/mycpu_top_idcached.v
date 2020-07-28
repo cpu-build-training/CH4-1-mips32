@@ -4,7 +4,7 @@ module mycpu_top_idcached(
          input
          wire aclk,
          wire aresetn,
-         wire[5:0] int_i,
+         wire[5:0] ext_int,
 
 
          // write address channel signals
@@ -380,7 +380,7 @@ dcache dcache_0(
     .bresp(mw_bresp),
     .bvalid(mw_bvalid),
     .bready(mw_bready),
-    
+
 
     // CPU SRAM like
     .data_req(data_req),
@@ -428,7 +428,7 @@ inst_cache inst_cache_0(
     .inst_addr_out(current_inst_address),
     .inst_rdata(rom_data),
     .inst_data_ok(inst_valid)
-    
+
     // .inst_cache(1'b0)
 );
 
@@ -455,7 +455,7 @@ openmips openmips0(
            .data_data_ok(data_data_ok),
            .data_rdata(data_rdata),
 
-           .int_i(int_i),
+           .int_i(ext_int),
            .timer_int_o(),
 
            .debug_wb_pc(debug_wb_pc),
