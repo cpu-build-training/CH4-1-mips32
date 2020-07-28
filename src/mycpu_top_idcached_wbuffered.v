@@ -19,14 +19,14 @@ module mycpu_top_idcached_wbuffered(
          wire[2:0]   awprot,
          output wire awvalid,
          input
-         wire    awready,
+         wire        awready,
 
          // write data channel signals
          output
          wire[3:0]    wid,
          wire[31:0]   wdata,
-         wire[3:0]   wstrb,
-         output wire        wlast,
+         wire[3:0]    wstrb,
+         output wire  wlast,
          wire        wvalid,
          input       wready,
 
@@ -378,6 +378,7 @@ wire        dch_wbf_bvalid  ;
 dcache_wbuffered dcache_wbuffered_0(
     .clk(aclk),
     .rstn(aresetn),
+    .flush(flush),
 
     // AXI
     .arid(mr_arid),

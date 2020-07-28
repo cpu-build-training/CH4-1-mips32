@@ -1,8 +1,9 @@
 `timescale 1ns / 1ps
 
 module dcache_wbuffered(
-    input         clk ,
-    input         rstn,     // 低有效
+    input         clk    ,
+    input         rstn   ,     // 低有效
+    input         flush  ,
     
     // axi
     // ar
@@ -227,8 +228,8 @@ module dcache_wbuffered(
             case(work_state)
                 // state: 0
                 s_idle: begin
-                    if(data_req == 1'b1) begin
-                        if(data_wr == 1'b0) begin
+                    if(data_req && !flush) begin
+                        if(!data_wr) begin
                             if(work0 && work1 && data_cache) begin
                                 work_state  <= s_cached_lookup;
                                 is_read     <= 1'b1;

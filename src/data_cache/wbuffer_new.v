@@ -186,8 +186,13 @@ module wbuffer_new(
                     (lookup_paddr[31:5] == paddr_prefixes[13]) ? 5'b11101 :
                     (lookup_paddr[31:5] == paddr_prefixes[14]) ? 5'b11110 :
                     (lookup_paddr[31:5] == paddr_prefixes[15]) ? 5'b11111 : 5'b00000;
-    assign lookup_res_hit = lookup_res_hit_and_wbuffer_addr[4];
+    // 是否有tag相同的行
+    wire has_hit_candidate = lookup_res_hit_and_wbuffer_addr[4];
     wire [3:0] lookup_res_wbuffer_addr = lookup_res_hit_and_wbuffer_addr[3:0];
+    wire candidate_is_in_q = (tail_pointer > head_pointer) ? ((lookup_res_wbuffer_addr >= head_pointer) && (lookup_res_wbuffer_addr < tail_pointer)) :
+                             (tail_pointer < head_pointer) ? ((lookup_res_wbuffer_addr >= head_pointer) || (lookup_res_wbuffer_addr < tail_pointer)) : 1'b0;
+    // 还要判断下这行是不是真的在队列中
+    assign lookup_res_hit = has_hit_candidate && candidate_is_in_q;
 
     generate
         genvar i;
