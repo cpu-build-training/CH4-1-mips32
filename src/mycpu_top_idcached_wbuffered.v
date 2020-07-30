@@ -333,7 +333,7 @@ wire dch_wbf_wreq_recvd;
 wire dch_wbf_uched_wreq;
 wire dch_wbf_wdone;
 
-wire [31:0] dch_wbf_wdata_paddr;
+wire [26:0] dch_wbf_wdata_paddr_prefix;
 wire [31:0] dch_wbf_wdata_bank0;
 wire [31:0] dch_wbf_wdata_bank1;
 wire [31:0] dch_wbf_wdata_bank2;
@@ -405,7 +405,7 @@ dcache_wbuffered dcache_wbuffered_0(
     .wbuffer_uchd_wreq(dch_wbf_uched_wreq),
     .wbuffer_wdone(dch_wbf_wdone),
 
-    .wbuffer_wdata_paddr(dch_wbf_wdata_paddr),
+    .wbuffer_wdata_paddr_prefix(dch_wbf_wdata_paddr_prefix),
     .wbuffer_wdata_bank0(dch_wbf_wdata_bank0),
     .wbuffer_wdata_bank1(dch_wbf_wdata_bank1),
     .wbuffer_wdata_bank2(dch_wbf_wdata_bank2),
@@ -480,7 +480,7 @@ wbuffer_new wbuffer_0(
     .uchd_wreq(dch_wbf_uched_wreq),
     .wdone(dch_wbf_wdone),
 
-    .wdata_paddr(dch_wbf_wdata_paddr),
+    .wdata_paddr_prefix(dch_wbf_wdata_paddr_prefix),
     .wdata_bank0(dch_wbf_wdata_bank0),
     .wdata_bank1(dch_wbf_wdata_bank1),
     .wdata_bank2(dch_wbf_wdata_bank2),

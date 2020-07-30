@@ -14,7 +14,7 @@ module wbuffer_new(
     // 写完成, 仅在实际写入ram的那一个周期为高
     output wdone,
     // physical address of witten data to be buffered (32 - 5 = 27 bits)
-    input  [31:0] wdata_paddr,
+    input  [26:0] wdata_paddr_prefix,
     // written data to be buffered
     input  [31:0] wdata_bank0,
     input  [31:0] wdata_bank1,
@@ -229,7 +229,7 @@ module wbuffer_new(
                             
                             cur_buffer_size  <= cur_buffer_size + 1;
                             // 记录这一行的物理地址(仅使用高27位)
-                            paddr_prefixes[tail_pointer] <= wdata_paddr[31:5];
+                            paddr_prefixes[tail_pointer] <= wdata_paddr_prefix;
                         end
                     end else if(lookup_req) begin
                         // dcache发出req的同时会给出lookup_paddr,所以该状态下已经可以得到lookup_res
@@ -245,6 +245,10 @@ module wbuffer_new(
                     if(full) begin
                         // 开始清空buffer
                         work_state <= state_clear_buffer_init;
+                    end else if(lookup_req) begin
+                        // 如果这时来了一个lookup_req,立即响应
+                        // 因为可能在收到wdone的同时发出lookup_res
+                        work_state <= state_lookup_res;
                     end else begin
                         // 写入完毕,回到idle
                         work_state <= state_idle;
@@ -325,7 +329,7 @@ module wbuffer_new(
     assign buffer_addr = ((work_state == state_idle) && wreq && !lookup_res_hit) ? tail_pointer : // 向tail_pointer指向的位置写
                          ((work_state == state_idle) && wreq && lookup_res_hit)  ? lookup_res_wbuffer_addr :  // 如果要写的行就在写缓冲中,则直接覆盖
                          (work_state == state_clear_buffer_addr_hshake || work_state == state_clear_buffer_data_transf) ? head_pointer : // 整个传输过程中需要一直保持所需的地址
-                         ((work_state == state_idle) && lookup_req) ? lookup_res_wbuffer_addr : 1'b0;  // lookup时从lookup_res的地址中读
+                         ((work_state == state_idle || work_state == state_write_to_buffer_done) && lookup_req) ? lookup_res_wbuffer_addr : 1'b0;  // lookup时从lookup_res的地址中读
     assign wbuffer_ram_wen = (work_state == state_idle && wreq) ? 1'b1 : 1'b0;  // idle下且有写请求时需要向wbuffer_ram写
     // 要写的数据直接连到dcache上,dcache会在发出wreq的同时给出要写的数据
     // 可以保证dcache只会在state_idle下发出wreq

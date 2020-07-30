@@ -56,7 +56,7 @@ module dcache_wbuffered(
     input         wbuffer_wreq_recvd ,
     input         wbuffer_wdone      ,
 
-    output [31:0] wbuffer_wdata_paddr,
+    output [26:0] wbuffer_wdata_paddr_prefix,
     output [31:0] wbuffer_wdata_bank0,
     output [31:0] wbuffer_wdata_bank1,
     output [31:0] wbuffer_wdata_bank2,
@@ -559,7 +559,8 @@ module dcache_wbuffered(
     assign wbuffer_uchd_wreq   = (work_state == s_uncached_write_addr_hshake ||
                                   work_state == s_uncached_write_data_transf ||
                                   work_state == s_uncached_write_waitfor_bv) ? 1'b1 :1'b0;
-    assign wbuffer_wdata_paddr = data_paddr_r;
+    assign wbuffer_wdata_paddr_prefix = way0_is_victim ? {tag0_rdata, line_idx_r} :
+                                        way1_is_victim ? {tag1_rdata, line_idx_r} : 27'b0;
     assign wbuffer_wdata_bank0 = way0_is_victim ? dcache_rdata_way_bank[0][0] :
                                  way1_is_victim ? dcache_rdata_way_bank[1][0] : 32'b0;
     assign wbuffer_wdata_bank1 = way0_is_victim ? dcache_rdata_way_bank[0][1] :
