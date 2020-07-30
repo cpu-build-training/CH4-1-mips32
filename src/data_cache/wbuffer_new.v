@@ -211,6 +211,7 @@ module wbuffer_new(
             head_pointer    <= 0;
             tail_pointer    <= 0;
             cur_buffer_size <= 0;
+            write_word_idx  <= 0;
         end else begin
             case(work_state)
                 // state: 0
@@ -264,6 +265,7 @@ module wbuffer_new(
                             write_word_idx <= write_word_idx + 1;
                         // 如果这一行写完了(实际上在写最后一个字节,但这里的赋值都是给下个周期用的)
                         else if(write_word_idx == 7) begin
+                            write_word_idx <= 0;
                             if(cur_buffer_size == 1) begin
                                 // 如果这是要写回内存的最后一行
                                 // 开始等待直到收到所有的bvalid
