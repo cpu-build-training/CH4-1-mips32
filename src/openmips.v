@@ -179,8 +179,8 @@ wire[`RegBus]       ctrl_cp0_epc;
 wire[31:0]          excepttype;
 
 // EX/MEM -> EX
-wire[1:0]           cnt_i;
-wire[`DoubleRegBus] hilo_temp_i;
+// wire[1:0]           cnt_i;
+// wire[`DoubleRegBus] hilo_temp_i;
 
 // DIV modules
 wire[`DoubleRegBus] ex_div_result_i;
@@ -377,8 +377,8 @@ ex ex0(
      .wb_lo_i(hilo_lo_i),
 
      // From EX/MEM
-     .cnt_i(cnt_i),
-     .hilo_temp_i(hilo_temp_i),
+     // .cnt_i(cnt_i),
+     // .hilo_temp_i(hilo_temp_i),
 
      // TO CTRL
      .stallreq(stallreq_from_ex),

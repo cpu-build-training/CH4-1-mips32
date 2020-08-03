@@ -119,6 +119,7 @@ module dcache_wbuffered(
             data_cache_r    <= data_cache;
         end
     end
+    wire [3:0]  data_sel_t = data_req ? data_sel : data_sel_r;
     wire [19:0] tag_r      = data_paddr_r[31:12];
     wire [6:0]  line_idx_r = data_paddr_r[11:5];
 
@@ -140,10 +141,9 @@ module dcache_wbuffered(
     wire hit0, hit1;
     wire valid0, valid1;
     wire work0, work1;
-    wire op0, op1;
     wire[19:0] tag0_rdata, tag1_rdata;
-    dcache_tag dcache_tag_0(rst, clk, tag0_wen, tag_wdata, access_cache_addr, tag0_rdata, hit0, valid0, work0, op0);
-    dcache_tag dcache_tag_1(rst, clk, tag1_wen, tag_wdata, access_cache_addr, tag1_rdata, hit1, valid1, work1, op1);
+    dcache_tag dcache_tag_0(rst, clk, tag0_wen, tag_wdata, access_cache_addr, tag0_rdata, hit0, valid0, work0);
+    dcache_tag dcache_tag_1(rst, clk, tag1_wen, tag_wdata, access_cache_addr, tag1_rdata, hit1, valid1, work1);
     
     wire hit = (hit0 && valid0) || (hit1 && valid1);
 
@@ -277,11 +277,14 @@ module dcache_wbuffered(
                 s_uncached_read_addr_hshake: begin
                     if(arready)
                         work_state  <= s_uncached_read_data_transf;
+                    else begin
+                    end
                 end
                 // state: 2
                 s_uncached_read_data_transf: begin
-                    if(rvalid) begin
+                    if(rvalid)
                         work_state  <= s_rw_done;
+                    else begin
                     end
                 end
                 // uncached write
@@ -289,16 +292,22 @@ module dcache_wbuffered(
                 s_uncached_write_addr_hshake: begin
                     if(awready)
                         work_state  <= s_uncached_write_data_transf;
+                    else begin
+                    end
                 end
                 // state: 4
                 s_uncached_write_data_transf: begin
                     if(wready)
                         work_state  <= s_uncached_write_waitfor_bv;
+                    else begin
+                    end
                 end
                 // state: 5
                 s_uncached_write_waitfor_bv: begin
                     if(bvalid)
                         work_state  <= s_rw_done;
+                    else begin
+                    end
                 end
                 // uncached rw / cached miss rw done
                 // state: 6
@@ -383,6 +392,8 @@ module dcache_wbuffered(
                     // 理论上wreq_recvd会与wreq同时出现
                     if(wbuffer_wreq_recvd)
                         work_state  <= s_miss_victim_wb_waitfor_wdone;
+                    else begin
+                    end
                 end
                 // state: 10   a
                 s_miss_victim_wb_waitfor_wdone: begin
@@ -391,6 +402,8 @@ module dcache_wbuffered(
                     // 在下个周期可以得到查询结果
                     if(wbuffer_wdone)
                         work_state  <= s_check_wbuffer_lookup_res;
+                    else begin
+                    end
                 end
                 // state: 11   b
                 s_check_wbuffer_lookup_res: begin
@@ -417,18 +430,23 @@ module dcache_wbuffered(
                 s_miss_fetch_addr_hshake: begin
                     if(arready)
                         work_state  <= s_miss_fetch_data_transf;
+                    else begin
+                    end
                 end
                 // state: 13   d
                 s_miss_fetch_data_transf: begin
                     if(rvalid) begin
                         if(read_counter == data_paddr_r[4:2])
                             read_data   <= rdata;
+                        else begin
+                        end
                         if(rlast) begin
                             work_state   <= s_miss_update;
                             read_counter <= 3'b0;
                         end else begin
                             read_counter <= read_counter + 3'b1;
                         end
+                    end else begin
                     end
                 end
                 // state: 14   e
@@ -449,8 +467,11 @@ module dcache_wbuffered(
                     lru[line_idx_r] <= 1'b1;
                 else if(hit1 && valid1)
                     lru[line_idx_r] <= 1'b0;
+                else begin
+                end
             end else if(work_state == s_miss_update) begin
                 lru[line_idx_r] <= ~lru[line_idx_r];
+            end else begin
             end
         end
     end
@@ -467,6 +488,7 @@ module dcache_wbuffered(
                     way0_dirty[line_idx_r] <= 1'b0;
                 else
                     way0_dirty[line_idx_r] <= 1'b1;
+            end else begin
             end
         end
     end
@@ -482,6 +504,7 @@ module dcache_wbuffered(
                     way1_dirty[line_idx_r] <= 1'b0;
                 else
                     way1_dirty[line_idx_r] <= 1'b1;
+            end else begin
             end
         end
     end
@@ -511,14 +534,14 @@ module dcache_wbuffered(
     generate
         for(i = 0; i < 8; i = i + 1) begin
             assign wen_way_bank[0][i] = (((work_state == s_cached_lookup && !is_read && hit0 && valid0) ||
-                                          (work_state == s_miss_update && !is_read && way0_is_victim)) && data_paddr_r[4:2] == i) ? data_sel :
+                                          (work_state == s_miss_update && !is_read && way0_is_victim)) && data_paddr_r[4:2] == i) ? data_sel_t :
                                         (work_state == s_check_wbuffer_lookup_res && wbuffer_lookup_res_hit) ? 4'b1111 : 
                                         {4{burst_wen_way_bank[0][i]}};
         end
         for(i = 0; i < 8; i = i + 1) begin
             assign wen_way_bank[1][i] = (((work_state == s_cached_lookup && !is_read && hit1 && valid1) ||
                                           (work_state == s_miss_update && !is_read && way1_is_victim)) &&
-                                          data_paddr_r[4:2] == i) ? data_sel :
+                                          data_paddr_r[4:2] == i) ? data_sel_t :
                                         (work_state == s_check_wbuffer_lookup_res && wbuffer_lookup_res_hit) ? 4'b1111 : 
                                         {4{burst_wen_way_bank[1][i]}};
         end
@@ -617,7 +640,7 @@ module dcache_wbuffered(
     // w
     // assign wid    = 4'b0000;
     assign wdata  = (work_state == s_uncached_write_data_transf) ? data_wdata_r : 32'b0;
-    assign wstrb  = (work_state == s_uncached_write_data_transf) ? data_sel : 4'b0000;
+    assign wstrb  = (work_state == s_uncached_write_data_transf) ? data_sel_t : 4'b0000;
     assign wlast  = (work_state == s_uncached_write_data_transf) ? 1'b1 : 1'b0;
     assign wvalid = (work_state == s_uncached_write_data_transf) ? 1'b1 : 1'b0;
     // b

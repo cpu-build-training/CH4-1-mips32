@@ -153,10 +153,10 @@ module wbuffer_new(
     parameter[2:0] state_clear_buffer_addr_hshake = 3'b011;  // 写入一行前的地址握手
     parameter[2:0] state_clear_buffer_data_transf = 3'b100;  // burst传输一行数据,结束时会发出wlast
     parameter[2:0] state_clear_buffer_wait_bvalid = 3'b101;  // 保持该状态直到所有的bvalid都收到
-    parameter[2:0] state_lookup_res               = 3'b110;
+    parameter[2:0] state_lookup_res               = 3'b110;  // 该状态下得到命中的行的数据
 
     // 总共有16个,每个27位   paddr_prefixes[buffer_addr]
-    reg  [26:0] paddr_prefixes[15:0];
+    reg[26:0] paddr_prefixes[15:0];
 
     assign lookup_res_data_bank0 = rdata_bank0;
     assign lookup_res_data_bank1 = rdata_bank1;
@@ -193,17 +193,7 @@ module wbuffer_new(
                              (tail_pointer < head_pointer) ? ((lookup_res_wbuffer_addr >= head_pointer) || (lookup_res_wbuffer_addr < tail_pointer)) : 1'b0;
     // 还要判断下这行是不是真的在队列中
     assign lookup_res_hit = has_hit_candidate && candidate_is_in_q;
-
-    generate
-        genvar i;
-        for(i = 0; i < 16; i = i + 1) begin
-            always @ (posedge clk) begin
-                if(rst) begin
-                    paddr_prefixes[i] <= 27'd0;
-                end
-            end
-        end
-    endgenerate
+    
 
     always @ (posedge clk) begin
         if(rst) begin
@@ -212,6 +202,23 @@ module wbuffer_new(
             tail_pointer    <= 0;
             cur_buffer_size <= 0;
             write_word_idx  <= 0;
+
+            paddr_prefixes[0]  <= 27'd0;
+            paddr_prefixes[1]  <= 27'd0;
+            paddr_prefixes[2]  <= 27'd0;
+            paddr_prefixes[3]  <= 27'd0;
+            paddr_prefixes[4]  <= 27'd0;
+            paddr_prefixes[5]  <= 27'd0;
+            paddr_prefixes[6]  <= 27'd0;
+            paddr_prefixes[7]  <= 27'd0;
+            paddr_prefixes[8]  <= 27'd0;
+            paddr_prefixes[9]  <= 27'd0;
+            paddr_prefixes[10] <= 27'd0;
+            paddr_prefixes[11] <= 27'd0;
+            paddr_prefixes[12] <= 27'd0;
+            paddr_prefixes[13] <= 27'd0;
+            paddr_prefixes[14] <= 27'd0;
+            paddr_prefixes[15] <= 27'd0;
         end else begin
             case(work_state)
                 // state: 0
@@ -225,7 +232,7 @@ module wbuffer_new(
                             if(tail_pointer < 15)
                                 tail_pointer <= tail_pointer + 1;
                             else
-                                tail_pointer <= 4;
+                                tail_pointer <= 0;
                             
                             cur_buffer_size  <= cur_buffer_size + 1;
                             // 记录这一行的物理地址(仅使用高27位)
@@ -261,6 +268,7 @@ module wbuffer_new(
                     if(awready) begin
                         work_state <= state_clear_buffer_data_transf;
                         write_word_idx <= 0;
+                    end else begin
                     end
                 end
                 state_clear_buffer_data_transf: begin
@@ -291,6 +299,7 @@ module wbuffer_new(
                     // 收到所有bvalid后才可以认为本次写缓冲完成
                     if(bvalid_cnt == 0) begin
                         work_state = state_write_to_buffer_done;
+                    end else begin
                     end
                 end
                 // 是否命中已经在上一个状态(state_idle)下得到,并保持在这个状态中
@@ -310,6 +319,8 @@ module wbuffer_new(
             bvalid_cnt <= cur_buffer_size;
         else if(bvalid)
             bvalid_cnt <= bvalid_cnt - 1;
+        else begin
+        end
     end
 
     
@@ -373,5 +384,4 @@ module wbuffer_new(
     assign empty  = (cur_buffer_size == 0)  ? 1'b1 : 1'b0;
     // 在回到state_write_to_buffer_done且之前没有收到wreq则可以认为有dcache主动要求的clear操作完成
     assign clear_done = ((work_state == state_write_to_buffer_done) && !has_wreq) ? 1'b1 : 1'b0;
-
 endmodule

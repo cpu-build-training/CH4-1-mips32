@@ -25,9 +25,9 @@ module ex(
          input wire          mem_whilo_i,
 
          // 第一个执行周期得到的乘法结果
-         wire[`DoubleRegBus] hilo_temp_i,
+         // wire[`DoubleRegBus] hilo_temp_i,
          // 当前处于执行阶段的第几个时钟周期
-         wire[1:0]   cnt_i,
+         // wire[1:0]   cnt_i,
 
          // 来自除法模块的输入
          wire[`DoubleRegBus] div_result_i,
