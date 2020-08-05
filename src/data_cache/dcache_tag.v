@@ -10,8 +10,7 @@ module dcache_tag(
     output  wire[19:0]  rdata,
     output  wire        hit,
     output  wire        valid,
-    output  wire        work,
-    input   wire        op
+    output  wire        work
     );
     
     reg[20:0] tag[127:0];
@@ -42,7 +41,7 @@ module dcache_tag(
     
     always @ (posedge clk) begin
         if (!work) tag[reset_counter] <= 21'b0; // reset
-        else if (wen || op) tag[addr[11:5]] <= wdata; // modify tag according to addr
+        else if (wen) tag[addr[11:5]] <= wdata; // modify tag according to addr
     end
     
     // read tag

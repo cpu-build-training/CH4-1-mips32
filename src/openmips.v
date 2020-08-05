@@ -9,7 +9,7 @@ module openmips(
          input wire              rom_data_valid,
          output  wire[`RegBus]   rom_addr_o,
          output wire             rom_ce_o,
-         wire                    inst_ready,
+         wire                    inst_ready,  // useless
          input wire              pc_ready,
          input wire[`RegBus]     current_inst_address,
 
@@ -23,20 +23,6 @@ module openmips(
          input wire  data_addr_ok,
          input wire data_data_ok,
          input wire[`RegBus] data_rdata,
-
-         //  wire                    mem_data_ready,
-         //  input wire                    mem_addr_read_ready,
-         //  input wire[`RegBus]     ram_data_i,
-         //  input wire              ram_write_ready,
-         //  input wire              ram_read_valid,
-         //  output
-         //  wire[`RegBus]     ram_addr_o,
-         //  wire[`RegBus]     ram_data_o,
-         //  output wire                ram_we_o,
-         //  output wire          full,
-         //  wire[3:0]           ram_sel_o,
-         //  output wire                ram_ce_o,
-         //  wire                ram_re_o,
 
          // 6 个外部硬件中断输入
          input wire[5:0]          int_i,
@@ -193,8 +179,8 @@ wire[`RegBus]       ctrl_cp0_epc;
 wire[31:0]          excepttype;
 
 // EX/MEM -> EX
-wire[1:0]           cnt_i;
-wire[`DoubleRegBus] hilo_temp_i;
+// wire[1:0]           cnt_i;
+// wire[`DoubleRegBus] hilo_temp_i;
 
 // DIV modules
 wire[`DoubleRegBus] ex_div_result_i;
@@ -391,8 +377,8 @@ ex ex0(
      .wb_lo_i(hilo_lo_i),
 
      // From EX/MEM
-     .cnt_i(cnt_i),
-     .hilo_temp_i(hilo_temp_i),
+     // .cnt_i(cnt_i),
+     // .hilo_temp_i(hilo_temp_i),
 
      // TO CTRL
      .stallreq(stallreq_from_ex),

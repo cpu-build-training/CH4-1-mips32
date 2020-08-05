@@ -158,9 +158,9 @@
 `define EXE_LB_OP          8'b10100000
 `define EXE_LBU_OP         8'b10100100
 `define EXE_LH_OP          8'b10100001
-`define EXE_LHU_OP          8'b10100101
-`define EXE_LW_OP         8'b10100011
-`define EXE_LWL_OP          8'b10100010
+`define EXE_LHU_OP         8'b10100101
+`define EXE_LW_OP          8'b10100011
+`define EXE_LWL_OP         8'b10100010
 `define EXE_LWR_OP          8'b10100110
 `define EXE_SB_OP          8'b00101000
 `define EXE_SH_OP          8'b00101001

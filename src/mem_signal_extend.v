@@ -45,7 +45,7 @@ always @(posedge clk)
       begin
         addr_ok_last_long <= 1'b0;
       end
-    else if (addr_ok == 1'b1)
+    else if (addr_ok == 1'b1 && !flush)
       begin
         addr_ok_last_long <= 1'b1;
       end

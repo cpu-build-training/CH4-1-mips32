@@ -9,7 +9,7 @@ module inst_cache(
     // ar
     output [3 :0] arid   ,
     output [31:0] araddr ,
-    output [7 :0] arlen  ,
+    output [3 :0] arlen  ,
     output [2 :0] arsize ,
     output [1 :0] arburst,
     output [1 :0] arlock ,
@@ -48,7 +48,6 @@ module inst_cache(
     wire[31:0] access_cache_addr;
     wire tag0_wen, tag1_wen, tag2_wen, tag3_wen;
     wire[20:0] tag_wdata;
-    wire op0, op1, op2, op3;
 
     reg[31:0] inst_addr_r;
     always @ (posedge clk) begin
@@ -83,10 +82,10 @@ module inst_cache(
     end
     assign flushed = flush || flushed_r;
 
-    icache_tag icache_tag_0(rst, clk, tag0_wen, tag_wdata, access_cache_addr, hit0, valid0, work0, op0);
-    icache_tag icache_tag_1(rst, clk, tag1_wen, tag_wdata, access_cache_addr, hit1, valid1, work1, op1);
-    icache_tag icache_tag_2(rst, clk, tag2_wen, tag_wdata, access_cache_addr, hit2, valid2, work2, op2);
-    icache_tag icache_tag_3(rst, clk, tag3_wen, tag_wdata, access_cache_addr, hit3, valid3, work3, op3);
+    icache_tag icache_tag_0(rst, clk, tag0_wen, tag_wdata, access_cache_addr, hit0, valid0, work0);
+    icache_tag icache_tag_1(rst, clk, tag1_wen, tag_wdata, access_cache_addr, hit1, valid1, work1);
+    icache_tag icache_tag_2(rst, clk, tag2_wen, tag_wdata, access_cache_addr, hit2, valid2, work2);
+    icache_tag icache_tag_3(rst, clk, tag3_wen, tag_wdata, access_cache_addr, hit3, valid3, work3);
 
     wire[31:0] icache_way0_0_rdata;
     wire[31:0] icache_way0_1_rdata;
@@ -361,7 +360,7 @@ module inst_cache(
     assign arid    = 4'b0000;
     assign araddr  = (work_state == state_access_ram_0) ? inst_addr_mapped :
                      (work_state == state_miss_access_ram_0) ? {inst_addr_r[31:5], 5'b00000} : 32'b0;
-    assign arlen   = (inst_cache_r == 1'b1) ? 8'b0000_0111 : 8'b0000_0000;
+    assign arlen   = (inst_cache_r == 1'b1) ? 4'b0111 : 4'b0000;
     assign arsize  = 3'b010;
     assign arburst = (inst_cache_r == 1'b1) ? 2'b01 : 2'b00;
     assign arlock  = 2'b00;
