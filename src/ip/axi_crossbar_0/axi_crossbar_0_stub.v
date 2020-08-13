@@ -1,10 +1,9 @@
-// Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+// Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
-// Tool Version: Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
-// Date        : Mon Jul 20 15:16:47 2020
+// Tool Version: Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
+// Date        : Thu Aug 13 21:05:12 2020
 // Host        : LAPTOP-81S7H2KQ running 64-bit major release  (build 9200)
-// Command     : write_verilog -force -mode synth_stub
-//               C:/Users/MagicStudio/OneDrive/LoongSon/CH4-1-mips32/src/ip/axi_crossbar_0/axi_crossbar_0_stub.v
+// Command     : write_verilog -force -mode synth_stub D:/Git/CH4-1-mips32/src/ip/axi_crossbar_0/axi_crossbar_0_stub.v
 // Design      : axi_crossbar_0
 // Purpose     : Stub declaration of top-level module interface
 // Device      : xc7a200tfbg676-2
@@ -13,7 +12,7 @@
 // This empty module with port declaration file causes synthesis tools to infer a black box for IP.
 // The synthesis directives are for Synopsys Synplify support to prevent IO buffer insertion.
 // Please paste the declaration into a Verilog source file or add the file as an additional source.
-(* X_CORE_INFO = "axi_crossbar_v2_1_19_axi_crossbar,Vivado 2018.3" *)
+(* X_CORE_INFO = "axi_crossbar_v2_1_21_axi_crossbar,Vivado 2019.2" *)
 module axi_crossbar_0(aclk, aresetn, s_axi_awid, s_axi_awaddr, 
   s_axi_awlen, s_axi_awsize, s_axi_awburst, s_axi_awlock, s_axi_awcache, s_axi_awprot, 
   s_axi_awqos, s_axi_awvalid, s_axi_awready, s_axi_wid, s_axi_wdata, s_axi_wstrb, s_axi_wlast, 

@@ -1,3 +1,29 @@
+2019.2:
+ * Version 2.1 (Rev. 21)
+ * General: Generate BD error when attempting to program more than 16 decode slots
+ * Revision change in one or more subcores
+
+2019.1.3:
+ * Version 2.1 (Rev. 20)
+ * No changes
+
+2019.1.2:
+ * Version 2.1 (Rev. 20)
+ * No changes
+
+2019.1.1:
+ * Version 2.1 (Rev. 20)
+ * No changes
+
+2019.1:
+ * Version 2.1 (Rev. 20)
+ * General: Hide support for versal
+ * Revision change in one or more subcores
+
+2018.3.1:
+ * Version 2.1 (Rev. 19)
+ * No changes
+
 2018.3:
  * Version 2.1 (Rev. 19)
  * Revision change in one or more subcores
@@ -130,7 +156,7 @@
  * Native Vivado Release
  * There have been no functional or interface changes to this IP.  The version number has changed to support unique versioning in Vivado starting with 2013.1.
 
-(c) Copyright 2012 - 2018 Xilinx, Inc. All rights reserved.
+(c) Copyright 2012 - 2019 Xilinx, Inc. All rights reserved.
 
 This file contains confidential and proprietary information
 of Xilinx, Inc. and is protected under U.S. and
