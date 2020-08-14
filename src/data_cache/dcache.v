@@ -97,8 +97,8 @@ module dcache(
     wire work0, work1;
     wire op0, op1;
     wire[19:0] tag0_rdata, tag1_rdata;
-    dcache_tag dcache_tag_0(rst, clk, tag0_wen, tag_wdata, access_cache_addr, tag0_rdata, hit0, valid0, work0, op0);
-    dcache_tag dcache_tag_1(rst, clk, tag1_wen, tag_wdata, access_cache_addr, tag1_rdata, hit1, valid1, work1, op1);
+    dcache_tag dcache_tag_0(rst, clk, tag0_wen, tag_wdata, access_cache_addr, tag0_rdata, hit0, valid0, work0);
+    dcache_tag dcache_tag_1(rst, clk, tag1_wen, tag_wdata, access_cache_addr, tag1_rdata, hit1, valid1, work1);
     
     wire[31:0] dcache_way0_0_rdata;
     wire[31:0] dcache_way0_1_rdata;
