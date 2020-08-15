@@ -4,50 +4,52 @@ module mem_wb(
          input wire clk, wire rst,
          //  访存阶段结果
          input
-         wire[`RegAddrBus]       mem_wd,
-         input wire              mem_wreg,
-         wire[`RegBus]           mem_wdata,
+         wire[`RegAddrBus]      mem_wd,
+         input wire             mem_wreg,
+         wire[`RegBus]          mem_wdata,
 
-         wire[`RegBus]         mem_hi,
-         wire[`RegBus]         mem_lo,
-         input wire mem_whilo,
-         wire[`RegBus]        mem_current_address,
+         wire[`RegBus]          mem_hi,
+         wire[`RegBus]          mem_lo,
+         input wire             mem_whilo,
+         wire[`RegBus]          mem_current_address,
 
          // LLbit
-         input wire    mem_LLbit_we,
-         wire mem_LLbit_value,
+         input wire             mem_LLbit_we,
+         wire                   mem_LLbit_value,
 
          // cp0
-         wire mem_cp0_reg_we,
-         wire[4:0] mem_cp0_reg_write_addr,
-         wire[`RegBus] mem_cp0_reg_data,
+         wire                   mem_cp0_reg_we,
+         wire[4:0]              mem_cp0_reg_write_addr,
+         wire[2:0]              mem_cp0_reg_write_sel,
+         wire[`RegBus]          mem_cp0_reg_data,
 
          // 异常
          input  wire flush,
 
          // 送到回写阶段的信息
          output
-         reg[`RegAddrBus]        wb_wd,
-         output reg                     wb_wreg,
+         reg[`RegAddrBus]       wb_wd,
+         output reg             wb_wreg,
          reg[`RegBus]           wb_wdata,
-         reg[`RegBus]        wb_hi,
-         reg[`RegBus]        wb_lo,
-         output reg                 wb_whilo,
+         reg[`RegBus]           wb_hi,
+         reg[`RegBus]           wb_lo,
+         output reg             wb_whilo,
 
          // LLbit
          reg wb_LLbit_we,
          reg wb_LLbit_value,
 
          // cp0
-         output reg              wb_cp0_reg_we,
-         reg[4:0]         wb_cp0_reg_write_addr,
-         reg[`RegBus]     wb_cp0_reg_data,
+         output reg             wb_cp0_reg_we,
+         reg[4:0]               wb_cp0_reg_write_addr,
+         reg[2:0]               wb_cp0_reg_write_sel,
+         reg[`RegBus]           wb_cp0_reg_data,
 
          // DEBUG
-         reg[`RegBus]   wb_current_address,
+         reg[`RegBus]           wb_current_address,
 
          // From CTRL module.
-         input wire[5:0]     stall
+         input wire[5:0]        stall
        );
 
 always @(posedge clk)
@@ -64,6 +66,7 @@ always @(posedge clk)
         wb_LLbit_value <= 1'b0;
         wb_cp0_reg_we <= `WriteDisable;
         wb_cp0_reg_write_addr <= 5'b00000;
+        wb_cp0_reg_write_sel  <= 0;
         wb_cp0_reg_data <= `ZeroWord;
         wb_current_address <= `ZeroWord;
       end
@@ -79,6 +82,7 @@ always @(posedge clk)
         wb_LLbit_value <= 1'b0;
         wb_cp0_reg_we <= `WriteDisable;
         wb_cp0_reg_write_addr <= 5'b00000;
+        wb_cp0_reg_write_sel  <= 0;
         wb_cp0_reg_data <= `ZeroWord;
         // wb_current_address <= `ZeroWord;
       end
@@ -94,6 +98,7 @@ always @(posedge clk)
         wb_LLbit_value <= mem_LLbit_value;
         wb_cp0_reg_we <= mem_cp0_reg_we;
         wb_cp0_reg_write_addr <= mem_cp0_reg_write_addr;
+        wb_cp0_reg_write_sel  <= mem_cp0_reg_write_sel;
         wb_cp0_reg_data <= mem_cp0_reg_data;
         wb_current_address <= mem_current_address;
       end

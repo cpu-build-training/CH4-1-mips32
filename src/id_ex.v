@@ -6,42 +6,42 @@ module id_ex(
 
          // 从译码阶段传过来的信息
          input
-         wire[`AluOpBus] id_aluop,
-         wire[`AluSelBus] id_alusel,
-         wire[`RegBus]   id_reg1,
-         wire[`RegBus]   id_reg2,
-         wire[`RegAddrBus] id_wd,
-         input wire            id_wreg,
+         wire[`AluOpBus]    id_aluop,
+         wire[`AluSelBus]   id_alusel,
+         wire[`RegBus]      id_reg1,
+         wire[`RegBus]      id_reg2,
+         wire[`RegAddrBus]  id_wd,
+         input wire         id_wreg,
 
-         wire[`RegBus]    id_link_address,
-         input wire       id_is_in_delayslot,
+         wire[`RegBus]      id_link_address,
+         input wire         id_is_in_delayslot,
         //  wire             next_inst_in_delayslot_i,
          // 当前处于译码阶段的指令
-         wire[`RegBus]    id_inst,
+         wire[`RegBus]      id_inst,
 
          // 异常
-         input wire             flush,
-         wire[`RegBus]    id_current_inst_address,
-         wire[31:0]       id_excepttype,
+         input wire         flush,
+         wire[`RegBus]      id_current_inst_address,
+         wire[31:0]         id_excepttype,
 
          // 传到执行阶段的信息
          output
-         reg[`AluOpBus]      ex_aluop,
-         reg[`AluSelBus]     ex_alusel,
-         reg[`RegBus]        ex_reg1,
-         reg[`RegBus]        ex_reg2,
-         reg[`RegAddrBus]    ex_wd,
-         output reg                 ex_wreg,
+         reg[`AluOpBus]     ex_aluop,
+         reg[`AluSelBus]    ex_alusel,
+         reg[`RegBus]       ex_reg1,
+         reg[`RegBus]       ex_reg2,
+         reg[`RegAddrBus]   ex_wd,
+         output reg         ex_wreg,
 
-         reg[`RegBus]         ex_link_address,
-         output reg                  ex_is_in_delayslot,
+         reg[`RegBus]       ex_link_address,
+         output reg         ex_is_in_delayslot,
         //  reg                  is_in_delayslot_o,
          // 当前处于执行阶段的指令
-         reg[`RegBus]         ex_inst,
+         reg[`RegBus]       ex_inst,
 
          // 异常
-         reg[`RegBus]         ex_current_inst_address,
-         reg[31:0]            ex_excepttype,
+         reg[`RegBus]       ex_current_inst_address,
+         reg[31:0]          ex_excepttype,
 
          // From CTRL module.
          input wire[5:0]     stall

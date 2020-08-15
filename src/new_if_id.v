@@ -22,8 +22,13 @@ module new_if_id (
          // 是否 axi 可以读取下个 pc
          output wire next_pc_valid,
 
-         output reg id_in_delay_slot
+         output reg id_in_delay_slot,
+
+         input  wire[31:0] pc_excepttype_o,
+         output wire[31:0] id_excepttype_i
        );
+
+assign id_excepttype_i = pc_excepttype_o;
 
 reg[`RegBus] stored_inst;
 reg[`RegBus] stored_pc;
@@ -119,7 +124,6 @@ always @(posedge clk)
     if (rst == `RstEnable)
       begin
         in_delay_slot<=`False_v;
-
       end
     else if (id_next_in_delay_slot == 1'b1)
       begin
@@ -132,10 +136,9 @@ always @(posedge clk)
       end
     else
       begin
-
       end
 
-    // // 为了产生一个周期的延迟，和其他数据同步。
+    // 为了产生一个周期的延迟，和其他数据同步。
     if(rst == `RstEnable)
       id_in_delay_slot <= `False_v;
     else

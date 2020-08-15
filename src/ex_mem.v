@@ -23,21 +23,22 @@ module ex_mem(
          wire[`RegBus]   ex_reg2,
 
          // cp0
-         input wire            ex_cp0_reg_we,
+         input wire           ex_cp0_reg_we,
          wire[4:0]            ex_cp0_reg_write_addr,
-         wire[`RegBus]   ex_cp0_reg_data,
+         wire[2:0]            ex_cp0_reg_write_sel,
+         wire[`RegBus]        ex_cp0_reg_data,
 
          // CTRL
-         input wire      flush,
-         wire[31:0]      ex_excepttype,
-         input wire      ex_is_in_delayslot,
-         wire[`RegBus]   ex_current_inst_address,
+         input wire           flush,
+         wire[31:0]           ex_excepttype,
+         input wire           ex_is_in_delayslot,
+         wire[`RegBus]        ex_current_inst_address,
 
          // 送到访存阶段的信息
          output
-         reg[`RegAddrBus]        mem_wd,
-         output reg              mem_wreg,
-         reg[`RegBus]            mem_wdata,
+         reg[`RegAddrBus]     mem_wd,
+         output reg           mem_wreg,
+         reg[`RegBus]         mem_wdata,
 
          reg[`RegBus]         mem_hi,
          reg[`RegBus]         mem_lo,
@@ -46,18 +47,19 @@ module ex_mem(
         //  reg[1:0]             cnt_o,
 
          // STORE / LOAD
-         reg[`AluOpBus]      mem_aluop,
-         reg[`RegBus]        mem_mem_addr,
-         reg[`RegBus]        mem_reg2,
+         reg[`AluOpBus]       mem_aluop,
+         reg[`RegBus]         mem_mem_addr,
+         reg[`RegBus]         mem_reg2,
 
          // cp0
-         output reg             mem_cp0_reg_we,
-         reg[4:0]        mem_cp0_reg_write_addr,
-         reg[`RegBus]    mem_cp0_reg_data,
+         output reg           mem_cp0_reg_we,
+         reg[4:0]             mem_cp0_reg_write_addr,
+         reg[2:0]             mem_cp0_reg_write_sel,
+         reg[`RegBus]         mem_cp0_reg_data,
 
-         reg[31:0]       mem_excepttype,
-         output reg             mem_is_in_delayslot,
-         reg[`RegBus]    mem_current_inst_address,
+         reg[31:0]            mem_excepttype,
+         output reg           mem_is_in_delayslot,
+         reg[`RegBus]         mem_current_inst_address,
 
          // From CTRL module.
          input wire[5:0]     stall
@@ -80,6 +82,7 @@ always @(posedge clk)
         mem_reg2 <= `ZeroWord;
         mem_cp0_reg_we <= `WriteDisable;
         mem_cp0_reg_write_addr <= 5'b00000;
+        mem_cp0_reg_write_sel <= 0;
         mem_cp0_reg_data <= `ZeroWord;
         mem_excepttype <= `ZeroWord;
         mem_is_in_delayslot <= `NotInDelaySlot;
@@ -101,6 +104,7 @@ always @(posedge clk)
         mem_reg2 <= `ZeroWord;
         mem_cp0_reg_we <= `WriteDisable;
         mem_cp0_reg_write_addr <= 5'b00000;
+        mem_cp0_reg_write_sel = 0;
         mem_cp0_reg_data <= `ZeroWord;
         mem_excepttype <= `ZeroWord;
         mem_is_in_delayslot <= `NotInDelaySlot;
@@ -122,6 +126,7 @@ always @(posedge clk)
         mem_reg2 <= `ZeroWord;
         mem_cp0_reg_we <= `WriteDisable;
         mem_cp0_reg_write_addr <= 5'b00000;
+        mem_cp0_reg_write_sel = 0;
         mem_cp0_reg_data <= `ZeroWord;
         mem_excepttype <= `ZeroWord;
         mem_is_in_delayslot <= `NotInDelaySlot;
@@ -143,6 +148,7 @@ always @(posedge clk)
         mem_reg2 <= ex_reg2;
         mem_cp0_reg_we <= ex_cp0_reg_we;
         mem_cp0_reg_write_addr <= ex_cp0_reg_write_addr;
+        mem_cp0_reg_write_sel  <= ex_cp0_reg_write_sel;
         mem_cp0_reg_data <= ex_cp0_reg_data;
         mem_excepttype <= ex_excepttype;
         mem_is_in_delayslot <= ex_is_in_delayslot;

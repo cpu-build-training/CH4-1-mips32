@@ -150,7 +150,6 @@ assign current_inst_address_o = pc_i;
 
 
 // 对指令进行译码
-
 always @(*)
   begin
     if (rst == `RstEnable)
@@ -1048,6 +1047,25 @@ always @(*)
                   end
               endcase
             end
+          `EXE_COP0: begin
+            if(inst_i[25:6] == 20'b1000_0000_0000_0000_0000) begin
+              instvalid = `InstValid;
+              case(op3)
+                `EXE_TLBP: begin
+                  aluop_o = `EXE_TLBP_OP;
+                end
+                `EXE_TLBR: begin
+                  aluop_o = `EXE_TLBR_OP;
+                end
+                `EXE_TLBWI: begin
+                  aluop_o = `EXE_TLBWI_OP;
+                end
+                `EXE_TLBWR: begin
+                  aluop_o = `EXE_TLBWR_OP;
+                end
+              endcase
+            end
+          end
           default:
             begin
             end

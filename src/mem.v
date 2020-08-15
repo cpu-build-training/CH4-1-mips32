@@ -10,7 +10,6 @@ module mem(
          input wire               wreg_i,
          wire[`RegBus]            wdata_i,
 
-
          input wire               whilo_i,
          wire[`RegBus]            hi_i,
          wire[`RegBus]            lo_i,
@@ -24,8 +23,6 @@ module mem(
          // 读取的 data 是否 valid
          input wire               mem_data_i_valid,
          wire[`RegBus]            mem_data_i,
-         // axi bvalid
-         // 写入是否 ready
          input wire               mem_write_ready,
 
          // 新增的输入接口
@@ -36,6 +33,7 @@ module mem(
          // cp0
          wire                     cp0_reg_we_i,
          wire[4:0]                cp0_reg_write_addr_i,
+         wire[2:0]                cp0_reg_write_sel_i,
          wire[`RegBus]            cp0_reg_data_i,
 
          // 异常
@@ -53,6 +51,7 @@ module mem(
          // 用来检测数据相关
          input wire               wb_cp0_reg_we,
          wire[4:0]                wb_cp0_reg_write_addr,
+         wire[2:0]                wb_cp0_reg_write_sel,
          wire[`RegBus]            wb_cp0_reg_data,
 
          // 访存阶段的结果
@@ -65,7 +64,7 @@ module mem(
          reg[`RegBus]             lo_o,
          output reg whilo_o,
          // 送到外部数据存储器 RAM 的信息
-         reg[`RegBus]             mem_addr_o,
+         reg[`RegBus]             mem_vaddr_o,
          output wire              mem_read_ready,
          wire                     mem_we_o,
          reg[3:0]                 mem_sel_o,
@@ -79,12 +78,19 @@ module mem(
          // cp0
          reg                      cp0_reg_we_o,
          reg[4:0]                 cp0_reg_write_addr_o,
+         reg[2:0]                 cp0_reg_write_sel_o,
          reg[`RegBus]             cp0_reg_data_o,
 
+         // mmu
+         output wire[`AluOpBus]   aluop_o,
+         input  wire              data_paddr_refill_i,
+         input  wire              data_paddr_invalid_i,
+         input  wire              data_paddr_modified_i,
+
          // 异常
-         reg[31:0]                excepttype_o,
-         wire[`RegBus]            cp0_epc_o,
-         wire[`RegBus]            current_inst_address_o,
+         output reg[31:0]         excepttype_o,
+         output wire[`RegBus]     cp0_epc_o,
+         output wire[`RegBus]     current_inst_address_o,
          output wire              is_in_delayslot_o,
          output wire              stallreq_for_mem,
          wire[`RegBus]            badvaddr_o
@@ -129,6 +135,12 @@ assign mem_read_ready = `Ready;
 // 如果 pc 有异常，说明是 pc 读取地址错误，需要保存的地址是 pc 中的内容
 assign badvaddr_o = (current_inst_address_i[1:0] == 2'b00)? mem_addr_i:current_inst_address_i;
 
+wire is_load_op  = (aluop_i == `EXE_LB_OP || aluop_i == `EXE_LBU_OP || aluop_i == `EXE_LH_OP || aluop_i == `EXE_LHU_OP || 
+                    aluop_i == `EXE_LW_OP || aluop_i == `EXE_LWL_OP || aluop_i == `EXE_LWR_OP|| aluop_i == `EXE_LL_OP);
+wire is_store_op = (aluop_i == `EXE_SB_OP || aluop_i == `EXE_SH_OP  || aluop_i == `EXE_SW_OP || aluop_i == `EXE_SWL_OP ||
+                    aluop_i == `EXE_SWR_OP|| aluop_i == `EXE_SC_OP);
+assign aluop_o   = aluop_i;
+
 // 获取 LLbit 寄存器的最新之， 如果回写阶段的指令要写 LLbit，那么回写阶段要写入的
 // 值就是 LLbit 寄存器的最新值，反之， LLbit 模块给出的值 LLbit_i 是最新值
 always @(*)
@@ -151,7 +163,7 @@ always @(*)
       end
   end
 
-/// 第一段：得到 CP0 中寄存器的最新指
+/// 第一段：得到 CP0 中寄存器的最新值
 // 得到 CP0 中 Status 的最新值
 // 判断当前处于回写阶段的指令是否要写 CP0 中 Status 寄存器，如果要写，
 // 那么要写如的值就是 Status 寄存器的最新值，反之，从 CP0 模块通过 cp0_status_i 接口
@@ -163,7 +175,8 @@ always @(*)
         cp0_status = `ZeroWord;
       end
     else if ((wb_cp0_reg_we == `WriteEnable) &&
-             (wb_cp0_reg_write_addr == `CP0_REG_STATUS))
+             (wb_cp0_reg_write_addr == `CP0_REG_STATUS) &&
+             (wb_cp0_reg_write_sel == 0))
       begin
         cp0_status= wb_cp0_reg_data;
       end
@@ -181,7 +194,8 @@ always @(*)
         cp0_epc = `ZeroWord;
       end
     else if ((wb_cp0_reg_we == `WriteEnable) &&
-             (wb_cp0_reg_write_addr == `CP0_REG_EPC))
+             (wb_cp0_reg_write_addr == `CP0_REG_EPC) &&
+             (wb_cp0_reg_write_sel == 0))
       begin
         cp0_epc = wb_cp0_reg_data;
       end
@@ -203,7 +217,8 @@ always @(*)
         cp0_cause = `ZeroWord;
       end
     else if((wb_cp0_reg_we == `WriteEnable)&&
-            (wb_cp0_reg_write_addr == `CP0_REG_CAUSE))
+            (wb_cp0_reg_write_addr == `CP0_REG_CAUSE) &&
+            (wb_cp0_reg_write_sel == 0))
       begin
         cp0_cause = `ZeroWord;
         // IP[1:0] 字段是可写的
@@ -221,74 +236,62 @@ always @(*)
   end
 
 /// 第二段：给出最终的异常类型
-
-always @(*)
-  begin
-    if(rst == `RstEnable)
-      begin
-        excepttype_o = `ZeroWord;
-      end
-    else
-      begin
-        excepttype_o = `ZeroWord;
-        if(current_inst_address_i != `ZeroWord)
-          begin
-            if (((cp0_cause[15:8] & (cp0_status[15:8]))!= 8'h00) &&
-                (cp0_status[1] == 1'b0)&&
-                (cp0_status[0] == 1'b1))
-              begin
-                // interrupt
-                excepttype_o = 32'h0000_0001;
-              end
-            else if (excepttype_i[`SYSCALL_IDX] == 1'b1)
-              begin
-                // syscall
-                excepttype_o = 32'h0000_0008;
-              end
-            else if (excepttype_i[`BREAK_IDX] == 1'b1)
-              begin
-                // break
-                excepttype_o = 32'h0000_0009;
-              end
-            else if (excepttype_i[`INSTINVALID_IDX] == 1'b1)
-              begin
-                // inst_invalid
-                excepttype_o = 32'h0000_000a;
-              end
-            else if (excepttype_i[`TRAP_IDX] == 1'b1)
-              begin
-                // trap
-                excepttype_o = 32'h0000_000d;
-              end
-            else if (excepttype_i[`OVERFLOW_IDX] == 1'b1)
-              begin
-                // ov
-                excepttype_o = 32'h0000_000c;
-              end
-            else if(excepttype_i[`ADEL_IDX] == 1'b1)
-              begin
-                excepttype_o = `ADEL_FINAL;
-              end
-            else if(excepttype_i[`ADES_IDX] == 1'b1)
-              begin
-                excepttype_o = `ADES_FINAL;
-              end
-            else if (excepttype_i[`ERET_IDX] == 1'b1)
-              begin
-                // eret
-                excepttype_o = 32'h0000_000e;
-              end
-          end
-      end
+always @(*) begin
+  if(rst == `RstEnable) begin
+    excepttype_o = `ZeroWord;
+  end else begin
+    excepttype_o = `ZeroWord;
+    if(current_inst_address_i != `ZeroWord) begin
+      if (((cp0_cause[15:8] & (cp0_status[15:8]))!= 8'h00) &&
+          (cp0_status[1] == 1'b0) &&
+          (cp0_status[0] == 1'b1)) begin
+        // interrupt
+        excepttype_o = 32'h0000_0001;
+      end else if (excepttype_i[`SYSCALL_IDX] == 1'b1) begin
+        // syscall
+        excepttype_o = 32'h0000_0008;
+      end else if (excepttype_i[`BREAK_IDX] == 1'b1) begin
+        // break
+        excepttype_o = 32'h0000_0009;
+      end else if (excepttype_i[`INSTINVALID_IDX] == 1'b1) begin
+        // inst_invalid
+        excepttype_o = 32'h0000_000a;
+      end else if (excepttype_i[`TRAP_IDX] == 1'b1) begin
+        // trap
+        excepttype_o = 32'h0000_000d;
+      end else if (excepttype_i[`OVERFLOW_IDX] == 1'b1) begin
+        // ov
+        excepttype_o = 32'h0000_000c;
+      end else if(excepttype_i[`ADEL_IDX] == 1'b1) begin
+        excepttype_o = `ADEL_FINAL;
+      end else if(excepttype_i[`ADES_IDX] == 1'b1) begin
+        excepttype_o = `ADES_FINAL;
+      end else if(excepttype_i[`ERET_IDX] == 1'b1) begin
+        excepttype_o = 32'h0000_000e;
+      end else if(excepttype_i[`TLBRL_CODE_IDX])
+        excepttype_o = `TLBRL_CODE_FINAL;
+      end else if(data_paddr_refill_i && is_load_op)
+        excepttype_o = `TLBRL_DATA_FINAL;
+      else if(data_paddr_refill_i && is_store_op)
+        excepttype_o = `TLBRS_FINAL;
+      else if(excepttype_i[`TLBIL_CODE_IDX])
+        excepttype_o = `TLBRL_CODE_FINAL;
+      else if(data_paddr_invalid_i && is_load_op)
+        excepttype_o = `TLBIL_DATA_FINAL;
+      else if(data_paddr_invalid_i && is_store_op)
+        excepttype_o = `TLBIS_FINAL;
+      else if(data_paddr_modified_i)
+        excepttype_o = `TLBM_FINAL;
+      else
+        excepttype_o = `NOEXC_FINAL;
   end
+end
 
 // 第三段：给出对数据存储器的写操作
 // mem_we_o 输出到数据存储器，表示是否为写操作
 // 如果发生异常，那么就要取消写操作
 assign mem_we_o = mem_we & (~(|excepttype_o));
-
 // 目前是组合逻辑电路
-
 always @(*)
   begin
     if(rst==`RstEnable)
@@ -299,7 +302,7 @@ always @(*)
         hi_o = `ZeroWord;
         lo_o = `ZeroWord;
         whilo_o = `WriteDisable;
-        mem_addr_o = `ZeroWord;
+        mem_vaddr_o = `ZeroWord;
         mem_we = `WriteDisable;
         mem_sel_o = 4'b0000;
         mem_data_o = `ZeroWord;
@@ -308,6 +311,7 @@ always @(*)
         LLbit_value_o = 1'b0;
         cp0_reg_we_o = `WriteDisable;
         cp0_reg_write_addr_o = 5'b00000;
+        cp0_reg_write_sel_o  = 0;
         cp0_reg_data_o = `ZeroWord;
       end
     if (excepttype_i[`ADES_IDX]==1'b1 && excepttype_i[`ADEL_IDX]== 1'b1)
@@ -318,7 +322,7 @@ always @(*)
         hi_o = hi_i;
         lo_o = lo_i;
         whilo_o = whilo_i;
-        mem_addr_o = `ZeroWord;
+        mem_vaddr_o = `ZeroWord;
         mem_we = `WriteDisable;
         mem_data_o = `ZeroWord;
         mem_sel_o = 4'b1111;
@@ -327,6 +331,7 @@ always @(*)
         LLbit_value_o = 1'b0;
         cp0_reg_we_o = cp0_reg_we_i;
         cp0_reg_write_addr_o = cp0_reg_write_addr_i;
+        cp0_reg_write_sel_o  = cp0_reg_write_sel_i;
         cp0_reg_data_o = cp0_reg_data_i;
       end
     else
@@ -337,7 +342,7 @@ always @(*)
         hi_o = hi_i;
         lo_o = lo_i;
         whilo_o = whilo_i;
-        mem_addr_o = `ZeroWord;
+        mem_vaddr_o = `ZeroWord;
         mem_we = `WriteDisable;
         mem_data_o = `ZeroWord;
         mem_sel_o = 4'b1111;
@@ -346,11 +351,12 @@ always @(*)
         LLbit_value_o = 1'b0;
         cp0_reg_we_o = cp0_reg_we_i;
         cp0_reg_write_addr_o = cp0_reg_write_addr_i;
+        cp0_reg_write_sel_o  = cp0_reg_write_sel_i;
         cp0_reg_data_o = cp0_reg_data_i;
         case (aluop_i)
           `EXE_LB_OP:
             begin
-              mem_addr_o = mem_addr_i;
+              mem_vaddr_o = mem_addr_i;
               mem_we = `WriteDisable;
               mem_ce_o = `ChipEnable;
               case (mem_addr_i[1:0])
@@ -382,7 +388,7 @@ always @(*)
             end
           `EXE_LBU_OP:
             begin
-              mem_addr_o = mem_addr_i;
+              mem_vaddr_o = mem_addr_i;
               mem_we = `WriteDisable;
               mem_ce_o = `ChipEnable;
               case (mem_addr_i[1:0])
@@ -414,7 +420,7 @@ always @(*)
             end
           `EXE_LH_OP:
             begin
-              mem_addr_o = mem_addr_i;
+              mem_vaddr_o = mem_addr_i;
               mem_we = `WriteDisable;
               mem_ce_o = `ChipEnable;
               case (mem_addr_i[1:0])
@@ -438,7 +444,7 @@ always @(*)
             end
           `EXE_LHU_OP:
             begin
-              mem_addr_o = mem_addr_i;
+              mem_vaddr_o = mem_addr_i;
               mem_we = `WriteDisable;
               mem_ce_o = `ChipEnable;
               case (mem_addr_i[1:0])
@@ -462,7 +468,7 @@ always @(*)
             end
           `EXE_LW_OP:
             begin
-              mem_addr_o = mem_addr_i;
+              mem_vaddr_o = mem_addr_i;
               // wdata_o    = {mem_data_i[7:0], mem_data_i[15:8], mem_data_i[23:16], mem_data_i[31:24]};
               wdata_o = mem_data_i;
               mem_sel_o = 4'b1111;
@@ -471,7 +477,7 @@ always @(*)
           `EXE_LWL_OP:
             // TODO
             begin
-              mem_addr_o = {mem_addr_i[31:2], 2'b00};
+              mem_vaddr_o = {mem_addr_i[31:2], 2'b00};
               mem_we     = `WriteDisable;
               mem_sel_o = 4'b1111;
               mem_ce_o = `ChipEnable;
@@ -500,7 +506,7 @@ always @(*)
             end
           `EXE_LWR_OP:
             begin
-              mem_addr_o = {mem_addr_i[31:2], 2'b00};
+              mem_vaddr_o = {mem_addr_i[31:2], 2'b00};
               mem_we     = `WriteDisable;
               mem_sel_o = 4'b1111;
               mem_ce_o = `ChipEnable;
@@ -529,7 +535,7 @@ always @(*)
             end
           `EXE_SB_OP:
             begin
-              mem_addr_o = mem_addr_i;
+              mem_vaddr_o = mem_addr_i;
               mem_we = `WriteEnable;
               mem_data_o = {reg2_i[7:0], reg2_i[7:0], reg2_i[7:0],reg2_i[7:0]};
               mem_ce_o = `ChipEnable;
@@ -558,7 +564,7 @@ always @(*)
             end
           `EXE_SH_OP:
             begin
-              mem_addr_o = mem_addr_i;
+              mem_vaddr_o = mem_addr_i;
               mem_we = `WriteEnable;
               // mem_data_o = {reg2_i[7:0],reg2_i[15:8], reg2_i[7:0], reg2_i[15:8]};
               mem_data_o = {reg2_i[15:8],reg2_i[7:0],reg2_i[15:8], reg2_i[7:0]};
@@ -580,7 +586,7 @@ always @(*)
             end
           `EXE_SW_OP:
             begin
-              mem_addr_o = mem_addr_i;
+              mem_vaddr_o = mem_addr_i;
               mem_we = `WriteEnable;
               // mem_data_o = {reg2_i[7:0], reg2_i[15:8], reg2_i[23:16],reg2_i[31:24]};
               mem_data_o = reg2_i;
@@ -589,7 +595,7 @@ always @(*)
             end
           `EXE_SWL_OP:
             begin
-              mem_addr_o = {mem_addr_i[31:2], 2'b00};
+              mem_vaddr_o = {mem_addr_i[31:2], 2'b00};
               mem_we = `WriteEnable;
               mem_ce_o = `ChipEnable;
               case (mem_addr_i[1:0])
@@ -621,7 +627,7 @@ always @(*)
             end
           `EXE_SWR_OP:
             begin
-              mem_addr_o = {mem_addr_i[31:2], 2'b00};
+              mem_vaddr_o = {mem_addr_i[31:2], 2'b00};
               mem_we = `WriteEnable;
               mem_ce_o = `ChipEnable;
               case (mem_addr_i[1:0])
@@ -653,7 +659,7 @@ always @(*)
             end
           `EXE_LL_OP:
             begin
-              mem_addr_o = mem_addr_i;
+              mem_vaddr_o = mem_addr_i;
               mem_we = `WriteDisable;
               wdata_o = mem_data_i;
               LLbit_we_o = `WriteEnable;
@@ -665,7 +671,7 @@ always @(*)
             begin
               if(LLbit == 1'b1)
                 begin
-                  mem_addr_o = mem_addr_i;
+                  mem_vaddr_o = mem_addr_i;
                   mem_we = `WriteEnable;
                   mem_data_o = reg2_i;
                   wdata_o = 32'b1;

@@ -31,9 +31,9 @@ module inst_cache(
     output        inst_addr_ready,
     output [31:0] inst_addr_out,
     output        inst_data_ok,
-    output [31:0] inst_rdata
+    output [31:0] inst_rdata,
 
-    // input         inst_cache
+    input         inst_cache
     );
 
     wire rst;
@@ -62,7 +62,7 @@ module inst_cache(
                                 inst_addr_r[31:29] == 3'b101) ?
                                 { 3'b0, inst_addr_r[28:0]} : inst_addr_r;
 
-    wire inst_cache = inst_addr[31:29] == 3'b101 ? 1'b0 : 1'b1;
+    // wire inst_cache = inst_addr[31:29] == 3'b101 ? 1'b0 : 1'b1;
     // assign inst_cache = inst_addr_r[31:29] == 3'b101 ? 1'b0 : 1'b1;
     reg inst_cache_r;
     always @ (posedge clk) begin

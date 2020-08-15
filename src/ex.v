@@ -4,76 +4,80 @@ module ex(
          input wire rst,
          // 译码阶段送到执行阶段的信息
          input
-         wire[`AluOpBus]     aluop_i,
-         wire[`AluSelBus]    alusel_i,
-         wire[`RegBus]       reg1_i,
-         wire[`RegBus]       reg2_i,
-         wire[`RegAddrBus]   wd_i,
-         input wire                wreg_i,
+         wire[`AluOpBus]      aluop_i,
+         wire[`AluSelBus]     alusel_i,
+         wire[`RegBus]        reg1_i,
+         wire[`RegBus]        reg2_i,
+         wire[`RegAddrBus]    wd_i,
+         input wire           wreg_i,
 
          // HILO
-         wire[`RegBus] hi_i,
-         wire[`RegBus] lo_i,
+         wire[`RegBus]        hi_i,
+         wire[`RegBus]        lo_i,
 
          // 回写阶段的指令是否要写 HI\LO，用于检测数据相关问题
-         wire[`RegBus] wb_hi_i,
-         wire[`RegBus] wb_lo_i,
-         input wire          wb_whilo_i,
+         wire[`RegBus]        wb_hi_i,
+         wire[`RegBus]        wb_lo_i,
+         input wire           wb_whilo_i,
          // 访存阶段的指令是否要写 HI\LO，用于检测数据相关问题
-         wire[`RegBus] mem_hi_i,
-         wire[`RegBus] mem_lo_i,
-         input wire          mem_whilo_i,
+         wire[`RegBus]        mem_hi_i,
+         wire[`RegBus]        mem_lo_i,
+         input wire           mem_whilo_i,
 
          // 第一个执行周期得到的乘法结果
-         wire[`DoubleRegBus] hilo_temp_i,
+         wire[`DoubleRegBus]  hilo_temp_i,
          // 当前处于执行阶段的第几个时钟周期
-         wire[1:0]   cnt_i,
+         wire[1:0]            cnt_i,
 
          // 来自除法模块的输入
-         wire[`DoubleRegBus] div_result_i,
-         input wire                 div_ready_i,
+         wire[`DoubleRegBus]  div_result_i,
+         input wire           div_ready_i,
 
          // 当前处于执行阶段的指令是否位于延迟槽
-         wire is_in_delayslot_i,
+         wire                 is_in_delayslot_i,
          // 当前处于执行阶段的转移指令要保存的返回地址
          wire[`RegBus]        link_address_i,
          // 新增输入接口 inst_i, 其值就是当前处于执行阶段的指令
-         wire[`RegBus]  inst_i,
+         wire[`RegBus]        inst_i,
 
          // 访存阶段的指令是否要写 CP0 中的寄存器，用来检测数据相关
          input wire           mem_cp0_reg_we,
-         wire[4:0]       mem_cp0_reg_write_addr,
-         wire[`RegBus]    mem_cp0_reg_data,
+         wire[4:0]            mem_cp0_reg_write_addr,
+         wire[2:0]            mem_cp0_reg_write_sel,
+         wire[`RegBus]        mem_cp0_reg_data,
 
          // 回写阶段的指令是否要写 CP0 中的寄存器，检测数据相关
-         input wire         wb_cp0_reg_we,
-         wire[4:0]    wb_cp0_reg_write_addr,
-         wire[`RegBus]    wb_cp0_reg_data,
+         input wire           wb_cp0_reg_we,
+         wire[4:0]            wb_cp0_reg_write_addr,
+         wire[2:0]            wb_cp0_reg_write_sel,
+         wire[`RegBus]        wb_cp0_reg_data,
 
          // 与 CP0 直接相连，用于读取其中指定寄存器的值
-         wire[`RegBus]  cp0_reg_data_i,
+         wire[`RegBus]        cp0_reg_data_i,
 
          // 异常
          wire[31:0]           excepttype_i,
          wire[`RegBus]        current_inst_address_i,
          output reg[4:0]      cp0_reg_read_addr_o,
+         output reg[2:0]      cp0_reg_read_sel_o,
 
          // 向流水线下一级传递，用于写 CP0 中的指定寄存器
          output reg           cp0_reg_we_o,
          output reg[4:0]      cp0_reg_write_addr_o,
+         output reg[2:0]      cp0_reg_write_sel_o,
          output reg[`RegBus]  cp0_reg_data_o,
 
 
          // 执行结果
          output
-         reg[`RegAddrBus]    wd_o,
+         reg[`RegAddrBus]     wd_o,
          output reg           wreg_o,
-         reg[`RegBus]        wdata_o,
+         reg[`RegBus]         wdata_o,
 
          // 处于执行阶段的指令对 HI\LO 寄存器的写操作请求
-         reg[`RegBus]        hi_o,
-         reg[`RegBus]        lo_o,
-         output reg          whilo_o,
+         reg[`RegBus]         hi_o,
+         reg[`RegBus]         lo_o,
+         output reg           whilo_o,
          // 保存逻辑运算的结果
          //    reg[`RegBus]        logicout
 
@@ -83,18 +87,18 @@ module ex(
         //  reg[1:0]             cnt_o,
 
          //    TO CTRL
-         output reg stallreq,
+         output reg           stallreq,
 
          // 到除法模块的输出
-         reg[`RegBus]    div_opdata1_o,
-         reg[`RegBus]    div_opdata2_o,
-         output reg      div_start_o,
-         reg             signed_div_o,
+         reg[`RegBus]         div_opdata1_o,
+         reg[`RegBus]         div_opdata2_o,
+         output reg           div_start_o,
+         reg                  signed_div_o,
 
          // 为加载、存储指令
-         wire[`AluOpBus]     aluop_o,
-         wire[`RegBus]       mem_addr_o,
-         wire[`RegBus]       reg2_o,
+         wire[`AluOpBus]      aluop_o,
+         wire[`RegBus]        mem_addr_o,
+         wire[`RegBus]        reg2_o,
 
          // 异常
          wire[31:0]           excepttype_o,
@@ -479,19 +483,20 @@ always @(*)
 
 
 //  MOV 类指令
-
 always @(*)
   begin
     if(rst == `RstEnable)
       begin
         moveres = `ZeroWord;
         cp0_reg_read_addr_o = 5'b00000;
+        cp0_reg_read_sel_o  = 0;
       end
     else
       begin
         moveres = `ZeroWord;
         // 要从 CP0 中读取的寄存器的地址
         cp0_reg_read_addr_o = 5'b00000;
+        cp0_reg_read_sel_o  = 0;
         case (aluop_i)
           `EXE_MFHI_OP:
             begin
@@ -509,18 +514,22 @@ always @(*)
             begin
               // 要从 CP0 中读取的寄存器的地址
               cp0_reg_read_addr_o = inst_i[15:11];
+              cp0_reg_read_sel_o  = inst_i[2:0];
 
               // 读取到的 CP0 中指定寄存器的值
               moveres = cp0_reg_data_i;
 
               // 处理数据相关
               if (mem_cp0_reg_we == `WriteEnable &&
-                  mem_cp0_reg_write_addr == inst_i[15:11])
+                  mem_cp0_reg_write_addr == inst_i[15:11] &&
+                  mem_cp0_reg_write_sel == inst_i[2:0])
                 begin
                   // 访存阶段数据相关
                   moveres = mem_cp0_reg_data;
                 end
-              else if (wb_cp0_reg_we == `WriteEnable && wb_cp0_reg_write_addr == inst_i[15:11])
+              else if (wb_cp0_reg_we == `WriteEnable && 
+                       wb_cp0_reg_write_addr == inst_i[15:11] &&
+                       wb_cp0_reg_write_sel == inst_i[2:0])
                 begin
                   // 回写阶段数据相关
                   moveres = wb_cp0_reg_data;
@@ -716,6 +725,7 @@ always @(*)
     if(rst == `RstEnable)
       begin
         cp0_reg_write_addr_o = 5'b00000;
+        cp0_reg_write_sel_o  = 0;
         cp0_reg_we_o = `WriteDisable;
         cp0_reg_data_o = `ZeroWord;
       end
@@ -723,12 +733,14 @@ always @(*)
       begin
         // 是 mtc0 指令
         cp0_reg_write_addr_o = inst_i[15:11];
+        cp0_reg_write_sel_o  = inst_i[2:0];
         cp0_reg_we_o = `WriteEnable;
         cp0_reg_data_o = reg1_i;
       end
     else
       begin
         cp0_reg_write_addr_o = 5'b00000;
+        cp0_reg_write_sel_o  = 0;
         cp0_reg_we_o = `WriteDisable;
         cp0_reg_data_o = `ZeroWord;
       end
@@ -738,10 +750,8 @@ always @(*)
 // 依据上面得到的比较结果，判断是否满足自陷指令的条件，从而给出变量 trapassert 的值
 always @(*)
   begin
-
     excepttype_cur_stage = `ZeroWord;
     // excepttype_cur_stage[`TRAP_IDX] = `TrapNotAssert;
-
     case (aluop_i)
       // teg, teqi
       `EXE_TEQ_OP, `EXE_TEQI_OP:
@@ -780,7 +790,6 @@ always @(*)
           excepttype_cur_stage[`TRAP_IDX] = `TrapNotAssert;
         end
     endcase
-
     // 根据指令类型以及 mem_addr_o 的值，判断是否发生地址未对齐异常
     if(rst == `RstEnable)
       begin

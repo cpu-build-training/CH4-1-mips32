@@ -2,16 +2,16 @@
 module div(
          input wire clk, wire rst,
          input
-         wire    signed_div_i,
-         wire[31:0] opdata1_i,
-         wire[31:0] opdata2_i,
+         wire         signed_div_i,
+         wire[31:0]   opdata1_i,
+         wire[31:0]   opdata2_i,
          input
-         wire        start_i,
-         wire        annul_i,
+         wire         start_i,
+         wire         annul_i,
 
          output
-         reg[63:0]   result_o,
-         reg         ready_o
+         reg[63:0]    result_o,
+         reg          ready_o
        );
 
 wire[32:0]      div_temp;

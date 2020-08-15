@@ -26,6 +26,7 @@
 `define EXE_ADDIU       6'b001001
 `define EXE_SLTI        6'b001010
 `define EXE_SLTIU       6'b001011
+`define EXE_COP0        6'b010000
 
 
 // function code
@@ -107,10 +108,17 @@
 `define EXE_TNEI        5'b01110
 
 `define EXE_ERET        32'b01000010_00000000_00000000_00011000
+// COP0
+`define EXE_TLBP        6'b001000
+`define EXE_TLBR        6'b000001
+`define EXE_TLBWI       6'b000010
+`define EXE_TLBWR       6'b000110
+
+
 
 // AluOp !!! 尽量不要出现重复，比如 ADD & CLZ
 `define EXE_OR_OP       8'b00100101
-`define EXE_NOP_OP      8'b0
+`define EXE_NOP_OP      8'b00000000
 `define EXE_AND_OP      8'b00100100
 `define EXE_XOR_OP      8'b00100110
 `define EXE_NOR_OP      8'b00100111
@@ -140,52 +148,56 @@
 // `define EXE_MADDU_OP       8'b01000001
 // `define EXE_MSUB_OP        8'b01000100
 // `define EXE_MSUBU_OP       8'b01000101
-`define EXE_DIV_OP         8'b00011010
-`define EXE_DIVU_OP        8'b00011011
-`define EXE_J_OP           8'b01000010
-`define EXE_JAL_OP         8'b01000011
-`define EXE_JALR_OP        8'b01001001
-`define EXE_JR_OP          8'b01001000
-`define EXE_BEQ_OP         8'b10000100
-`define EXE_BGEZ_OP        8'b00000001
-`define EXE_BGEZAL_OP      8'b10010001
-`define EXE_BGTZ_OP        8'b10000111
-`define EXE_BLEZ_OP        8'b10000110
-`define EXE_BLTZ_OP        8'b00000000
-`define EXE_BLTZ_OP        8'b00000000
-`define EXE_BLTZAL_OP      8'b10010000
-`define EXE_BNE_OP         8'b00000101
-`define EXE_LB_OP          8'b10100000
-`define EXE_LBU_OP         8'b10100100
-`define EXE_LH_OP          8'b10100001
+`define EXE_DIV_OP          8'b00011010
+`define EXE_DIVU_OP         8'b00011011
+`define EXE_J_OP            8'b01000010
+`define EXE_JAL_OP          8'b01000011
+`define EXE_JALR_OP         8'b01001001
+`define EXE_JR_OP           8'b01001000
+`define EXE_BEQ_OP          8'b10000100
+`define EXE_BGEZ_OP         8'b00000001
+`define EXE_BGEZAL_OP       8'b10010001
+`define EXE_BGTZ_OP         8'b10000111
+`define EXE_BLEZ_OP         8'b10000110
+`define EXE_BLTZ_OP         8'b00000000
+`define EXE_BLTZ_OP         8'b00000000
+`define EXE_BLTZAL_OP       8'b10010000
+`define EXE_BNE_OP          8'b00000101
+`define EXE_LB_OP           8'b10100000
+`define EXE_LBU_OP          8'b10100100
+`define EXE_LH_OP           8'b10100001
 `define EXE_LHU_OP          8'b10100101
-`define EXE_LW_OP         8'b10100011
+`define EXE_LW_OP           8'b10100011
 `define EXE_LWL_OP          8'b10100010
 `define EXE_LWR_OP          8'b10100110
-`define EXE_SB_OP          8'b00101000
-`define EXE_SH_OP          8'b00101001
+`define EXE_SB_OP           8'b00101000
+`define EXE_SH_OP           8'b00101001
 `define EXE_SW_OP           8'b10101011
 `define EXE_SWL_OP          8'b10101010
-`define EXE_SWR_OP         8'b00101110
-`define EXE_LL_OP          8'b00110000
-`define EXE_SC_OP          8'b00111000
+`define EXE_SWR_OP          8'b00101110
+`define EXE_LL_OP           8'b00110000
+`define EXE_SC_OP           8'b00111000
 `define EXE_MFC0_OP         8'b10111010
 `define EXE_MTC0_OP         8'b10111011
-`define EXE_SYSCALL_OP         8'b10001100
-`define EXE_BREAK_OP           8'b10001101
-`define EXE_TEQ_OP             8'b00110100
-`define EXE_TEQI_OP            8'b10101100
-`define EXE_TGE_OP             8'b10110000
-`define EXE_TGEI_OP            8'b10101000
-`define EXE_TGEIU_OP           8'b10101001
-`define EXE_TGEU_OP            8'b10110001
-`define EXE_TLT_OP             8'b10110010
-`define EXE_TLTI_OP            8'b11101010
-`define EXE_TLTIU_OP           8'b11101011
-`define EXE_TLTU_OP            8'b10110011
-`define EXE_TNE_OP             8'b10110110
-`define EXE_TNEI_OP            8'b10101110
-`define EXE_ERET_OP            8'b00101111
+`define EXE_SYSCALL_OP      8'b10001100
+`define EXE_BREAK_OP        8'b10001101
+`define EXE_TEQ_OP          8'b00110100
+`define EXE_TEQI_OP         8'b10101100
+`define EXE_TGE_OP          8'b10110000
+`define EXE_TGEI_OP         8'b10101000
+`define EXE_TGEIU_OP        8'b10101001
+`define EXE_TGEU_OP         8'b10110001
+`define EXE_TLT_OP          8'b10110010
+`define EXE_TLTI_OP         8'b11101010
+`define EXE_TLTIU_OP        8'b11101011
+`define EXE_TLTU_OP         8'b10110011
+`define EXE_TNE_OP          8'b10110110
+`define EXE_TNEI_OP         8'b10101110
+`define EXE_ERET_OP         8'b00101111
+`define EXE_TLBP_OP         8'b10000000
+`define EXE_TLBR_OP         8'b10000001
+`define EXE_TLBWI_OP        8'b10000010
+`define EXE_TLBWR_OP        8'b10000011
 
 
 // AluSel
@@ -240,6 +252,14 @@
 `define DataMemNumLog2  17          // 实际使用的地址宽度
 `define ByteWidth       7:0         // 一个字节的宽度，是 8bit
 
+`define CP0_REG_INDEX       5'b00000  // 0
+`define CP0_REG_RANDOM      5'b00001  // 1
+`define CP0_REG_ENTRYLO0    5'b00010  // 2
+`define CP0_REG_ENTRYLO1    5'b00011  // 3
+`define CP0_REG_CONTEXT     5'b00100  // 4
+`define CP0_REG_PAGEMASK    5'b00101  // 5
+`define CP0_REG_WIRED       5'b00110  // 6
+`define CP0_REG_ENTRYHI     5'b01010  // 10
 `define CP0_REG_COUNT       5'b01001
 `define CP0_REG_COMPARE     5'b01011
 `define CP0_REG_STATUS      5'b01100
@@ -269,6 +289,20 @@
 `define WriteFree           1'b0
 `define WriteBusy           1'b1
 
+// tlb
+`define VPN2        89:71
+`define ASID        70:63
+`define PAGEMASK    62:51
+`define G           50
+`define PFN0        49:30
+`define C0          29:27
+`define D0          26
+`define V0          25
+`define PFN1        24:5
+`define C1          4:2
+`define D1          1
+`define V1          0
+
 // Exception Related
 // 在mem及之前各类型异常对应的标志位在excepttype中的下标
 `define INTERRUPT_IDX       7:0
@@ -280,7 +314,15 @@
 `define OVERFLOW_IDX        13
 `define ADEL_IDX            14
 `define ADES_IDX            15
+`define TLBRL_CODE_IDX      16  // TLB refill, entrace: 0xbfc00200
+`define TLBRL_DATA_IDX      17
+`define TLBRS_IDX           18
+`define TLBIL_CODE_IDX      19  // TLB invalid, entrace: 0xbfc00380
+`define TLBIL_DATA_IDX      20
+`define TLBIS_IDX           21
+`define TLBM_IDX            22  // TLB modified, entrace: 0xbfc00380
 
+`define NOEXC_FINAL         32'h0000_0000
 `define INTERRUPT_FINAL     32'h0000_0001
 `define SYSCALL_FINAL       32'h0000_0008
 `define INSTINVALID_FINAL   32'h0000_000a
@@ -290,3 +332,23 @@
 `define OVERFLOW_FINAL      32'h0000_000c
 `define ADEL_FINAL          32'h0000_000f
 `define ADES_FINAL          32'h0000_0010
+`define TLBRL_CODE_FINAL    32'h0000_0011  // load refill
+`define TLBRL_DATA_FINAL    32'h0000_0012
+`define TLBRS_FINAL         32'h0000_0013  // store refill
+`define TLBIL_CODE_FINAL    32'h0000_0014  // load invalid
+`define TLBIL_DATA_FINAL    32'h0000_0015
+`define TLBIS_FINAL         32'h0000_0016  // store invalid
+`define TLBM_FINAL          32'h0000_0017  // modified
+
+// 填入CP0.Cause.ExcCode
+`define EXCCODE_INT         5'b00000
+`define EXCCODE_SYSCALL     5'b01000
+`define EXCCODE_BR          5'b01001
+`define EXCCODE_INSTINV     5'b01010
+`define EXCCODE_TR          5'b01101
+`define EXCCODE_OV          5'b01100
+`define EXCCODE_ADEL        5'b00100
+`define EXCCODE_ADES        5'b00101
+`define EXCCODE_TLBL        5'h2
+`define EXCCODE_TLBS        5'h3
+`define EXCCODE_TLBM        5'h1

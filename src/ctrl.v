@@ -1,20 +1,20 @@
 `include "defines.v"
 module ctrl(
-         input wire rst,
-         wire stallreq_from_id,
-         wire stallreq_from_ex,
-         wire stallreq_from_mem,
+         input  wire    rst,
+         input  wire    stallreq_from_id,
+         input  wire    stallreq_from_ex,
+         input  wire    stallreq_from_mem,
         //  wire stallreq_from_if,
         //  wire[1:0] axi_read_state,
-         input wire mem_we,
+         input  wire     mem_we,
          // 来自 MEM
-         wire[31:0]   excepttype_i,
-         wire[`RegBus]    cp0_epc_i,
+         input  wire[31:0]      excepttype_i,
+         input  wire[`RegBus]   cp0_epc_i,
 
          output
          reg[`RegBus]     new_pc,
-         reg               flush,
-         reg[5:0] stall
+         reg              flush,
+         reg[5:0]         stall
        );
 always @(*)
   begin
@@ -66,6 +66,30 @@ always @(*)
               new_pc = 32'hBFC0_0380;
             end
           `ADES_FINAL:
+            begin
+              new_pc = 32'hBFC0_0380;
+            end
+          `TLBRL_CODE_FINAL: 
+            begin
+              new_pc = 32'hBFC0_0200;
+            end
+          `TLBRL_DATA_FINAL: 
+            new_pc = 32'hBFC0_0200;
+          `TLBRS_FINAL:
+            begin
+              new_pc = 32'hBFC0_0200;
+            end
+          `TLBIL_CODE_FINAL:
+            begin
+              new_pc = 32'hBFC0_0380;
+            end
+          `TLBIL_DATA_FINAL:
+            new_pc = 32'hBFC0_0380;
+          `TLBIS_FINAL:
+            begin
+              new_pc = 32'hBFC0_0380;
+            end
+          `TLBM_FINAL:
             begin
               new_pc = 32'hBFC0_0380;
             end
