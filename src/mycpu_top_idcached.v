@@ -332,6 +332,8 @@ wire data_addr_ok;
 wire data_data_ok;
 wire[`RegBus] data_rdata;
 
+wire inst_cache;
+wire data_cache;
 
 // data r/w
 dcache dcache_0(
@@ -393,12 +395,12 @@ dcache dcache_0(
     .data_rdata(data_rdata),
 
     .data_sel(data_select),
-    .data_wdata(data_wdata)
+    .data_wdata(data_wdata),
 
-    // .data_cache(1'b0)
+    .data_cache(data_cache)
 );
 
-
+wire[31:0] inst_vaddr;
 // inst read
 inst_cache inst_cache_0(
     .clk(aclk),
@@ -425,11 +427,13 @@ inst_cache inst_cache_0(
     .inst_req(rom_re),                      // cpu::rom_ce_o == read_adapter::address_valid
     .inst_addr_ready(pc_ready),             // cpu::pc_ready == read_adapter::address_read_ready
     .inst_addr(rom_addr),
-    .inst_addr_out(current_inst_address),
     .inst_rdata(rom_data),
-    .inst_data_ok(inst_valid)
+    .inst_data_ok(inst_valid),
 
-    // .inst_cache(1'b0)
+    .inst_vaddr_in(inst_vaddr),
+    .inst_vaddr_out(current_inst_address),
+
+    .inst_cache(inst_cache)
 );
 
 
@@ -443,7 +447,10 @@ openmips openmips0(
            .rom_ce_o(rom_re),
            .inst_ready(inst_ready),
            .pc_ready(pc_ready),
-           .current_inst_address(current_inst_address),
+           .inst_cache(inst_cache),
+
+           .inst_vaddr(inst_vaddr),
+           .current_inst_vaddr(current_inst_address),
 
 
            .data_req(data_req),
@@ -454,6 +461,7 @@ openmips openmips0(
            .data_addr_ok(data_addr_ok),
            .data_data_ok(data_data_ok),
            .data_rdata(data_rdata),
+           .data_cache(data_cache),
 
            .int_i(ext_int),
            .timer_int_o(),

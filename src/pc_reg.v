@@ -26,7 +26,7 @@ module pc_reg(
          input  wire                inst_paddr_refill_i,
          input  wire                inst_paddr_invalid_i,
 
-         output reg[31:0]           excepttype_o
+         output wire[31:0]          excepttype_o
        );
 // reg valid_pc;
 
@@ -53,7 +53,7 @@ reg[`RegBus] next_pc;
 reg branch_flag;
 reg[`RegBus] branch_target_address;
 
-assign inst_vaddr = flush ? new_pc : (branch_flag_i ? branch_target_address_i : next_pc);
+assign inst_vaddr_o = flush ? new_pc : (branch_flag_i ? branch_target_address_i : next_pc);
 
 // 存储每次收到的 branch
 always @(posedge clk) begin
@@ -118,15 +118,9 @@ always @(posedge clk) begin
   // if stall, then pc remain the same
 end
 
-always @ (*) begin
-  if(rst == `RstEnable)
-    excepttype_o = 32'b0;
-  else if(inst_paddr_refill)
-    excepttype_o[`TLBIL_CODE_IDX] = 1'b1;
-  else if(inst_paddr_refill)
-    excepttype_o[`TLBRL_CODE_IDX] = 1'b1;
-  else
-    excepttype_o = excepttype_o;
-end
+// wire inst_vaddr_is_not_aligned = (inst_vaddr_o[1:0] != 2'b00);
+// assign excepttype_o = {12'b0, inst_paddr_invalid_i, 2'b0, inst_paddr_refill_i, 1'b0, inst_vaddr_is_not_aligned, 14'b0};
+
+assign excepttype_o = {12'b0, inst_paddr_invalid_i, 2'b0, inst_paddr_refill_i, 16'b0};
 
 endmodule // pc_reg

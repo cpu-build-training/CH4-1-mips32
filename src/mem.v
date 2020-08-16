@@ -275,7 +275,7 @@ always @(*) begin
       else if(data_paddr_refill_i && is_store_op)
         excepttype_o = `TLBRS_FINAL;
       else if(excepttype_i[`TLBIL_CODE_IDX])
-        excepttype_o = `TLBRL_CODE_FINAL;
+        excepttype_o = `TLBIL_CODE_FINAL;
       else if(data_paddr_invalid_i && is_load_op)
         excepttype_o = `TLBIL_DATA_FINAL;
       else if(data_paddr_invalid_i && is_store_op)

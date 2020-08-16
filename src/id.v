@@ -3,66 +3,66 @@
 // 源操作数2、要写入的目的寄存器地址等信息
 `include "defines.v"
 module id(
-         input wire  rst,
-         wire [`InstAddrBus] pc_i,
-         wire[`InstBus]  inst_i,
+         input wire  			rst,
+         wire [`InstAddrBus] 	pc_i,
+         wire[`InstBus]  		inst_i,
 
          // 来自执行阶段的 aluop
-         wire[`AluOpBus]      ex_aluop_i,
+         wire[`AluOpBus]      	ex_aluop_i,
 
          // 读取的 Regfile 的值
-         input wire[`RegBus] reg1_data_i,
-         wire[`RegBus] reg2_data_i,
+         input wire[`RegBus] 	reg1_data_i,
+         wire[`RegBus] 			reg2_data_i,
 
          // 输出到 Regfile 的信息
          output
-         reg reg1_read_o,
-         reg reg2_read_o,
-         reg[`RegAddrBus] reg1_addr_o,
-         reg[`RegAddrBus] reg2_addr_o,
+         reg 					reg1_read_o,
+         reg 					reg2_read_o,
+         reg[`RegAddrBus] 		reg1_addr_o,
+         reg[`RegAddrBus] 		reg2_addr_o,
 
          // 送到执行阶段的信息
-         output reg[`AluOpBus]   aluop_o,
-         reg[`AluSelBus]  alusel_o,
-         reg[`RegBus] reg1_o,
-         reg[`RegBus] reg2_o,
-         reg[`RegAddrBus] wd_o,
-         output reg          wreg_o,
+         output reg[`AluOpBus]  aluop_o,
+         reg[`AluSelBus]  		alusel_o,
+         reg[`RegBus] 			reg1_o,
+         reg[`RegBus] 			reg2_o,
+         reg[`RegAddrBus] 		wd_o,
+         output reg          	wreg_o,
 
          //    TO CTRL
-         output wire stallreq,
+         output wire 			stallreq,
 
-         output wire[31:0] excepttype_o,
-         output wire[`RegBus]    current_inst_address_o,
+         output wire[31:0] 		excepttype_o,
+         output wire[`RegBus]   current_inst_address_o,
 
          // 数据前推所需要加入的新的输入
          // 来自 ex, mem 的输出
          // 处于执行阶段的指令的运算结果
          input
-         wire                 ex_wreg_i,
-         wire[`RegBus]        ex_wdata_i,
-         wire[`RegAddrBus]    ex_wd_i,
+         wire                 	ex_wreg_i,
+         wire[`RegBus]        	ex_wdata_i,
+         wire[`RegAddrBus]    	ex_wd_i,
 
          // 处于访存阶段的指令的运算结果
          input
-         wire                 mem_wreg_i,
-         wire[`RegBus]        mem_wdata_i,
-         wire[`RegAddrBus]    mem_wd_i,
+         wire                 	mem_wreg_i,
+         wire[`RegBus]        	mem_wdata_i,
+         wire[`RegAddrBus]    	mem_wd_i,
 
          // 如果上一条指令是转移指令，那么下一条指令进入译码阶段的时候，输入变量
          // is_in_delayslot_i 为 true, 表示是延迟槽指令，反之，为 false
-         input wire           is_in_delayslot_i,
-         output reg           next_inst_in_delayslot_o,
-         reg                  branch_flag_o,
-         reg[`RegBus]         branch_target_address_o,
-         reg[`RegBus]         link_addr_o,
-         output reg           is_in_delayslot_o,
+         input wire           	is_in_delayslot_i,
+         output reg           	next_inst_in_delayslot_o,
+         reg                  	branch_flag_o,
+         reg[`RegBus]         	branch_target_address_o,
+         reg[`RegBus]         	link_addr_o,
+         output reg           	is_in_delayslot_o,
 
          // 当前处于译码阶段的指令
          output wire[`RegBus]   inst_o,
 
          // 在IF阶段产生的异常
-         input wire[`RegBus]  excepttype_i
+         input wire[`RegBus]  	excepttype_i
        );
 
 // reg1_data_i  从 Regfile 输入的第一个读寄存器端口的输入

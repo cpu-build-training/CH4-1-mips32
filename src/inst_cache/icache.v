@@ -29,9 +29,11 @@ module inst_cache(
     input         inst_req,
     input  [31:0] inst_addr,
     output        inst_addr_ready,
-    output [31:0] inst_addr_out,
     output        inst_data_ok,
     output [31:0] inst_rdata,
+
+    input  [31:0] inst_vaddr_in,
+    output [31:0] inst_vaddr_out,
 
     input         inst_cache
     );
@@ -51,12 +53,15 @@ module inst_cache(
     wire op0, op1, op2, op3;
 
     reg[31:0] inst_addr_r;
+    reg[31:0] inst_vaddr_r;
     always @ (posedge clk) begin
         if (inst_req == 1'b1 || flush) begin
             inst_addr_r <= inst_addr;
+            inst_vaddr_r <= inst_vaddr_in;
         end
     end
-    assign inst_addr_out = (flushed ? 32'b0 : inst_addr_r);
+    // assign inst_addr_out = (flushed ? 32'b0 : inst_addr_r);
+    assign inst_vaddr_out = (flushed ? 32'b0 : inst_vaddr_r);
     wire[31:0] inst_addr_mapped;
     assign inst_addr_mapped  =  (inst_addr_r[31:29] == 3'b100 ||
                                 inst_addr_r[31:29] == 3'b101) ?

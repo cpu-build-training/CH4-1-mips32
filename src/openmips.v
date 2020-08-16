@@ -11,8 +11,9 @@ module openmips(
 	output wire            	rom_ce_o,
 	output wire            	inst_ready,
 	input  wire      	   	pc_ready,
-	input  wire[`RegBus]   	current_inst_address,
 	output wire				inst_cache,
+	output wire[`RegBus]   	inst_vaddr,
+	input  wire[`RegBus]   	current_inst_vaddr,
 
 
 	// data
@@ -51,7 +52,7 @@ wire[`RegBus] pc_branch_target_address_i;
 wire pc_branch_flag_i;
 
 //  连接 IF/ID 模块与译码阶段 ID 模块的变量
-wire[`InstAddrBus]  inst_vaddr;
+// wire[`InstAddrBus]  inst_vaddr;  // 作为openmips的output了
 wire[31:0]          pc_excepttype_o;
 wire[`InstAddrBus]  id_pc_i;
 wire[`InstBus]      id_inst_i;
@@ -267,7 +268,7 @@ assign inst_ready = 1'b1;
 new_if_id new_if_id0(
 	.clk(clk), .rst(rst), .flush(flush),
 	.valid(rom_data_valid),
-	.if_inst(rom_data_i), .if_pc(current_inst_address),
+	.if_inst(rom_data_i), .if_pc(current_inst_vaddr),
 	.id_inst(id_inst_i), .id_pc(id_pc_i),
 	.stall(stall),
 
@@ -276,8 +277,8 @@ new_if_id new_if_id0(
 	.id_next_in_delay_slot(id_next_inst_in_delayslot_o),
 	.id_in_delay_slot(id_is_in_delayslot_i),
 
-	.excepttype_i(pc_excepttype_o),
-	.excepttype_o(id_excepttype_i)
+	.pc_excepttype_i(pc_excepttype_o),
+	.id_excepttype_o(id_excepttype_i)
 );
 
 id id0(
@@ -285,7 +286,6 @@ id id0(
 
 	// 来自 Regfile 模块的输入
 	.reg1_data_i(reg1_data), .reg2_data_i(reg2_data),
-	.excepttype_i(id_excepttype_i),
 
 	// 送到 regfile 模块的信息
 	.reg1_read_o(reg1_read), .reg2_read_o(reg2_read),
@@ -313,6 +313,7 @@ id id0(
 	.branch_target_address_o(pc_branch_target_address_i),
 	.branch_flag_o(pc_branch_flag_i),
 
+	.excepttype_i(id_excepttype_i),
 	.excepttype_o(id_excepttype_o),
 	.current_inst_address_o(id_current_inst_addr_o)
 );
@@ -549,7 +550,7 @@ mem mem0(
 	.mem_data_i_valid(mem_read_finish),
 
 	// 送到 mem_signal_extend 的信息
-	.mem_addr_o(data_vaddr),
+	.mem_vaddr_o(data_vaddr),
 	.mem_we_o(mem_write_enable),
 	.mem_sel_o(mem_sel_i),
 	.mem_data_o(mem_data_i),
@@ -708,7 +709,7 @@ LLbit_reg LLbit_reg0(
 	.LLbit_o(LLbit_LLbit_value)
 );
 
-cp0_reg cp0_reg0(
+cp0_reg_new cp0_reg0(
 	.clk(clk),
 	.rst(rst),
 
@@ -725,7 +726,7 @@ cp0_reg cp0_reg0(
 	.status_o(cp0_status_o),
 	.cause_o(cp0_cause_o),
 	.epc_o(cp0_epc_o),
-	.config_o(cp0_config_o),
+	.config0_o(cp0_config_o),
 	.prid_o(cp0_prid_o),
 	.badvaddr_o(cp0_badvaddr_o),
 

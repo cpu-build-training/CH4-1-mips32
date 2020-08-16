@@ -148,56 +148,56 @@
 // `define EXE_MADDU_OP       8'b01000001
 // `define EXE_MSUB_OP        8'b01000100
 // `define EXE_MSUBU_OP       8'b01000101
-`define EXE_DIV_OP          8'b00011010
-`define EXE_DIVU_OP         8'b00011011
-`define EXE_J_OP            8'b01000010
-`define EXE_JAL_OP          8'b01000011
-`define EXE_JALR_OP         8'b01001001
-`define EXE_JR_OP           8'b01001000
-`define EXE_BEQ_OP          8'b10000100
-`define EXE_BGEZ_OP         8'b00000001
-`define EXE_BGEZAL_OP       8'b10010001
-`define EXE_BGTZ_OP         8'b10000111
-`define EXE_BLEZ_OP         8'b10000110
-`define EXE_BLTZ_OP         8'b00000000
-`define EXE_BLTZ_OP         8'b00000000
-`define EXE_BLTZAL_OP       8'b10010000
-`define EXE_BNE_OP          8'b00000101
-`define EXE_LB_OP           8'b10100000
-`define EXE_LBU_OP          8'b10100100
-`define EXE_LH_OP           8'b10100001
-`define EXE_LHU_OP          8'b10100101
-`define EXE_LW_OP           8'b10100011
-`define EXE_LWL_OP          8'b10100010
-`define EXE_LWR_OP          8'b10100110
-`define EXE_SB_OP           8'b00101000
-`define EXE_SH_OP           8'b00101001
-`define EXE_SW_OP           8'b10101011
-`define EXE_SWL_OP          8'b10101010
-`define EXE_SWR_OP          8'b00101110
-`define EXE_LL_OP           8'b00110000
-`define EXE_SC_OP           8'b00111000
-`define EXE_MFC0_OP         8'b10111010
-`define EXE_MTC0_OP         8'b10111011
-`define EXE_SYSCALL_OP      8'b10001100
-`define EXE_BREAK_OP        8'b10001101
-`define EXE_TEQ_OP          8'b00110100
-`define EXE_TEQI_OP         8'b10101100
-`define EXE_TGE_OP          8'b10110000
-`define EXE_TGEI_OP         8'b10101000
-`define EXE_TGEIU_OP        8'b10101001
-`define EXE_TGEU_OP         8'b10110001
-`define EXE_TLT_OP          8'b10110010
-`define EXE_TLTI_OP         8'b11101010
-`define EXE_TLTIU_OP        8'b11101011
-`define EXE_TLTU_OP         8'b10110011
-`define EXE_TNE_OP          8'b10110110
-`define EXE_TNEI_OP         8'b10101110
-`define EXE_ERET_OP         8'b00101111
-`define EXE_TLBP_OP         8'b10000000
-`define EXE_TLBR_OP         8'b10000001
-`define EXE_TLBWI_OP        8'b10000010
-`define EXE_TLBWR_OP        8'b10000011
+`define EXE_DIV_OP      8'b00011010
+`define EXE_DIVU_OP     8'b00011011
+`define EXE_J_OP        8'b01000010
+`define EXE_JAL_OP      8'b01000011
+`define EXE_JALR_OP     8'b01001001
+`define EXE_JR_OP       8'b01001000
+`define EXE_BEQ_OP      8'b10000100
+`define EXE_BGEZ_OP     8'b00000001
+`define EXE_BGEZAL_OP   8'b10010001
+`define EXE_BGTZ_OP     8'b10000111
+`define EXE_BLEZ_OP     8'b10000110
+`define EXE_BLTZ_OP     8'b00000000
+`define EXE_BLTZ_OP     8'b00000000
+`define EXE_BLTZAL_OP   8'b10010000
+`define EXE_BNE_OP      8'b00000101
+`define EXE_LB_OP       8'b10100000
+`define EXE_LBU_OP      8'b10100100
+`define EXE_LH_OP       8'b10100001
+`define EXE_LHU_OP      8'b10100101
+`define EXE_LW_OP       8'b10100011
+`define EXE_LWL_OP      8'b10100010
+`define EXE_LWR_OP      8'b10100110
+`define EXE_SB_OP       8'b00101000
+`define EXE_SH_OP       8'b00101001
+`define EXE_SW_OP       8'b10101011
+`define EXE_SWL_OP      8'b10101010
+`define EXE_SWR_OP      8'b00101110
+`define EXE_LL_OP       8'b00110000
+`define EXE_SC_OP       8'b00111000
+`define EXE_MFC0_OP     8'b10111010
+`define EXE_MTC0_OP     8'b10111011
+`define EXE_SYSCALL_OP  8'b10001100
+`define EXE_BREAK_OP    8'b10001101
+`define EXE_TEQ_OP      8'b00110100
+`define EXE_TEQI_OP     8'b10101100
+`define EXE_TGE_OP      8'b10110000
+`define EXE_TGEI_OP     8'b10101000
+`define EXE_TGEIU_OP    8'b10101001
+`define EXE_TGEU_OP     8'b10110001
+`define EXE_TLT_OP      8'b10110010
+`define EXE_TLTI_OP     8'b11101010
+`define EXE_TLTIU_OP    8'b11101011
+`define EXE_TLTU_OP     8'b10110011
+`define EXE_TNE_OP      8'b10110110
+`define EXE_TNEI_OP     8'b10101110
+`define EXE_ERET_OP     8'b00101111
+`define EXE_TLBP_OP     8'b10000000
+`define EXE_TLBR_OP     8'b10000001
+`define EXE_TLBWI_OP    8'b10000010
+`define EXE_TLBWR_OP    8'b10000011
 
 
 // AluSel
@@ -211,11 +211,11 @@
 `define EXE_RES_LOAD_STORE  3'b111
 
 // 与指令存储器 ROM 有关的宏定义
-`define InstAddrBus     31:0    // ROM 的地址总线宽度
-`define InstBus         31:0    // ROM 的数据总线宽度
-`define InstAddrIncrement    32'h4    // PC 自动增加时的大小，这里采用字节寻址
-`define InstMemNum      131071      // ROM 的实际大小为 128KB
-`define InstMemNumLog2  17          // ROM 实际使用的地址线宽度
+`define InstAddrBus         31:0    // ROM 的地址总线宽度
+`define InstBus             31:0    // ROM 的数据总线宽度
+`define InstAddrIncrement   32'h4    // PC 自动增加时的大小，这里采用字节寻址
+`define InstMemNum          131071      // ROM 的实际大小为 128KB
+`define InstMemNumLog2      17          // ROM 实际使用的地址线宽度
 
 // 与通用寄存器 Regfile 有关的宏定义
 `define RegAddrBus      4:0     // Regfile 模块的地址线宽度
@@ -237,8 +237,8 @@
 
 `define DivResultNotReady   1'b0
 `define DivResultReady      1'b1
-`define DivStart        1'b1
-`define DivStop         1'b0
+`define DivStart            1'b1
+`define DivStop             1'b0
 
 `define Branch          1'b1
 `define NotBranch       1'b0
@@ -270,7 +270,7 @@
 `define CP0_REG_BADVADDR    5'b01000
 
 `define InterruptAssert     1'b1
-`define InterruptNotAssert     1'b0
+`define InterruptNotAssert  1'b0
 
 `define TrapAssert          1'b1
 `define TrapNotAssert       1'b0

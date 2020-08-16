@@ -43,7 +43,7 @@ assign r_resp = tlb_entry[r_index];
 
 // write
 always @ (posedge clk) begin
-    if (rst == `RST_ENABLE) begin
+    if (rst == `RstEnable) begin
         tlb_entry[0] <= 90'b0;
         tlb_entry[1] <= 90'b0;
         tlb_entry[2] <= 90'b0;
@@ -127,7 +127,7 @@ end
 // inst addr mmu
 reg[5:0] itlb_hit_index;
 always @ (*) begin
-    if (rst == `RST_ENABLE) begin
+    if (rst == `RstEnable) begin
         qi_paddr = 32'b0;
         qi_miss  = 1'b0;
         qi_invalid = 1'b0;
@@ -197,7 +197,7 @@ end
 // data addr mmu
 reg[5:0] dtlb_hit_index;
 always @ (*) begin
-    if (rst == `RST_ENABLE) begin
+    if (rst == `RstEnable) begin
         qd_paddr = 32'b0;
         qd_miss  = 1'b0;
         qd_invalid = 1'b0;

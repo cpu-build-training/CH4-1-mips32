@@ -58,8 +58,8 @@ module cp0_reg_new(
     output	reg[`RegBus]    entryLo1_o, // addr = 3
     output	reg[`RegBus]    context_o,  // addr = 4
     output	reg[`RegBus]    pageMask_o, // addr = 5
-    output  reg[`RegBus]    wired_o     // addr = 6
-    output	reg[`RegBus]    entryHi_o   // addr = 10
+    output  reg[`RegBus]    wired_o,    // addr = 6
+    output	reg[`RegBus]    entryHi_o,  // addr = 10
     output  reg[`RegBus]    config1_o   // addr = 16, sel = 1
 );
 	// with tlb
@@ -86,14 +86,16 @@ module cp0_reg_new(
     wire[4:0]   commit_exccode  = excepttype_i == `INTERRUPT_FINAL   ? `EXCCODE_INT      :
                                   excepttype_i == `SYSCALL_FINAL     ? `EXCCODE_SYSCALL  :
                                   excepttype_i == `BREAK_FINAL       ? `EXCCODE_BR       :
-                                  excepttype_i == `INSTINVALID_FINAL ? `EXCCODE_INSTINV :
+                                  excepttype_i == `INSTINVALID_FINAL ? `EXCCODE_INSTINV  :
                                   excepttype_i == `TRAP_FINAL        ? `EXCCODE_TR       :
                                   excepttype_i == `OVERFLOW_FINAL    ? `EXCCODE_OV       :
                                   excepttype_i == `ADEL_FINAL        ? `EXCCODE_ADEL     :
                                   excepttype_i == `ADES_FINAL        ? `EXCCODE_ADES     :
-                                  excepttype_i == `TLBRL_FINAL       ? `EXCCODE_TLBL     :
+                                  excepttype_i == `TLBRL_CODE_FINAL  ? `EXCCODE_TLBL     :
+                                  excepttype_i == `TLBRL_DATA_FINAL  ? `EXCCODE_TLBL     :
                                   excepttype_i == `TLBRS_FINAL       ? `EXCCODE_TLBS     :
-                                  excepttype_i == `TLBIL_FINAL       ? `EXCCODE_TLBL     :
+                                  excepttype_i == `TLBIL_CODE_FINAL  ? `EXCCODE_TLBL     :
+                                  excepttype_i == `TLBIL_DATA_FINAL  ? `EXCCODE_TLBL     :
                                   excepttype_i == `TLBIS_FINAL       ? `EXCCODE_TLBS     :
                                   excepttype_i == `TLBM_FINAL        ? `EXCCODE_TLBM     : cause_o[6:2];
     // 对于ADEL/ADES,mem会判断到底是取指造成的还是访存造成的,然后给出badvaddr(pc/mem_addr)
@@ -127,16 +129,16 @@ module cp0_reg_new(
     // badvaddr
     always @ (posedge clk) begin
         if(rst == `RstEnable) begin
-            badavddr_o <= `ZeroWord;
-        end else if(we_i && waddr_i == `CP0_REG_COMPARE) begin
-            badavddr_o <= commit_badvaddr;
+            badvaddr_o <= `ZeroWord;
+        end else if(has_exception && excepttype_i != `ERET_FINAL) begin
+            badvaddr_o <= commit_badvaddr;
         end
     end
     // epc
     always @ (posedge clk) begin
         if(rst == `RstEnable) begin
             epc_o <= `ZeroWord;
-        end else if(has_exception && !is_handling_exception) begin
+        end else if(has_exception && excepttype_i != `ERET_FINAL && !is_handling_exception) begin
             epc_o <= commit_epc;
         end else if(we_i && waddr_i == `CP0_REG_EPC) begin
             epc_o <= wdata_i;
@@ -161,7 +163,7 @@ module cp0_reg_new(
             cause_o <= `ZeroWord;
         end else begin
             cause_o[15:10] <= int_i;
-            if(has_exception && !is_handling_exception) begin
+            if(has_exception && excepttype_i != `ERET_FINAL && !is_handling_exception) begin
                 cause_o[31]  <= commit_bd;
                 cause_o[6:2] <= commit_exccode;
             end else if(we_i && waddr_i == `CP0_REG_CAUSE) begin
@@ -190,7 +192,7 @@ module cp0_reg_new(
     // config1
     always @ (posedge clk) begin
         if(rst == `RstEnable) begin
-            cp0_config1 <= {1'b0, // M
+            config1_o   <= {1'b0, // M
                             6'b011111, // MMUSize - 1
                             3'b001, // IS
                             3'b100, // IL
@@ -205,9 +207,9 @@ module cp0_reg_new(
 	// tlb related cp0 regs
     // index
 	always @ (posedge clk) begin
-		if(rwt == `RstEnable) begin
+		if(rst == `RstEnable) begin
 			index_o <=  `ZeroWord;
-		end else if(WriteEnable && waddr_i == 5'd0) begin
+		end else if(we_i && waddr_i == `CP0_REG_INDEX) begin
 			index_o[4:0] <= wdata_i[4:0];
 		end else if(aluop_i == `EXE_TLBP_OP) begin
             index_o[31]  <= p_miss;
@@ -263,9 +265,9 @@ module cp0_reg_new(
         if(rst == `RstEnable) begin
             pageMask_o <=  `ZeroWord;
         end else if(we_i && waddr_i == `CP0_REG_PAGEMASK) begin
-            pagemask[24:13] <= wdata_i[24:13];
+            pageMask_o[24:13] <= wdata_i[24:13];
         end else if(aluop_i == `EXE_TLBR) begin
-            pagemask[24:13] <= r_resp[`PAGEMASK];
+            pageMask_o[24:13] <= r_resp[`PAGEMASK];
         end
     end
     // wired
@@ -372,15 +374,15 @@ module cp0_reg_new(
 		end
 	end
 
-    assign w_valid = (!has_exception && !is_handling_exception && (aluop_i == `ALUOP_TLBWI || aluop_i == `ALUOP_TLBWR));
+    assign w_valid = (!has_exception && !is_handling_exception && (aluop_i == `EXE_TLBWI_OP || aluop_i == `EXE_TLBWR_OP));
     wire[31:0] random_idx = random_o + wired_o;
-    assign w_index = aluop_i == `ALUOP_TLBWR ? random_idx[4:0] : index_o[4:0];
+    assign w_index = aluop_i == `EXE_TLBWR_OP ? random_idx[4:0] : index_o[4:0];
 
 	tlb tlb_0(
        .clk(clk),
        .rst(rst),
         
-       .r_index(cp0_index[4:0]),
+       .r_index(index_o[4:0]),
        .r_resp(r_resp),
         
        .w_valid(w_valid),
@@ -408,5 +410,5 @@ module cp0_reg_new(
        .qd_invalid(data_invalid),
        .qd_modified(data_modified),
        .qd_cache(data_cache)
-	)
+    );
 endmodule // cp0_reg

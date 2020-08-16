@@ -24,11 +24,11 @@ module new_if_id (
 
          output reg id_in_delay_slot,
 
-         input  wire[31:0] pc_excepttype_o,
-         output wire[31:0] id_excepttype_i
+         input  wire[31:0] pc_excepttype_i,
+         output wire[31:0] id_excepttype_o
        );
 
-assign id_excepttype_i = pc_excepttype_o;
+assign id_excepttype_o = pc_excepttype_i;
 
 reg[`RegBus] stored_inst;
 reg[`RegBus] stored_pc;
