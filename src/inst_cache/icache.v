@@ -224,7 +224,7 @@ module inst_cache(
         end else if (work_state == state_miss_access_ram_1) begin                           // state: 6
             if (rvalid) begin
                 write_counter <= write_counter + 1'b1;
-                if (write_counter == inst_addr_r[4:2]) wait_data = rdata;
+                if (write_counter == inst_addr_r[4:2]) wait_data <= rdata;
             end
             if (rlast && rvalid) begin
                 write_counter <= 3'b000;

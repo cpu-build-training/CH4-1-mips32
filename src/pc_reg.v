@@ -118,9 +118,6 @@ always @(posedge clk) begin
   // if stall, then pc remain the same
 end
 
-// wire inst_vaddr_is_not_aligned = (inst_vaddr_o[1:0] != 2'b00);
-// assign excepttype_o = {12'b0, inst_paddr_invalid_i, 2'b0, inst_paddr_refill_i, 1'b0, inst_vaddr_is_not_aligned, 14'b0};
-
 assign excepttype_o = {12'b0, inst_paddr_invalid_i, 2'b0, inst_paddr_refill_i, 16'b0};
 
 endmodule // pc_reg

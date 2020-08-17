@@ -25,13 +25,14 @@ module new_if_id (
          output reg id_in_delay_slot,
 
          input  wire[31:0] pc_excepttype_i,
-         output wire[31:0] id_excepttype_o
+         output reg[31:0]  id_excepttype_o
        );
 
-assign id_excepttype_o = pc_excepttype_i;
+
 
 reg[`RegBus] stored_inst;
 reg[`RegBus] stored_pc;
+reg[31:0]    stored_excepttype;
 
 reg delayed_next_pc_valid;
 
@@ -55,17 +56,20 @@ always @(posedge clk)
         begin
           stored_inst <= `ZeroWord;
           stored_pc <= `ZeroWord;
+          stored_excepttype <= `ZeroWord;
         end
       else if (valid == `Valid && stall[1] == `Stop)
         begin
           stored_inst <= if_inst;
           stored_pc <= if_pc;
+          stored_excepttype <= pc_excepttype_i;
         end
       else if (stall[1] == `NoStop && stored_pc != `ZeroWord)
         begin
           // 此时旧值正好传给 id_*，所以清零
           stored_inst <= `ZeroWord;
           stored_pc <= `ZeroWord;
+          stored_excepttype <= `ZeroWord;
         end
       else
         begin
@@ -82,6 +86,7 @@ always @(posedge clk)
           // on reset or flush
           id_pc <= `ZeroWord;
           id_inst <= `ZeroWord;
+          id_excepttype_o <= `ZeroWord;
           delayed_next_pc_valid <= `InValid;
         end
       else
@@ -90,12 +95,14 @@ always @(posedge clk)
             begin
               id_pc <= if_pc;
               id_inst <= if_inst;
+              id_excepttype_o <= pc_excepttype_i;
               delayed_next_pc_valid <= `InValid;
             end
           else if (stall[1] == `NoStop && stored_pc != `ZeroWord)
             begin
               id_pc <= stored_pc;
               id_inst <= stored_inst;
+              id_excepttype_o <= stored_excepttype;
               // delayed_next_pc_valid <= `Valid;
               delayed_next_pc_valid <= `InValid;
             end
@@ -110,6 +117,7 @@ always @(posedge clk)
             begin
               id_pc <= `ZeroWord;
               id_inst <= `ZeroWord;
+              id_excepttype_o <= `ZeroWord;
               delayed_next_pc_valid <= `InValid;
             end
         end
