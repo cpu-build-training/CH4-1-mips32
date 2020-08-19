@@ -3,7 +3,7 @@
 module dcache(
     input         clk,
     input         rstn,
-    
+
     // axi
     // ar
     output [3 :0] arid   ,
@@ -46,7 +46,7 @@ module dcache(
     input  [1 :0] bresp  ,
     input         bvalid ,
     output        bready ,
-    
+
     // from cpu, sram like
     input         data_req,
     input         data_wr,
@@ -59,15 +59,15 @@ module dcache(
 
     // input         data_cache
     );
-    
+
     wire rst;
     assign rst = ~rstn;
-    
+
     wire data_cache = data_addr[31:29] == 3'b101 ? 1'b0 : 1'b1;
 
     wire[31:0] data_addr_mapped;
     assign data_addr_mapped = (data_addr[31:29] == 3'b100 ||
-                              data_addr[31:29] == 3'b101) ? 
+                              data_addr[31:29] == 3'b101) ?
                               {3'b0, data_addr[28:0]} : data_addr;
     reg[31:0] data_addr_r;
     reg[31:0] data_wdata_r;
@@ -82,11 +82,11 @@ module dcache(
         end
     end
 
-    
+
     reg[127:0] lru;
     reg[127:0] way0_dirty;
     reg[127:0] way1_dirty;
-    
+
     wire tag0_wen;
     wire tag1_wen;
     wire[20:0] tag_wdata;
@@ -97,9 +97,9 @@ module dcache(
     wire work0, work1;
     wire op0, op1;
     wire[19:0] tag0_rdata, tag1_rdata;
-    dcache_tag dcache_tag_0(rst, clk, tag0_wen, tag_wdata, access_cache_addr, tag0_rdata, hit0, valid0, work0, op0);
-    dcache_tag dcache_tag_1(rst, clk, tag1_wen, tag_wdata, access_cache_addr, tag1_rdata, hit1, valid1, work1, op1);
-    
+    dcache_tag dcache_tag_0(rst, clk, tag0_wen, tag_wdata, access_cache_addr, tag0_rdata, hit0, valid0, work0);
+    dcache_tag dcache_tag_1(rst, clk, tag1_wen, tag_wdata, access_cache_addr, tag1_rdata, hit1, valid1, work1);
+
     wire[31:0] dcache_way0_0_rdata;
     wire[31:0] dcache_way0_1_rdata;
     wire[31:0] dcache_way0_2_rdata;
@@ -116,7 +116,7 @@ module dcache(
     wire[31:0] dcache_way1_5_rdata;
     wire[31:0] dcache_way1_6_rdata;
     wire[31:0] dcache_way1_7_rdata;
-    
+
     wire[31:0] cache_wdata;
     wire[7:0] way0_wen;
     wire[7:0] way1_wen;
@@ -136,9 +136,9 @@ module dcache(
     wire[3:0] way1_data5_wen;
     wire[3:0] way1_data6_wen;
     wire[3:0] way1_data7_wen;
-    
-    
-    
+
+
+
     dcache_data way0_data_0(clk, rst, 1'b1, way0_data0_wen, cache_wdata, access_cache_addr, dcache_way0_0_rdata);
     dcache_data way0_data_1(clk, rst, 1'b1, way0_data1_wen, cache_wdata, access_cache_addr, dcache_way0_1_rdata);
     dcache_data way0_data_2(clk, rst, 1'b1, way0_data2_wen, cache_wdata, access_cache_addr, dcache_way0_2_rdata);
@@ -155,8 +155,8 @@ module dcache(
     dcache_data way1_data_5(clk, rst, 1'b1, way1_data5_wen, cache_wdata, access_cache_addr, dcache_way1_5_rdata);
     dcache_data way1_data_6(clk, rst, 1'b1, way1_data6_wen, cache_wdata, access_cache_addr, dcache_way1_6_rdata);
     dcache_data way1_data_7(clk, rst, 1'b1, way1_data7_wen, cache_wdata, access_cache_addr, dcache_way1_7_rdata);
-    
-    
+
+
     wire dirty_victim;
     reg[2:0] write_counter;
     reg[2:0] read_counter;
@@ -183,7 +183,7 @@ module dcache(
     parameter[4:0] state_miss_access_ram_read_2 = 5'b10010;
     parameter[4:0] state_miss_access_ram_read_3 = 5'b10011;
     parameter[4:0] state_miss_write_update = 5'b10100;
-    
+
     always @ (posedge clk) begin
         if (rst) begin
             work_state <= state_reset;
@@ -192,7 +192,7 @@ module dcache(
             read_counter <= 3'b0;
         end else begin
             case(work_state)
-            state_reset: begin 
+            state_reset: begin
                 if (data_req == 1'b1) begin
                     if (data_wr == 1'b0) begin
                         if (work0 && work1 && data_cache)
@@ -232,26 +232,26 @@ module dcache(
                     end
                 end else
                     work_state <= state_reset;
-            end 
+            end
             state_access_ram_write_0: begin // uncache write
                 if (awready)
                     work_state <= state_access_ram_write_1;
-            end 
+            end
             state_access_ram_write_1: begin
                 if (wready)
                     work_state <= state_access_ram_write_2;
-            end 
+            end
             state_access_ram_write_2: begin
                 if (bvalid)
                     work_state <= state_data_ready;
-            end 
+            end
             state_lookup_read: begin // cache read
                 if (hit) begin
                     if (data_req == 1'b1) begin
                         if (data_wr == 1'b0) begin
                             if (work0 && work1 && data_cache)
                                 work_state <= state_lookup_read;
-                            else 
+                            else
                                 work_state <= state_access_ram_read_0;
                         end else if (data_wr == 1'b1) begin
                             if (work0 && work1 && data_cache)
@@ -268,7 +268,7 @@ module dcache(
                     else
                         work_state <= state_miss_access_ram_read_0;
                 end
-            end 
+            end
             state_miss_access_ram_read_0: begin
                 if (arready)
                     work_state <= state_miss_access_ram_read_1;
@@ -286,11 +286,11 @@ module dcache(
             end
             state_miss_read_update: begin
                 work_state <= state_data_ready;
-            end 
+            end
             state_miss_write_read_0: begin
                 if (awready)
                     work_state <= state_miss_write_read_1;
-            end 
+            end
             state_miss_write_read_1: begin
                 if (wready) begin
                      if (write_counter == 3'b111) begin
@@ -299,11 +299,11 @@ module dcache(
                      end else
                         write_counter <= write_counter + 1'b1;
                 end
-            end 
+            end
             state_miss_write_read_2: begin
                 if (bvalid)
                     work_state <= state_miss_access_ram_read_0;
-            end 
+            end
             state_lookup_write: begin // cache write
                 if (hit) begin
                    work_state <= state_data_ready;
@@ -314,11 +314,11 @@ module dcache(
                     else
                         work_state <= state_miss_access_ram_read_2;
                 end
-            end 
+            end
             state_miss_access_ram_read_2: begin
                 if (arready)
                     work_state <= state_miss_access_ram_read_3;
-            end 
+            end
             state_miss_access_ram_read_3: begin
                 if (rvalid) begin
                     read_counter <= read_counter + 1'b1;
@@ -327,14 +327,14 @@ module dcache(
                     read_counter <= 3'b000;
                     work_state <= state_miss_write_update;
                 end
-            end 
+            end
             state_miss_write_update: begin
                 work_state <= state_data_ready;
             end
             state_miss_write_write_0: begin
                 if (awready)
                     work_state <= state_miss_write_write_1;
-            end 
+            end
             state_miss_write_write_1: begin
                 if (wready) begin
                      if (write_counter == 3'b111) begin
@@ -352,7 +352,7 @@ module dcache(
             endcase
         end
     end
-    
+
     always @ (posedge clk) begin
         if (rst) begin
             lru <= 128'b0;
@@ -365,7 +365,7 @@ module dcache(
             end
         end
     end
-    
+
     always @ (posedge clk) begin
         if (rst) begin
             way0_dirty <= 128'b0;
@@ -376,10 +376,10 @@ module dcache(
                 way0_dirty[data_addr_r[11:5]] <= 1'b0;
             end else if (work_state == state_miss_write_update && lru[data_addr_r[11:5]] == 1'b0) begin
                 way0_dirty[data_addr_r[11:5]] <= 1'b1;
-            end 
+            end
         end
     end
-    
+
     always @ (posedge clk) begin
         if (rst) begin
             way1_dirty <= 128'b0;
@@ -393,19 +393,19 @@ module dcache(
             end
         end
     end
-    
+
     assign dirty_victim = lru[data_addr_r[11:5]] == 1'b0 ? way0_dirty[data_addr_r[11:5]] :
                           lru[data_addr_r[11:5]] == 1'b1 ? way1_dirty[data_addr_r[11:5]] : 1'b0;
-    
+
     assign tag0_wen = ((work_state == state_miss_read_update || work_state == state_miss_write_update) && lru[data_addr_r[11:5]] == 1'b0) ? 1'b1 : 1'b0;
     assign tag1_wen = ((work_state == state_miss_read_update || work_state == state_miss_write_update) && lru[data_addr_r[11:5]] == 1'b1) ? 1'b1 : 1'b0;
     assign tag_wdata = (work_state == state_miss_read_update || work_state == state_miss_write_update) ? {1'b1, data_addr_r[31:12]} : 21'b0;
 //    assign access_tag_addr = data_addr;
-    
+
     assign hit = (hit0 && valid0) || (hit1 && valid1);
     wire[31:0] hit_word;
     wire[31:0] writeback_data;
-    
+
     wire way0_burst_read_wen = (work_state == state_miss_access_ram_read_1 || work_state == state_miss_access_ram_read_3) && rvalid && lru[data_addr_r[11:5]] == 1'b0;
     wire way1_burst_read_wen = (work_state == state_miss_access_ram_read_1 || work_state == state_miss_access_ram_read_3) && rvalid && lru[data_addr_r[11:5]] == 1'b1;
     assign way0_wen[0] = ((way0_burst_read_wen && read_counter == 3'b000)) ? 1'b1 : 1'b0;
@@ -424,8 +424,8 @@ module dcache(
     assign way1_wen[5] = ((way1_burst_read_wen && read_counter == 3'b101)) ? 1'b1 : 1'b0;
     assign way1_wen[6] = ((way1_burst_read_wen && read_counter == 3'b110)) ? 1'b1 : 1'b0;
     assign way1_wen[7] = ((way1_burst_read_wen && read_counter == 3'b111)) ? 1'b1 : 1'b0;
-    
-    assign way0_data0_wen = (((work_state == state_lookup_write && hit0 && valid0) || (work_state == state_miss_write_update && lru[data_addr_r[11:5]] == 1'b0)) && data_addr_r[4:2] == 3'b000) ? data_sel : {4{way0_wen[0]}}; 
+
+    assign way0_data0_wen = (((work_state == state_lookup_write && hit0 && valid0) || (work_state == state_miss_write_update && lru[data_addr_r[11:5]] == 1'b0)) && data_addr_r[4:2] == 3'b000) ? data_sel : {4{way0_wen[0]}};
     assign way0_data1_wen = (((work_state == state_lookup_write && hit0 && valid0) || (work_state == state_miss_write_update && lru[data_addr_r[11:5]] == 1'b0)) && data_addr_r[4:2] == 3'b001) ? data_sel : {4{way0_wen[1]}};
     assign way0_data2_wen = (((work_state == state_lookup_write && hit0 && valid0) || (work_state == state_miss_write_update && lru[data_addr_r[11:5]] == 1'b0)) && data_addr_r[4:2] == 3'b010) ? data_sel : {4{way0_wen[2]}};
     assign way0_data3_wen = (((work_state == state_lookup_write && hit0 && valid0) || (work_state == state_miss_write_update && lru[data_addr_r[11:5]] == 1'b0)) && data_addr_r[4:2] == 3'b011) ? data_sel : {4{way0_wen[3]}};
@@ -441,12 +441,12 @@ module dcache(
     assign way1_data5_wen = (((work_state == state_lookup_write && hit1 && valid1) || (work_state == state_miss_write_update && lru[data_addr_r[11:5]] == 1'b1)) && data_addr_r[4:2] == 3'b101) ? data_sel : {4{way1_wen[5]}};
     assign way1_data6_wen = (((work_state == state_lookup_write && hit1 && valid1) || (work_state == state_miss_write_update && lru[data_addr_r[11:5]] == 1'b1)) && data_addr_r[4:2] == 3'b110) ? data_sel : {4{way1_wen[6]}};
     assign way1_data7_wen = (((work_state == state_lookup_write && hit1 && valid1) || (work_state == state_miss_write_update && lru[data_addr_r[11:5]] == 1'b1)) && data_addr_r[4:2] == 3'b111) ? data_sel : {4{way1_wen[7]}};
-    
+
     assign cache_wdata = (work_state == state_miss_access_ram_read_1 || work_state == state_miss_access_ram_read_3) ? rdata :
                          (work_state == state_lookup_write || work_state == state_miss_write_update) ? data_wdata_r : 32'b0;
-    
+
     assign access_cache_addr = data_req ? data_addr_mapped : data_addr_r;
-    
+
     wire[31:0] word_selection0, word_selection1;
     assign word_selection0 = (data_addr_r[4:2] == 3'b000) ? dcache_way0_0_rdata :
                              (data_addr_r[4:2] == 3'b001) ? dcache_way0_1_rdata :
@@ -466,28 +466,28 @@ module dcache(
                              (data_addr_r[4:2] == 3'b111) ? dcache_way1_7_rdata : 32'b0;
     assign hit_word = (hit0 && valid0) ? word_selection0 :
                       (hit1 && valid1) ? word_selection1 : 32'b0;
-    
+
     wire[31:0] wb_word0, wb_word1;
-    assign wb_word0 = (write_counter == 3'b000) ? dcache_way0_0_rdata :       
-                      (write_counter == 3'b001) ? dcache_way0_1_rdata :       
-                      (write_counter == 3'b010) ? dcache_way0_2_rdata :       
-                      (write_counter == 3'b011) ? dcache_way0_3_rdata :       
-                      (write_counter == 3'b100) ? dcache_way0_4_rdata :       
-                      (write_counter == 3'b101) ? dcache_way0_5_rdata :       
-                      (write_counter == 3'b110) ? dcache_way0_6_rdata :       
+    assign wb_word0 = (write_counter == 3'b000) ? dcache_way0_0_rdata :
+                      (write_counter == 3'b001) ? dcache_way0_1_rdata :
+                      (write_counter == 3'b010) ? dcache_way0_2_rdata :
+                      (write_counter == 3'b011) ? dcache_way0_3_rdata :
+                      (write_counter == 3'b100) ? dcache_way0_4_rdata :
+                      (write_counter == 3'b101) ? dcache_way0_5_rdata :
+                      (write_counter == 3'b110) ? dcache_way0_6_rdata :
                       (write_counter == 3'b111) ? dcache_way0_7_rdata : 32'b0;
-    assign wb_word1 = (write_counter == 3'b000) ? dcache_way1_0_rdata :       
-                      (write_counter == 3'b001) ? dcache_way1_1_rdata :       
-                      (write_counter == 3'b010) ? dcache_way1_2_rdata :       
-                      (write_counter == 3'b011) ? dcache_way1_3_rdata :       
-                      (write_counter == 3'b100) ? dcache_way1_4_rdata :       
-                      (write_counter == 3'b101) ? dcache_way1_5_rdata :       
-                      (write_counter == 3'b110) ? dcache_way1_6_rdata :       
+    assign wb_word1 = (write_counter == 3'b000) ? dcache_way1_0_rdata :
+                      (write_counter == 3'b001) ? dcache_way1_1_rdata :
+                      (write_counter == 3'b010) ? dcache_way1_2_rdata :
+                      (write_counter == 3'b011) ? dcache_way1_3_rdata :
+                      (write_counter == 3'b100) ? dcache_way1_4_rdata :
+                      (write_counter == 3'b101) ? dcache_way1_5_rdata :
+                      (write_counter == 3'b110) ? dcache_way1_6_rdata :
                       (write_counter == 3'b111) ? dcache_way1_7_rdata : 32'b0;
     assign writeback_data = (lru[data_addr_r[11:5]] == 1'b0) ? wb_word0 :
                             (lru[data_addr_r[11:5]] == 1'b1) ? wb_word1 : 32'b0;
-    
-    
+
+
     // ar
     assign arid = 4'b0000;
     assign araddr = (work_state == state_access_ram_read_0) ? {data_addr_r[31:2], 2'b00} :
@@ -499,10 +499,10 @@ module dcache(
     assign arcache = 4'b0000;
     assign arprot = 3'b000;
     assign arvalid = (work_state == state_access_ram_read_0 || work_state == state_miss_access_ram_read_0 || work_state == state_miss_access_ram_read_2) ? 1'b1 : 1'b0;
-    
+
     // r
     assign rready = 1'b1;
-    
+
     // aw
     assign awid = 4'b0000;
     assign awaddr = (work_state == state_access_ram_write_0) ? {data_addr_r[31:2], 2'b00} :
@@ -515,30 +515,30 @@ module dcache(
     assign awcache = 4'b0000;
     assign awprot = 3'b000;
     assign awvalid = (work_state == state_access_ram_write_0 || work_state == state_miss_write_read_0 || work_state == state_miss_write_write_0) ? 1'b1 : 1'b0;
-    
+
     // w
     assign wid = 4'b0000;
-    assign wdata = (work_state == state_access_ram_write_1) ? data_wdata_r : 
+    assign wdata = (work_state == state_access_ram_write_1) ? data_wdata_r :
                    (work_state == state_miss_write_read_1 || work_state == state_miss_write_write_1) ? writeback_data : 32'b0;
     assign wstrb = (work_state == state_access_ram_write_1) ? data_sel :
                    (work_state == state_miss_write_read_1 || work_state == state_miss_write_write_1) ? 4'b1111 : 4'b0000;
     assign wlast = (work_state == state_access_ram_write_1 || (work_state == state_miss_write_read_1 && write_counter == 3'b111) || (work_state == state_miss_write_write_1 && write_counter == 3'b111)) ? 1'b1 : 1'b0;
     assign wvalid = (work_state == state_access_ram_write_1 || work_state == state_miss_write_read_1 || work_state == state_miss_write_write_1) ? 1'b1 : 1'b0;
-    
+
     // b
     assign bready = 1'b1;
-    
-    
+
+
     // data sram like
     // assign data_addr_ok = 1'b1;
     assign data_addr_ok = ((work_state == state_reset || work_state == state_data_ready || work_state == state_lookup_read) && data_req) ? 1'b1 : 1'b0;
-    assign data_data_ok = (work_state == state_data_ready) ? 1'b1 : 
+    assign data_data_ok = (work_state == state_data_ready) ? 1'b1 :
                           (work_state == state_lookup_read && hit) ? 1'b1 :
                           1'b0;
     assign data_rdata = (work_state == state_data_ready) ? wait_data :
                         (work_state == state_lookup_read) ? hit_word : 32'b0;
-    
-    
+
+
     function [3:0] get_wstrb(input [1:0] data_size, input [1:0] data_addr);
         begin
             case(data_size)
