@@ -868,6 +868,15 @@ always @(*)
           `EXE_SPECIAL2:
             begin
               case (op3)
+                `EXE_LSA:
+                  begin
+                    wreg_o = `WriteEnable;
+                    aluop_o = `EXE_LSA_OP;
+                    alusel_o = `EXE_RES_ARITHMETIC;
+                    reg1_read_o = `ReadEnable;
+                    reg2_read_o = `ReadEnable;
+                    instvalid = `InstValid;
+                  end
                 `EXE_CLZ:
                   begin
                     wreg_o = `WriteEnable;

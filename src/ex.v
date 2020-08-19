@@ -78,9 +78,9 @@ module ex(
          //    reg[`RegBus]        logicout
 
          // 第一个执行周期得到的乘法结果
-        //  reg[`DoubleRegBus] hilo_temp_o,
+         //  reg[`DoubleRegBus] hilo_temp_o,
          // 当前处于执行阶段的第几个时钟周期
-        //  reg[1:0]             cnt_o,
+         //  reg[1:0]             cnt_o,
 
          //    TO CTRL
          output reg stallreq,
@@ -196,6 +196,8 @@ always @(*)
     else
       begin
         case (aluop_i)
+          `EXE_LSA_OP:
+            arithmeticres = (reg1_i << (inst_i[7:6]+ 1)) + reg2_i;
           `EXE_SLT_OP, `EXE_SLTU_OP:
             arithmeticres = {{31{1'b0}},reg1_lt_reg2};
           `EXE_ADD_OP, `EXE_ADDU_OP, `EXE_ADDI_OP, `EXE_ADDIU_OP,`EXE_SUB_OP, `EXE_SUBU_OP:

@@ -105,6 +105,7 @@
 `define EXE_TLTU        6'b110011
 `define EXE_TNE         6'b110110
 `define EXE_TNEI        5'b01110
+`define EXE_LSA         6'b110111
 
 `define EXE_ERET        32'b01000010_00000000_00000000_00011000
 
@@ -186,6 +187,8 @@
 `define EXE_TNE_OP             8'b10110110
 `define EXE_TNEI_OP            8'b10101110
 `define EXE_ERET_OP            8'b00101111
+
+`define EXE_LSA_OP             8'b11110000
 
 
 // AluSel
