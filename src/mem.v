@@ -69,6 +69,8 @@ module mem(
          output wire              mem_read_ready,
          wire                     mem_we_o,
          reg[3:0]                 mem_sel_o,
+         // select size, 1, 2, 4
+         reg[2:0]                 mem_size_o,
          reg[`RegBus]             mem_data_o,
          output reg               mem_ce_o,
 
@@ -309,6 +311,8 @@ always @(*)
         cp0_reg_we_o = `WriteDisable;
         cp0_reg_write_addr_o = 5'b00000;
         cp0_reg_data_o = `ZeroWord;
+        // 默认是 4 字节
+        mem_size_o = 3'b010;
       end
     if (excepttype_i[`ADES_IDX]==1'b1 && excepttype_i[`ADEL_IDX]== 1'b1)
       begin
@@ -328,6 +332,7 @@ always @(*)
         cp0_reg_we_o = cp0_reg_we_i;
         cp0_reg_write_addr_o = cp0_reg_write_addr_i;
         cp0_reg_data_o = cp0_reg_data_i;
+        mem_size_o = 3'b010;
       end
     else
       begin
@@ -347,12 +352,14 @@ always @(*)
         cp0_reg_we_o = cp0_reg_we_i;
         cp0_reg_write_addr_o = cp0_reg_write_addr_i;
         cp0_reg_data_o = cp0_reg_data_i;
+        mem_size_o = 3'b010;
         case (aluop_i)
           `EXE_LB_OP:
             begin
               mem_addr_o = mem_addr_i;
               mem_we = `WriteDisable;
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b000;
               case (mem_addr_i[1:0])
                 2'b00:
                   begin
@@ -385,6 +392,7 @@ always @(*)
               mem_addr_o = mem_addr_i;
               mem_we = `WriteDisable;
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b000;
               case (mem_addr_i[1:0])
                 2'b00:
                   begin
@@ -417,6 +425,7 @@ always @(*)
               mem_addr_o = mem_addr_i;
               mem_we = `WriteDisable;
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b001;
               case (mem_addr_i[1:0])
                 2'b00:
                   begin
@@ -441,6 +450,7 @@ always @(*)
               mem_addr_o = mem_addr_i;
               mem_we = `WriteDisable;
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b001;
               case (mem_addr_i[1:0])
                 2'b00:
                   begin
@@ -467,6 +477,7 @@ always @(*)
               wdata_o = mem_data_i;
               mem_sel_o = 4'b1111;
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b010;
             end
           `EXE_LWL_OP:
             // TODO
@@ -475,6 +486,7 @@ always @(*)
               mem_we     = `WriteDisable;
               mem_sel_o = 4'b1111;
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b010;
               case (mem_addr_i[1:0])
                 2'b00:
                   begin
@@ -504,6 +516,7 @@ always @(*)
               mem_we     = `WriteDisable;
               mem_sel_o = 4'b1111;
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b010;
               case (mem_addr_i[1:0])
                 2'b00:
                   begin
@@ -533,6 +546,7 @@ always @(*)
               mem_we = `WriteEnable;
               mem_data_o = {reg2_i[7:0], reg2_i[7:0], reg2_i[7:0],reg2_i[7:0]};
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b000;
               case (mem_addr_i[1:0])
                 2'b00:
                   begin
@@ -563,6 +577,7 @@ always @(*)
               // mem_data_o = {reg2_i[7:0],reg2_i[15:8], reg2_i[7:0], reg2_i[15:8]};
               mem_data_o = {reg2_i[15:8],reg2_i[7:0],reg2_i[15:8], reg2_i[7:0]};
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b001;
               case (mem_addr_i[1:0])
                 2'b00:
                   begin
@@ -586,12 +601,14 @@ always @(*)
               mem_data_o = reg2_i;
               mem_sel_o = 4'b1111;
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b010;
             end
           `EXE_SWL_OP:
             begin
               mem_addr_o = {mem_addr_i[31:2], 2'b00};
               mem_we = `WriteEnable;
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b010;
               case (mem_addr_i[1:0])
                 2'b00:
                   begin
@@ -624,6 +641,7 @@ always @(*)
               mem_addr_o = {mem_addr_i[31:2], 2'b00};
               mem_we = `WriteEnable;
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b010;
               case (mem_addr_i[1:0])
                 2'b00:
                   begin
@@ -660,6 +678,7 @@ always @(*)
               LLbit_value_o = 1'b1;
               mem_sel_o = 4'b1111;
               mem_ce_o = `ChipEnable;
+              mem_size_o = 3'b010;
             end
           `EXE_SC_OP:
             begin
@@ -673,6 +692,7 @@ always @(*)
                   LLbit_value_o = 1'b0;
                   mem_sel_o = 4'b1111;
                   mem_ce_o = `ChipEnable;
+                  mem_size_o = 3'b010;
                 end
               else
                 begin

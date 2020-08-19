@@ -326,6 +326,7 @@ assign s_axi_rready = {ir_rready, mr_rready};
 wire data_req;
 wire data_wr;
 wire[3:0] data_select;
+wire[2:0] data_size;
 wire[`RegBus] data_addr;
 wire[`RegBus] data_wdata;
 wire data_addr_ok;
@@ -393,6 +394,7 @@ dcache dcache_0(
     .data_rdata(data_rdata),
 
     .data_sel(data_select),
+    .data_size(data_size),
     .data_wdata(data_wdata)
 
     // .data_cache(1'b0)
@@ -449,6 +451,7 @@ openmips openmips0(
            .data_req(data_req),
            .data_wr(data_wr),
            .data_select(data_select),
+           .data_size(data_size),
            .data_addr(data_addr),
            .data_wdata(data_wdata),
            .data_addr_ok(data_addr_ok),

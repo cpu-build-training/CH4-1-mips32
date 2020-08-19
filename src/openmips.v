@@ -18,6 +18,7 @@ module openmips(
          output wire data_req,
          output wire data_wr,
          output wire[3:0] data_select,
+         output wire[2:0] data_size,
          output wire[`RegBus] data_addr,
          output wire[`RegBus] data_wdata,
          input wire  data_addr_ok,
@@ -482,6 +483,7 @@ wire mem_write_enable;
 wire[`RegBus] mem_addr_i;
 wire[`RegBus] mem_data_i;
 wire[3:0] mem_sel_i;
+wire[2:0] mem_size_i;
 wire mem_write_finish;
 wire mem_read_finish;
 wire[`RegBus] mem_data_o;
@@ -531,6 +533,7 @@ mem mem0(
       .mem_sel_o(mem_sel_i),
       .mem_data_o(mem_data_i),
       .mem_ce_o(mem_ce_enable),
+      .mem_size_o(mem_size_i),
 
       // cp0
       .cp0_reg_we_i(mem_cp0_reg_we_i),
@@ -569,6 +572,7 @@ mem_signal_extend mem_signal_extend0 (
                     .mem_addr_i(mem_addr_i),
                     .mem_data_i(mem_data_i),
                     .mem_sel_i(mem_sel_i),
+                    .mem_size_i(mem_size_i),
                     .mem_write_finish(mem_write_finish),
                     .mem_read_finish(mem_read_finish),
                     .mem_data_o(mem_data_o),
@@ -580,7 +584,8 @@ mem_signal_extend mem_signal_extend0 (
                     .wdata(data_wdata),
                     .addr_ok(data_addr_ok),
                     .data_ok(data_data_ok),
-                    .rdata(data_rdata)
+                    .rdata(data_rdata),
+                    .size(data_size)
                   );
 
 // MEM/WB 实例化

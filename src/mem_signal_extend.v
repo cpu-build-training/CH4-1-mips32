@@ -14,6 +14,7 @@ module mem_signal_extend (
          input wire[`RegBus] mem_data_i,
          // select 信号，不需要处理，直接使用即可
          input wire[3:0]   mem_sel_i,
+         input wire[2:0]   mem_size_i,
 
          // 完成写操作
          output wire mem_write_finish,
@@ -27,6 +28,7 @@ module mem_signal_extend (
          output wire req,
          output wire wr,
          output wire[3:0] select,
+         output wire[2:0] size,
          output wire[`RegBus] addr,
          output wire[`RegBus] wdata,
          input wire addr_ok,
@@ -67,6 +69,7 @@ assign req = (addr_ok_last_long) ? 1'b0 : enable;
 // assign req = enable;
 assign wr = we;
 assign select = mem_sel_i;
+assign size = mem_size_i;
 assign addr = mem_addr_i;
 assign wdata = mem_data_i;
 assign mem_write_finish = (enable == 1'b1 && we == 1'b1)? data_ok:1'b0;
